@@ -1,0 +1,154 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+
+// Esquema de validação do formulário de login
+const loginSchema = z.object({
+  email: z.string().email("Digite um e-mail válido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
+
+// Tipo inferido do esquema de validação
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+interface LoginFormProps {
+  onSuccess: () => void;
+}
+
+export function LoginForm({ onSuccess }: LoginFormProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { login } = useAuth();
+  
+  // Inicializa o formulário com o esquema de validação
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // Mutação para fazer login
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginFormValues) => {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao fazer login");
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data?.access_token) {
+        // Utiliza a função de login do contexto de autenticação
+        login(data.access_token);
+        
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Você será redirecionado para o dashboard",
+        });
+        
+        // Callback de sucesso
+        onSuccess();
+      }
+    },
+    onError: (error: any) => {
+      console.error("Erro no login:", error);
+      toast({
+        title: "Erro ao fazer login",
+        description: error?.message || "Verifique suas credenciais e tente novamente",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handler de submissão do formulário
+  function onSubmit(data: LoginFormValues) {
+    loginMutation.mutate(data);
+  }
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl">Login</CardTitle>
+        <CardDescription>
+          Entre com suas credenciais para acessar o sistema
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-mail</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="seu.email@exemplo.com" 
+                      {...field} 
+                      disabled={loginMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder="******" 
+                      {...field} 
+                      disabled={loginMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="flex justify-center text-sm text-muted-foreground">
+        Sistema de Gerenciamento de Documentos Imobiliários
+      </CardFooter>
+    </Card>
+  );
+}

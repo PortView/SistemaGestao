@@ -1,4 +1,4 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route, Link, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,28 +10,49 @@ import DocumentDetail from "@/pages/document/[id]";
 import Properties from "@/pages/properties";
 import Notifications from "@/pages/notifications";
 import Settings from "@/pages/settings";
+import LoginPage from "@/pages/login";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+
+function ProtectedRouter() {
+  return (
+    <ProtectedRoute>
+      <MainLayout>
+        <Switch>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/documentos" component={Documents} />
+          <Route path="/documento/:id" component={DocumentDetail} />
+          <Route path="/propriedades" component={Properties} />
+          <Route path="/notificacoes" component={Notifications} />
+          <Route path="/configuracoes" component={Settings} />
+          <Route path="/">
+            <Redirect to="/dashboard" />
+          </Route>
+          <Route component={NotFound} />
+        </Switch>
+      </MainLayout>
+    </ProtectedRoute>
+  );
+}
 
 function Router() {
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/documentos" component={Documents} />
-        <Route path="/documento/:id" component={DocumentDetail} />
-        <Route path="/propriedades" component={Properties} />
-        <Route path="/notificacoes" component={Notifications} />
-        <Route path="/configuracoes" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </MainLayout>
+    <Switch>
+      <Route path="/login" component={LoginPage} />
+      <Route path="/:rest*">
+        <ProtectedRouter />
+      </Route>
+    </Switch>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

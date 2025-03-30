@@ -24,16 +24,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(500).json({ error: error.message || "Erro interno do servidor" });
   };
 
-  // Authentication (mock user for now)
-  app.get("/api/me", async (req, res) => {
+  // Login endpoint
+  app.post("/api/login", async (req, res) => {
     try {
-      // For now, return a mock user
-      const user = await storage.getCurrentUser();
-      if (!user) {
-        return res.status(401).json({ error: "Não autenticado" });
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "E-mail e senha são obrigatórios" });
       }
       
-      return res.json(user);
+      // Tenta autenticar com a API externa
+      const token = await storage.authenticate(email, password);
+      
+      if (!token) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+      
+      return res.json({ access_token: token });
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
+  // Current user endpoint
+  app.get("/api/me", async (req, res) => {
+    try {
+      // Get the token from the Authorization header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        // Se não houver token, use o usuário atual (para desenvolvimento)
+        const user = await storage.getCurrentUser();
+        if (!user) {
+          return res.status(401).json({ error: "Não autenticado" });
+        }
+        return res.json(user);
+      }
+      
+      // Se houver token, tenta obter o perfil do usuário da API externa
+      const token = authHeader.substring(7); // Remove 'Bearer ' do início
+      const userProfile = await storage.getUserProfile(token);
+      
+      if (!userProfile) {
+        return res.status(401).json({ error: "Token inválido ou expirado" });
+      }
+      
+      return res.json(userProfile);
     } catch (error) {
       handleError(res, error);
     }
