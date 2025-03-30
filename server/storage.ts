@@ -502,6 +502,7 @@ export class MemStorage implements IStorage {
           name: "Usuário de Teste",
           password: "**********",
           role: "user",
+          tipo: "Analista Técnico",
           avatarUrl: null
         };
         
@@ -540,6 +541,7 @@ export class MemStorage implements IStorage {
           name: "Usuário de Teste",
           password: "**********",
           role: "user",
+          tipo: "Analista Técnico",
           avatarUrl: null
         };
         

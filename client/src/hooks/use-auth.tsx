@@ -55,9 +55,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.invalidateQueries({ queryKey: ["/api/me"] });
   };
 
+  // Effect para salvar dados do usuário no localStorage quando disponíveis
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user_name", user.name || '');
+      
+      // Verifica se o usuário é um SiscopUser ou User normal
+      const userData = user as any; // usando any temporariamente para evitar erros de tipo
+      
+      if (userData.tipo) {
+        localStorage.setItem("user_tipo", userData.tipo);
+      } else if (userData.role) {
+        localStorage.setItem("user_tipo", userData.role);
+      } else {
+        localStorage.setItem("user_tipo", 'Analista'); // Valor padrão
+      }
+    }
+  }, [user]);
+
   // Função para logout
   const logout = () => {
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_tipo");
     setIsAuthenticated(false);
     queryClient.invalidateQueries();
     queryClient.clear();
