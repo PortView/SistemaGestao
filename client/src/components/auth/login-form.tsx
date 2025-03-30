@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 // Esquema de validação do formulário de login
 const loginSchema = z.object({
   email: z.string().email("Digite um e-mail válido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(4, "A senha deve ter pelo menos 4 caracteres"),
 });
 
 // Tipo inferido do esquema de validação
