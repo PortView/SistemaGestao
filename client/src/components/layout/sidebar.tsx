@@ -12,7 +12,8 @@ import {
   FileClock,
   FileWarning,
   FileX,
-  LogOut
+  LogOut,
+  ListTodo
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
@@ -33,13 +34,13 @@ const Sidebar = ({ isMobile = false, isOpen = false, onClose }: SidebarProps) =>
     queryKey: ["/api/me"],
   });
   
-  const { data: notifications } = useQuery({
+  const { data: notifications } = useQuery<any>({
     queryKey: ["/api/notifications", { read: false }],
     refetchInterval: 30000, // Recheck every 30 seconds
   });
   
   useEffect(() => {
-    if (notifications?.data) {
+    if (notifications && notifications.data && Array.isArray(notifications.data)) {
       setUnreadCount(notifications.data.length);
     }
   }, [notifications]);
@@ -48,6 +49,7 @@ const Sidebar = ({ isMobile = false, isOpen = false, onClose }: SidebarProps) =>
     { href: "/", label: "Dashboard", icon: <Home className="h-5 w-5" /> },
     { href: "/documentos", label: "Documentos", icon: <FileText className="h-5 w-5" /> },
     { href: "/propriedades", label: "Propriedades", icon: <Building2 className="h-5 w-5" /> },
+    { href: "/controle-processos", label: "Controle de Processos", icon: <ListTodo className="h-5 w-5" /> },
     { 
       href: "/notificacoes", 
       label: "Notificações", 

@@ -1,0 +1,50 @@
+Design a dark-themed process management system interface with the following specifications:
+
+### Global Layout
+- Create a full-screen interface (1920x1080px) with responsive design
+- Use a black background (#000000) for the main application
+- Implement a persistent top navigation bar with main application sections: "Administração", "Cadastro", "Gerência", "Técnico", and "Consultas"
+- When resolution is smaller, stack containers vertically while maintaining horizontal centering
+
+### Process Management Screen
+When user selects "Gerência > Controle de processos", display a screen divided into 5 main sections:
+
+#### 1. Top Section (Left Container)
+- Create a command container with:
+  - Client dropdown (searchable by partial text) connected to NEXT_PUBLIC_API_CLIENTES_URL
+  - UF dropdown that populates based on selected client
+  - Units dropdown showing concatenated "Contract + UF + Unit" from NEXT_PUBLIC_API_UNIDADES_UR
+- Include action buttons: "Editar", "Contratos", "Custos", "Adi. Compra", "Edit. Tarefas", "Histórico", "Finalizado"
+
+#### 2. Top Section (Right Container)
+- Create a filter panel with checkboxes for:
+  - "Cód Serv", "Status", "Dt.Limite"
+  - "Só Serv. não Concluídos", "Novos", "Suspensos", "Sem Nota"
+  - "Pendência", "Dic. Internet", "Só O.S."
+- Include fields for "Gerente", "Serviço", "H. Tramit", "H. Assoc", "Tarefas", "TE tramit", "TE assoc"
+
+#### 3. Middle Section (Left Grid)
+- Display a services grid populated from NEXT_PUBLIC_API_SERVICOS_URL
+- Include columns: "Cód Ser", "Desc. Serv", checkboxes, "Status", "Dt.Limite", "Val.Serv"
+- Show services related to the selected unit from top panel
+
+#### 4. Middle Section (Right Grid)
+- Display a tasks grid populated from NEXT_PUBLIC_API_TAREFAS_URL
+- Include columns: "Analista", "Dt.Tarefa", "OK", "Desc.Tarefa", "Evento", "H.Tram"
+- Show tasks related to the selected service from left grid
+
+#### 5. Bottom Section (Tabbed Interface)
+- Create four tabs with the first tab "Conformidade" active by default
+- In the Conformidade tab:
+  - Add a CNPJ dropdown related to selected client
+  - Include filter options: "Todos" and "Somente marcados para relatório"
+  - Add action buttons for inserting, editing, and deleting documents
+  - Display a compliance documents grid from NEXT_PUBLIC_API_CONFORMIDADE_URL
+  - Include columns: "Verif", "Rel", "Gest.Cli", "Cód", "Descrição", "Documento", "Área", "Emissão", "Vencim.", "Renov.", "Periodicidade", "Peso", "Atividade", "Obs.", "Dt.Prev.", "Grupo", "Compet.", "Doc.Orig", "Doc"
+
+### Visual Style
+- Maintain the blue header bar with white text
+- Use light blue (#d0e0f0) for container backgrounds
+- Preserve the existing font sizes and colors from the reference image
+- Use consistent button styling with gradient backgrounds
+- Implement grid lines and alternating row colors for better readability
