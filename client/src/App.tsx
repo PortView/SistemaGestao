@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Documents from "@/pages/documents";
 import DocumentDetail from "@/pages/document/[id]";
+import DocumentUploadPage from "@/pages/document/upload";
 import Properties from "@/pages/properties";
 import Notifications from "@/pages/notifications";
 import Settings from "@/pages/settings";
@@ -23,6 +24,7 @@ function ProtectedRouter() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/documentos" component={Documents} />
           <Route path="/documento/:id" component={DocumentDetail} />
+          <Route path="/documento/upload" component={DocumentUploadPage} />
           <Route path="/propriedades" component={Properties} />
           <Route path="/notificacoes" component={Notifications} />
           <Route path="/configuracoes" component={Settings} />
