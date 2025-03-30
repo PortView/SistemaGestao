@@ -141,16 +141,16 @@ const Header = () => {
         <div className="flex items-center mr-4">
           <div className="mr-4 text-right">
             <p className="text-sm font-medium text-white">
-              {siscopUser?.name || localStorage.getItem('user_name') || 'Carregando...'}
+              {localStorage.getItem('user_name') || 'Carregando...'}
             </p>
             <p className="text-xs text-gray-400">
-              {siscopUser?.tipo || localStorage.getItem('user_tipo') || 'Analista'}
+              {localStorage.getItem('user_tipo') || 'Analista'}
             </p>
           </div>
           
           <Avatar className="h-8 w-8 mr-2">
             <AvatarFallback className="bg-gray-700">
-              {(siscopUser?.name?.[0] || localStorage.getItem('user_name')?.[0] || 'U')}
+              {localStorage.getItem('user_name')?.[0] || 'U'}
             </AvatarFallback>
           </Avatar>
           
