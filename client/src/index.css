@@ -7,7 +7,24 @@
     @apply border-border;
   }
 
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+  }
+
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-black text-white;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html {
+    background-color: black;
+  }
+  
+  #root {
+    min-height: 100vh;
+    background-color: black;
   }
 }

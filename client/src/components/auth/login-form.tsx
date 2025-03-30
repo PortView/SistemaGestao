@@ -84,10 +84,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto bg-gray-800 border-gray-700 shadow-xl text-white">
       <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl text-white">Login</CardTitle>
+        <CardDescription className="text-gray-300">
           Entre com suas credenciais para acessar o sistema
         </CardDescription>
       </CardHeader>
@@ -99,15 +99,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+                  <FormLabel className="text-white">E-mail</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="seu.email@exemplo.com" 
                       {...field} 
                       disabled={loginMutation.isPending}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
@@ -116,22 +117,23 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Senha</FormLabel>
+                  <FormLabel className="text-white">Senha</FormLabel>
                   <FormControl>
                     <Input 
                       type="password" 
                       placeholder="******" 
                       {...field} 
                       disabled={loginMutation.isPending}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-400" />
                 </FormItem>
               )}
             />
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? (
@@ -146,7 +148,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center text-sm text-muted-foreground">
+      <CardFooter className="flex justify-center text-sm text-gray-400">
         Sistema de Gerenciamento de Documentos Imobiliários
       </CardFooter>
     </Card>

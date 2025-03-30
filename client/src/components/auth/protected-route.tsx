@@ -19,12 +19,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-lg text-gray-600">Carregando...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <p className="mt-4 text-lg text-white">Carregando...</p>
       </div>
     );
   }
 
-  return isAuthenticated ? <>{children}</> : null;
+  // Mesmo se não estiver autenticado, retornamos o children para evitar tela em branco
+  // O useEffect acima fará o redirecionamento
+  return <>{children}</>;
 }

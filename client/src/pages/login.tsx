@@ -21,18 +21,17 @@ export default function LoginPage() {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8"
+      className="min-h-screen flex items-center justify-center bg-black px-4 py-12 sm:px-6 lg:px-8"
       style={{
-        backgroundImage: "linear-gradient(to right bottom, #f0f9ff, #e0f2fe, #bae6fd)",
         backgroundSize: "cover",
       }}
     >
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-8 p-8 rounded-lg bg-gray-900 shadow-xl border border-gray-800">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-bold tracking-tight text-white">
             SISCOP
           </h1>
-          <h2 className="mt-2 text-lg text-gray-600">
+          <h2 className="mt-2 text-lg text-gray-400">
             Sistema de Gerenciamento de Documentos Imobiliários
           </h2>
         </div>
