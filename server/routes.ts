@@ -51,16 +51,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get the token from the Authorization header
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // Se não houver token, use o usuário atual (para desenvolvimento)
-        const user = await storage.getCurrentUser();
-        if (!user) {
-          return res.status(401).json({ error: "Não autenticado" });
+      
+      // Lógica para ambiente de desenvolvimento
+      if (process.env.NODE_ENV !== 'production') {
+        const token = authHeader && authHeader.startsWith('Bearer ') 
+          ? authHeader.substring(7) // Remove 'Bearer ' do início
+          : null;
+          
+        // Se houver token em desenvolvimento, busca perfil simulado
+        if (token) {
+          const userProfile = await storage.getUserProfile(token);
+          if (userProfile) {
+            console.log('Modo de desenvolvimento: retornando perfil de usuário do token');
+            return res.json(userProfile);
+          }
         }
-        return res.json(user);
+        
+        // Se não houver token ou perfil, usa o usuário atual
+        const user = await storage.getCurrentUser();
+        if (user) {
+          console.log('Modo de desenvolvimento: retornando usuário atual');
+          return res.json(user);
+        }
+        
+        return res.status(401).json({ error: "Não autenticado" });
       }
       
-      // Se houver token, tenta obter o perfil do usuário da API externa
+      // Lógica para ambiente de produção
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Não autenticado" });
+      }
+      
       const token = authHeader.substring(7); // Remove 'Bearer ' do início
       const userProfile = await storage.getUserProfile(token);
       
