@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SiscopUser } from "@/lib/types";
 
 const Header = () => {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
+  // Cast para SiscopUser se necessário - se os dados vierem da API do Siscop
+  const siscopUser = user as unknown as SiscopUser;
   const [activeMenu, setActiveMenu] = useState("");
   
   // Fetch unread notifications
@@ -137,13 +140,18 @@ const Header = () => {
       <div className="flex items-center space-x-2">
         <div className="flex items-center mr-4">
           <div className="mr-4 text-right">
-            <p className="text-sm font-medium text-white">{user?.name || 'Carregando...'}</p>
-            <p className="text-xs text-gray-400">{user?.role || 'Analista'}</p>
+            <p className="text-sm font-medium text-white">
+              {siscopUser?.name || localStorage.getItem('user_name') || 'Carregando...'}
+            </p>
+            <p className="text-xs text-gray-400">
+              {siscopUser?.tipo || localStorage.getItem('user_tipo') || 'Analista'}
+            </p>
           </div>
           
           <Avatar className="h-8 w-8 mr-2">
-            <AvatarImage src={user?.avatarUrl || ''} alt={user?.name || 'Usuário'} />
-            <AvatarFallback className="bg-gray-700">{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+            <AvatarFallback className="bg-gray-700">
+              {(siscopUser?.name?.[0] || localStorage.getItem('user_name')?.[0] || 'U')}
+            </AvatarFallback>
           </Avatar>
           
           <Button 

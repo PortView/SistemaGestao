@@ -56,8 +56,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     },
     onSuccess: (data) => {
       if (data?.access_token) {
-        // Utiliza a função de login do contexto de autenticação
+        // Salva o token de acesso
         login(data.access_token);
+        
+        // Salva dados do usuário para exibição no header
+        if (data.user) {
+          localStorage.setItem('user_name', data.user.name || '');
+          localStorage.setItem('user_tipo', data.user.tipo || '');
+          localStorage.setItem('user_cod', data.user.cod?.toString() || '');
+          localStorage.setItem('user_email', data.user.email || '');
+          localStorage.setItem('user_mvvm', data.user.mvvm || '');
+        }
         
         toast({
           title: "Login realizado com sucesso",

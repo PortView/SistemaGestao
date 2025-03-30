@@ -20,8 +20,8 @@ export default function ProcessControlPage() {
   return (
     <div className="bg-black text-white min-h-screen">
       {/* Conteúdo principal */}
-      <div className="container mx-auto px-4 pt-20 pb-6 space-y-4">
-        <h1 className="text-lg font-medium mb-4">Controle de Processos</h1>
+      <div className="container mx-auto px-4 pt-16 pb-6 space-y-3">
+        <h1 className="text-lg font-medium mt-1 mb-2">Controle de Processos</h1>
         
         {/* Área superior: command panel + filter panel */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
