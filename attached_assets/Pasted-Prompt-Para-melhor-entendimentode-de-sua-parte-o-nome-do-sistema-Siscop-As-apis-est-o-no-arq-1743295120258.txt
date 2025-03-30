@@ -1,0 +1,160 @@
+Prompt:
+Para melhor entendimentode de sua parte o nome do sistema é "Siscop".
+As apis estão no arquivo env.local.
+1 - Em NEXT_PUBLIC_API_AUTH_URL é usada para login passado email e senha e recebendo token e salvo em localStorage, para ser usado acesso as outras apis.
+json recebido =
+{ "access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoicmVkZXMwMUBhbWVuaS5jb20uYnIiLCJuYW1lIjoiUmVkZXMwMSIsImNvZCI6MTMxMCwiaWF0IjoxNzQzMjkzNTczLCJleHAiOjE3NDU4ODU1NzN9.oa4VhsrCKEcjYRNGSIIj48PiPwdpmoCcKPglXmo8ZSQ"
+}
+
+2 - NEXT_PUBLIC_API_ME_URL passando o token, recebe os dados do usuário que deverão ser armazenados tambem:
+{
+    "id": 3,
+    "email": "redes01@ameni.com.br",
+    "name": "Redes01",
+    "cod": 1310,
+    "tipo": "Gerente",
+    "mvvm": "true",
+    "codcargo": 4
+}
+
+3 - NEXT_PUBLIC_API_CLIENTES_URL=https passando o token e o parametro codcoor = 110 (código do usuario.cod), recebe os clientes e todas as ufs onde o cliente tem unidades do gerente indicado json:
+[
+    {
+        "codcli": 390,
+        "fantasia": "AGA - Aganor             ",
+        "lc_ufs": [
+            {
+                "uf": "AL"
+            },
+            {
+                "uf": "BA"
+            },
+            {
+                "uf": "CE"
+            },
+            {
+                "uf": "PA"
+            },
+            {
+                "uf": "PE"
+            }
+        ]
+    }
+]
+
+4 - NEXT_PUBLIC_API_UNIDADES_URL passando o token e os codcoor=110&codcli=1448&uf=AL&page=1, recebe json:
+{
+    "folowups": [
+        {
+            "contrato": 10998,
+            "codend": 12298,
+            "cadimov": {
+                "tipo": "ARR_MIG_ID_0360_Maceió Iguatemi (INC)",
+                "uf": "AL"
+            }
+        }],
+    "pagination": {
+        "totalItems": 27,
+        "currentPage": 1,
+        "itemsPerPage": 100,
+        "lastPage": 1
+    }
+}
+  
+5 - NEXT_PUBLIC_API_SERVICOS_URL passando o token e os parametros qcodCoor=1310&qcontrato=2503&qUnidade=5551&qConcluido=True&qCodServ=-1&qStatus=ALL&qDtlimite=2001-01-01 recebe json:
+[
+    {
+        "codccontra": 319464,
+        "contrato": 2503,
+        "codend": 5551,
+        "tipo": "McD_ABA_ID_0312_Araçatuba",
+        "descserv": "319464 - Digitalização de documentos",
+        "codServ": 165,
+        "rescisao": false,
+        "suspenso": false,
+        "dtLimite": "2024-12-31T00:00:00.000Z",
+        "dt_limiteS": "2024-12-31",
+        "mStatus": "",
+        "valserv": "192",
+        "valameni": "192",
+        "obsServ": "Regional - SAO - 2024 - Gerenciamento Siscop",
+        "novo": false,
+        "produto": " ",
+        "filtroOs": false,
+        "obsresci": "",
+        "sinal": false,
+        "servnf": true,
+        "concluido": false,
+        "teventserv": false,
+        "XdtLimite": "2024-12-31T00:00:00.000Z",
+        "revisao": false,
+        "eControle": "",
+        "pendente": false,
+        "qtdPende": 0,
+        "cnpjConform": null,
+        "medicao": false,
+        "codstatusocorr": null,
+        "tetramitacao": 0,
+        "teassessoria": 0,
+        "horasassessoria": null,
+        "horastramitacao": null
+    }
+]
+
+6 - NEXT_PUBLIC_API_CONFORMIDADE_URL passando o token e os parametros codimov=22769&web=false&relatorio=true&cnpj= &temcnpj=false, recebe json:
+[
+    {
+        "cod": 688838,
+        "codimov": 22769,
+        "codcfor": 3,
+        "descr": "Projeto Aprovado - Prefeitura",
+        "doc": "31 fls.",
+        "area": "0",
+        "dt": "2014-02-06T00:00:00.000Z",
+        "dtvenc": null,
+        "providencia": "",
+        "quando": null,
+        "quem": "Cliente",
+        "grupo": "",
+        "atividade": "",
+        "docscanv": false,
+        "docscani": true,
+        "qtdedoc": null,
+        "qlocal": null,
+        "finternet": true,
+        "terceiros": false,
+        "cad": false,
+        "arqmorto": false,
+        "cnpjconform": null,
+        "oldcnpj": null,
+        "periodocidade": "Única Vez",
+        "graurisco": "Alto",
+        "obs": "",
+        "frelatorio": true,
+        "dtrenov": null,
+        "fobs": false,
+        "codgpdepto": 0,
+        "vgraurisco": 2,
+        "valtrib": "0",
+        "docoriginal": false,
+        "dtdocoriginal": null,
+        "codusudocorig": null,
+        "docoriginalok": false,
+        "dtdocoriginalok": null,
+        "codusudocorigok": null,
+        "dtins": null,
+        "docpermanente": false,
+        "statusconform": false,
+        "dtstatusconform": null,
+        "codstatusconform": null,
+        "orgaopublico": "",
+        "orientacao": null,
+        "gestaocli": false,
+        "responsterceiro": false,
+        "dtrecebe": null,
+        "dtinput": null,
+        "flagtipopdf": false,
+        "subdescr": "GI",
+        "aba01": "0"
+    }
+]

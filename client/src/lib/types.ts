@@ -43,6 +43,72 @@ export interface NotificationFilters {
   limit?: number;
 }
 
+// Interfaces para API do Siscop
+export interface SiscopUser {
+  id: number;
+  email: string;
+  name: string;
+  cod: number;
+  tipo: string;
+  mvvm: string;
+  codcargo: number;
+}
+
+export interface SiscopCliente {
+  codcli: number;
+  fantasia: string;
+  lc_ufs: { uf: string }[];
+}
+
+export interface SiscopUnidade {
+  contrato: number;
+  codend: number;
+  cadimov: {
+    tipo: string;
+    uf: string;
+  };
+}
+
+export interface SiscopUnidadesResponse {
+  folowups: SiscopUnidade[];
+  pagination: {
+    totalItems: number;
+    currentPage: number;
+    itemsPerPage: number;
+    lastPage: number;
+  };
+}
+
+export interface SiscopServico {
+  codccontra: number;
+  contrato: number;
+  codend: number;
+  tipo: string;
+  descserv: string;
+  codServ: number;
+  dtLimite: string;
+  dt_limiteS: string;
+  concluido: boolean;
+  pendente: boolean;
+  obsServ: string;
+  valserv: string;
+  valameni: string;
+}
+
+export interface SiscopConformidade {
+  cod: number;
+  codimov: number;
+  descr: string;
+  doc: string;
+  dt: string;
+  dtvenc: string | null;
+  periodocidade: string;
+  graurisco: string;
+  providencia: string;
+  frelatorio: boolean;
+  statusconform: boolean;
+}
+
 export const documentStatusColors = {
   [DocumentStatus.PENDING]: "bg-red-100 text-red-800",
   [DocumentStatus.IN_ANALYSIS]: "bg-yellow-100 text-yellow-800",
