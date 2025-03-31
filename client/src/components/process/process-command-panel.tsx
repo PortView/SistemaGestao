@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { fetchClientes, fetchUnidades } from '@/lib/api-service';
 
 interface ProcessCommandPanelProps {
   onClientChange?: (clientId: number) => void;
@@ -17,15 +17,41 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
   
-  // Buscar clientes
+  // Obter o usuário do localStorage para pegar o codCoor
+  const getUserFromStorage = (): { cod: number } | null => {
+    if (typeof window !== 'undefined') {
+      const userJson = localStorage.getItem('siscop_user');
+      if (userJson) {
+        try {
+          return JSON.parse(userJson);
+        } catch (e) {
+          console.error('Erro ao fazer parse do usuário do localStorage:', e);
+        }
+      }
+    }
+    return null;
+  };
+  
+  const user = getUserFromStorage();
+  const codCoor = user?.cod || 0;
+  
+  // Buscar clientes da API usando o codCoor do usuário
   const { data: clients = [], isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
-    queryKey: ['/api/clientes'],
-    enabled: true,
+    queryKey: ['siscop-clientes', codCoor],
+    queryFn: async () => {
+      if (!codCoor) {
+        console.warn('codCoor não disponível, não é possível buscar clientes');
+        return [];
+      }
+      console.log('Buscando clientes para codCoor:', codCoor);
+      return await fetchClientes(codCoor);
+    },
+    enabled: !!codCoor,
   });
 
   // Determinar UFs disponíveis baseado no cliente selecionado
   const { data: ufs = [] } = useQuery<string[]>({
-    queryKey: ['/api/clientes', selectedClient, 'ufs'],
+    queryKey: ['siscop-ufs', selectedClient],
     queryFn: async () => {
       const cliente = clients.find(c => c.codcli === selectedClient);
       if (!cliente || !cliente.lc_ufs) return [];
@@ -34,15 +60,29 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       const uniqueUfs = Array.from(
         new Set(cliente.lc_ufs.map(u => u.uf))
       );
-      console.log('UFs disponíveis:', uniqueUfs);
+      console.log('UFs disponíveis para cliente', selectedClient, ':', uniqueUfs);
       return uniqueUfs;
     },
     enabled: !!selectedClient && clients.length > 0,
   });
 
-  // Buscar unidades baseado no cliente e UF
-  const { data: units = [] } = useQuery<SiscopUnidade[]>({
-    queryKey: ['/api/unidades', selectedClient, selectedUF],
+  // Buscar unidades baseado no cliente e UF da API externa
+  const { data: units = [], isLoading: isLoadingUnits } = useQuery<SiscopUnidade[]>({
+    queryKey: ['siscop-unidades', selectedClient, selectedUF],
+    queryFn: async () => {
+      if (!selectedClient || !selectedUF) return [];
+      
+      console.log('Buscando unidades para cliente:', selectedClient, 'UF:', selectedUF);
+      const params = { 
+        codcli: selectedClient, 
+        uf: selectedUF,
+        pagina: 1,
+        quantidade: 100
+      };
+      
+      const response = await fetchUnidades(params);
+      return response.folowups || [];
+    },
     enabled: !!selectedClient && !!selectedUF,
   });
 
