@@ -22,17 +22,17 @@ const Header = () => {
   // Cast para SiscopUser se necessário - se os dados vierem da API do Siscop
   const siscopUser = user as SiscopUser;
   const [activeMenu, setActiveMenu] = useState("");
-  
+
   // Fetch unread notifications
   const { data: notifications } = useQuery<any>({
     queryKey: ["/api/notifications", { read: false }],
     refetchInterval: 30000,
   });
-  
+
   const unreadCount = notifications && notifications.data && Array.isArray(notifications.data) 
     ? notifications.data.length 
     : 0;
-  
+
   const toggleTheme = () => {
     // In a real implementation, you'd also need to update the document class or a theme context
     setIsDarkMode(!isDarkMode);
@@ -86,11 +86,12 @@ const Header = () => {
         "Pendências",
         "Emol. Pagos",
         "Faturamento Gerencia",
-        "Prod. / Faturamento"
+        "Prod. / Faturamento",
+        "Verificação"
       ]
     }
   ];
-  
+
   return (
     <header className="h-16 px-4 flex items-center justify-between border-b border-gray-700 bg-black text-white fixed w-full z-50">
       <div className="flex items-center">
@@ -100,7 +101,7 @@ const Header = () => {
         >
           Siscop
         </span>
-        
+
         <nav className="flex">
           {menus.map((menu) => (
             <DropdownMenu key={menu.name} onOpenChange={(open) => open && setActiveMenu(menu.name)}>
@@ -118,14 +119,20 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-gray-700 text-white border-gray-800 w-56 rounded-none">
                 {menu.items.map((item) => (
-                  <DropdownMenuItem key={item} asChild>
+                  <DropdownMenuItem 
+                    key={item}
+                    asChild
+                    onClick={() => {
+                      if (item === "Verificação") {
+                        const event = new CustomEvent('open-verification');
+                        window.dispatchEvent(event);
+                      } else if (item === "Controle de Processos") {
+                        setLocation("/controle-processos");
+                      }
+                    }}
+                  >
                     <div 
                       className="cursor-pointer hover:bg-gray-600 w-full text-white px-4 py-2"
-                      onClick={() => {
-                        if (item === "Controle de Processos") {
-                          setLocation("/controle-processos");
-                        }
-                      }}
                     >
                       {item}
                     </div>
@@ -136,7 +143,7 @@ const Header = () => {
           ))}
         </nav>
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <div className="flex items-center mr-4">
           <div className="mr-4 text-right">
@@ -147,13 +154,13 @@ const Header = () => {
               {localStorage.getItem('user_tipo') || 'Analista'}
             </p>
           </div>
-          
+
           <Avatar className="h-8 w-8 mr-2">
             <AvatarFallback className="bg-gray-700">
               {(localStorage.getItem('user_name') || 'U')[0]}
             </AvatarFallback>
           </Avatar>
-          
+
           <Button 
             variant="ghost" 
             size="icon" 
