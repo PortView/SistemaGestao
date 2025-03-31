@@ -62,8 +62,10 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       
       console.log('Buscando clientes para codCoor:', codCoor);
       try {
+        console.log('Iniciando busca de clientes para codCoor:', codCoor);
         const clientData = await fetchClientes(codCoor);
-        console.log('Dados recebidos da API:', clientData);
+        console.log('Quantidade de clientes recebidos:', clientData?.length || 0);
+        console.log('Dados completos recebidos da API:', clientData);
         return clientData;
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
