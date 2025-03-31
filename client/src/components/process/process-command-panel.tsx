@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
@@ -128,24 +129,69 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     }
   }, [selectedUnit, onUnitChange]);
 
+  // Função para filtrar itens no dropdown com base na pesquisa
+  const [clientSearchTerm, setClientSearchTerm] = useState<string>('');
+  const [ufSearchTerm, setUfSearchTerm] = useState<string>('');
+  const [unitSearchTerm, setUnitSearchTerm] = useState<string>('');
+  
+  // Lista de clientes filtrada com base na pesquisa
+  const filteredClients = useMemo(() => {
+    if (!clientSearchTerm.trim()) return clients;
+    return clients.filter(client => 
+      client.fantasia.toLowerCase().includes(clientSearchTerm.toLowerCase())
+    );
+  }, [clients, clientSearchTerm]);
+
+  // Lista de UFs filtrada com base na pesquisa
+  const filteredUfs = useMemo(() => {
+    if (!ufSearchTerm.trim()) return ufs;
+    return ufs.filter(uf => 
+      uf.toLowerCase().includes(ufSearchTerm.toLowerCase())
+    );
+  }, [ufs, ufSearchTerm]);
+
+  // Lista de unidades filtrada com base na pesquisa
+  const filteredUnits = useMemo(() => {
+    if (!unitSearchTerm.trim()) return units;
+    
+    return units.filter(unit => {
+      const unitStr = `${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`;
+      return unitStr.toLowerCase().includes(unitSearchTerm.toLowerCase());
+    });
+  }, [units, unitSearchTerm]);
+
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-[940px] h-[150px]">
       <CardContent className="p-2">
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="space-y-1">
             <Select
               disabled={isLoadingClients}
               onValueChange={(value) => setSelectedClient(Number(value))}
             >
-              <SelectTrigger className="h-8 text-sm">
+              <SelectTrigger className="h-8 text-sm w-[380px]">
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
-              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-                {clients?.map((client) => (
-                  <SelectItem key={client.codcli} value={client.codcli.toString()}>
-                    {client.fantasia}
-                  </SelectItem>
-                ))}
+              <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                <div className="px-2 py-2">
+                  <Input
+                    placeholder="Buscar cliente..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="h-8 mb-2"
+                  />
+                </div>
+                {filteredClients.length > 0 ? (
+                  filteredClients.map((client) => (
+                    <SelectItem key={client.codcli} value={client.codcli.toString()}>
+                      {client.fantasia}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1 text-sm text-muted-foreground">
+                    Nenhum cliente encontrado
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -155,15 +201,29 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               disabled={!selectedClient || ufs.length === 0}
               onValueChange={(value) => setSelectedUF(value)}
             >
-              <SelectTrigger className="h-8 text-sm">
+              <SelectTrigger className="h-8 text-sm w-[280px]">
                 <SelectValue placeholder="UF" />
               </SelectTrigger>
-              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-                {ufs.map((uf) => (
-                  <SelectItem key={uf} value={uf}>
-                    {uf}
-                  </SelectItem>
-                ))}
+              <SelectContent className="z-50 fixed w-[280px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                <div className="px-2 py-2">
+                  <Input
+                    placeholder="Buscar UF..."
+                    value={ufSearchTerm}
+                    onChange={(e) => setUfSearchTerm(e.target.value)}
+                    className="h-8 mb-2"
+                  />
+                </div>
+                {filteredUfs.length > 0 ? (
+                  filteredUfs.map((uf) => (
+                    <SelectItem key={uf} value={uf}>
+                      {uf}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1 text-sm text-muted-foreground">
+                    Nenhuma UF encontrada
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -178,15 +238,29 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 }
               }}
             >
-              <SelectTrigger className="h-8 text-sm">
+              <SelectTrigger className="h-8 text-sm w-[260px]">
                 <SelectValue placeholder="Unidade" />
               </SelectTrigger>
-              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-                {units.map((unit) => (
-                  <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
-                    {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
-                  </SelectItem>
-                ))}
+              <SelectContent className="z-50 fixed w-[260px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                <div className="px-2 py-2">
+                  <Input
+                    placeholder="Buscar unidade..."
+                    value={unitSearchTerm}
+                    onChange={(e) => setUnitSearchTerm(e.target.value)}
+                    className="h-8 mb-2"
+                  />
+                </div>
+                {filteredUnits.length > 0 ? (
+                  filteredUnits.map((unit) => (
+                    <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
+                      {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1 text-sm text-muted-foreground">
+                    Nenhuma unidade encontrada
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

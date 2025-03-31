@@ -34,6 +34,26 @@
    - Validação de arquivos (PDF, JPEG, PNG)
    - Limite de 10MB por arquivo e máximo de 5 arquivos
 
+## Especificações de Layout
+
+1. **Dimensões Gerais**
+   - Largura total do projeto: 1920px (monitores de alta resolução)
+   - Para resoluções menores, usar responsividade para adequar componentes
+   - Usar scroll vertical para conteúdo que ultrapasse a altura da tela
+
+2. **Blocos e Dimensões**
+   - Blocos de topo e faixa do meio: largura de 940px
+   - Altura dos blocos superiores: 150px
+   - Altura da parte central: 460px
+   - Bloco inferior: largura total (1920px), altura de 460px
+
+3. **Espaçamentos**
+   - Espaçamento entre blocos: 2px
+
+4. **Componentes Específicos**
+   - Largura do dropdown de Clientes: 380px
+   - Todos os dropdowns devem incluir funcionalidade de busca por conteúdo
+
 ## Fluxo de Autenticação e Acesso
 
 1. Usuário faz login com email e senha
@@ -74,6 +94,7 @@
 - Utilizar o `codcoor` (código do coordenador, em minúsculo) do usuário logado como parâmetro para esta requisição
 - Implementar cache para reduzir o número de requisições frequentes
 - Implementar fallback para usar dados em cache caso a API falhe temporariamente
+- O dropdown de clientes deve ter largura fixa de 380px e incluir funcionalidade de busca
 
 ## Padrões de Tratamento de Erros
 - Implementar timeout para requisições para evitar esperas infinitas (máximo 15 segundos)

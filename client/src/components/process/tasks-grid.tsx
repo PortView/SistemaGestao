@@ -28,24 +28,24 @@ export function TasksGrid({ selectedService }: TasksGridProps) {
   });
   
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md">
-      <CardContent className="p-4">
-        <div className="rounded-md border overflow-hidden">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+      <CardContent className="p-2">
+        <div className="rounded-md border overflow-hidden h-[445px]">
           <Table>
-            <TableHeader className="bg-blue-600">
+            <TableHeader className="bg-blue-600 sticky top-0">
               <TableRow>
-                <TableHead className="text-white font-semibold text-sm">Analista</TableHead>
-                <TableHead className="text-white font-semibold text-sm">Dt.Tarefa</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">OK</TableHead>
-                <TableHead className="text-white font-semibold text-sm">Desc.Tarefa</TableHead>
-                <TableHead className="text-white font-semibold text-sm">Evento</TableHead>
-                <TableHead className="text-white font-semibold text-sm">H.Tram</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-24">Analista</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-20">Dt.Tarefa</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">OK</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1">Desc.Tarefa</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-24">Evento</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-16">H.Tram</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {!selectedService && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={6} className="text-center py-2 text-gray-500 text-xs">
                     Selecione um serviço para visualizar as tarefas.
                   </TableCell>
                 </TableRow>
@@ -53,7 +53,7 @@ export function TasksGrid({ selectedService }: TasksGridProps) {
               
               {selectedService && tasks.length === 0 && !isLoading && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={6} className="text-center py-2 text-gray-500 text-xs">
                     Nenhuma tarefa encontrada para este serviço.
                   </TableCell>
                 </TableRow>
@@ -61,7 +61,7 @@ export function TasksGrid({ selectedService }: TasksGridProps) {
               
               {selectedService && isLoading && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={6} className="text-center py-2 text-gray-500 text-xs">
                     Carregando tarefas...
                   </TableCell>
                 </TableRow>
@@ -72,14 +72,14 @@ export function TasksGrid({ selectedService }: TasksGridProps) {
                   key={task.id}
                   className={`${task.concluida ? 'bg-gray-100' : ''} hover:bg-blue-50`}
                 >
-                  <TableCell className="text-sm">{task.analista}</TableCell>
-                  <TableCell className="text-sm">{formatDate(new Date(task.dataTarefa))}</TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={task.concluida} />
+                  <TableCell className="text-xs py-1">{task.analista}</TableCell>
+                  <TableCell className="text-xs py-1">{formatDate(new Date(task.dataTarefa))}</TableCell>
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={task.concluida} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-sm">{task.descricao}</TableCell>
-                  <TableCell className="text-sm">{task.evento}</TableCell>
-                  <TableCell className="text-sm">{task.horasTramitacao}</TableCell>
+                  <TableCell className="text-xs py-1">{task.descricao}</TableCell>
+                  <TableCell className="text-xs py-1">{task.evento}</TableCell>
+                  <TableCell className="text-xs py-1">{task.horasTramitacao}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

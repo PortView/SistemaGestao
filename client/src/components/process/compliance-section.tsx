@@ -31,22 +31,22 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
   });
   
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-end mb-4">
-          <div className="flex items-end gap-4">
-            <div className="space-y-1">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+      <CardContent className="p-2">
+        <div className="flex justify-between items-end mb-2">
+          <div className="flex items-end gap-2">
+            <div className="space-y-0.5">
               <Label htmlFor="cnpj" className="text-xs font-medium">CNPJ</Label>
               <Select
                 disabled={!selectedClient || cnpjs.length === 0}
                 onValueChange={(value) => setCnpj(value)}
               >
-                <SelectTrigger className="h-8 text-sm w-64">
+                <SelectTrigger className="h-7 text-xs w-52">
                   <SelectValue placeholder="Selecione um CNPJ" />
                 </SelectTrigger>
                 <SelectContent>
                   {cnpjs.map((cnpj) => (
-                    <SelectItem key={cnpj} value={cnpj}>
+                    <SelectItem key={cnpj} value={cnpj} className="text-xs">
                       {cnpj}
                     </SelectItem>
                   ))}
@@ -54,61 +54,62 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
               </Select>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <Checkbox 
                 id="onlyForReport" 
                 checked={onlyForReport}
                 onCheckedChange={(checked) => setOnlyForReport(!!checked)}
+                className="h-3 w-3"
               />
-              <Label htmlFor="onlyForReport" className="text-sm">Somente marcados para relatório</Label>
+              <Label htmlFor="onlyForReport" className="text-xs">Somente p/ relatório</Label>
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-green-100 border-green-300 text-green-800 hover:bg-green-200">
-              <Plus className="h-4 w-4 mr-1" />
+          <div className="flex gap-1">
+            <Button variant="outline" size="sm" className="h-7 py-0 px-2 bg-green-100 border-green-300 text-green-800 hover:bg-green-200 text-xs">
+              <Plus className="h-3 w-3 mr-1" />
               Inserir
             </Button>
-            <Button variant="outline" size="sm" className="bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
-              <Edit className="h-4 w-4 mr-1" />
+            <Button variant="outline" size="sm" className="h-7 py-0 px-2 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200 text-xs">
+              <Edit className="h-3 w-3 mr-1" />
               Editar
             </Button>
-            <Button variant="outline" size="sm" className="bg-red-100 border-red-300 text-red-800 hover:bg-red-200">
-              <Trash2 className="h-4 w-4 mr-1" />
+            <Button variant="outline" size="sm" className="h-7 py-0 px-2 bg-red-100 border-red-300 text-red-800 hover:bg-red-200 text-xs">
+              <Trash2 className="h-3 w-3 mr-1" />
               Excluir
             </Button>
           </div>
         </div>
         
-        <div className="rounded-md border overflow-hidden max-h-[300px] overflow-y-auto">
+        <div className="rounded-md border overflow-hidden h-[400px] overflow-y-auto">
           <Table>
             <TableHeader className="bg-blue-600 sticky top-0">
               <TableRow>
-                <TableHead className="text-white font-semibold text-xs w-10">Verif</TableHead>
-                <TableHead className="text-white font-semibold text-xs w-10">Rel</TableHead>
-                <TableHead className="text-white font-semibold text-xs w-10">Gest.Cli</TableHead>
-                <TableHead className="text-white font-semibold text-xs w-10">Cód</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Descrição</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Documento</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Área</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Emissão</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Vencim.</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Renov.</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Periodicidade</TableHead>
-                <TableHead className="text-white font-semibold text-xs w-10">Peso</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Atividade</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Obs.</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Dt.Prev.</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Grupo</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Compet.</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Doc.Orig</TableHead>
-                <TableHead className="text-white font-semibold text-xs">Doc</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Verif</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Rel</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">G.Cli</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Cód</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Descrição</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Documento</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Área</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Emissão</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Vencim.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Renov.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Period.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Peso</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Ativ.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Obs.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Dt.Prev</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Grupo</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Comp.</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Doc.Ori</TableHead>
+                <TableHead className="text-white font-semibold text-[10px] py-1">Doc</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {!selectedClient && (
                 <TableRow>
-                  <TableCell colSpan={19} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
                     Selecione um cliente para visualizar os documentos de conformidade.
                   </TableCell>
                 </TableRow>
@@ -116,7 +117,7 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
               
               {selectedClient && !cnpj && (
                 <TableRow>
-                  <TableCell colSpan={19} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
                     Selecione um CNPJ para visualizar os documentos de conformidade.
                   </TableCell>
                 </TableRow>
@@ -124,7 +125,7 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
               
               {selectedClient && cnpj && complianceDocuments.length === 0 && !isLoading && (
                 <TableRow>
-                  <TableCell colSpan={19} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
                     Nenhum documento de conformidade encontrado.
                   </TableCell>
                 </TableRow>
@@ -132,7 +133,7 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
               
               {selectedClient && cnpj && isLoading && (
                 <TableRow>
-                  <TableCell colSpan={19} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
                     Carregando documentos de conformidade...
                   </TableCell>
                 </TableRow>
@@ -141,33 +142,33 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
               {complianceDocuments.map((doc) => (
                 <TableRow 
                   key={doc.cod}
-                  className={`${doc.statusconform ? 'bg-green-50' : 'bg-red-50'} hover:bg-blue-50 text-xs`}
+                  className={`${doc.statusconform ? 'bg-green-50' : 'bg-red-50'} hover:bg-blue-50 text-[10px]`}
                 >
-                  <TableCell className="text-center py-1">
-                    <Checkbox checked={doc.statusconform} />
+                  <TableCell className="text-center py-0.5">
+                    <Checkbox checked={doc.statusconform} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center py-1">
-                    <Checkbox checked={doc.frelatorio} />
+                  <TableCell className="text-center py-0.5">
+                    <Checkbox checked={doc.frelatorio} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center py-1">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-0.5">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="py-1">{doc.cod}</TableCell>
-                  <TableCell className="py-1">{doc.descr}</TableCell>
-                  <TableCell className="py-1">{doc.doc}</TableCell>
-                  <TableCell className="py-1">Área</TableCell>
-                  <TableCell className="py-1">{formatDate(new Date(doc.dt))}</TableCell>
-                  <TableCell className="py-1">{doc.dtvenc ? formatDate(new Date(doc.dtvenc)) : ''}</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">{doc.periodocidade}</TableCell>
-                  <TableCell className="py-1">{doc.graurisco}</TableCell>
-                  <TableCell className="py-1">{doc.providencia}</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">-</TableCell>
-                  <TableCell className="py-1">-</TableCell>
+                  <TableCell className="py-0.5">{doc.cod}</TableCell>
+                  <TableCell className="py-0.5">{doc.descr}</TableCell>
+                  <TableCell className="py-0.5">{doc.doc}</TableCell>
+                  <TableCell className="py-0.5">Área</TableCell>
+                  <TableCell className="py-0.5">{formatDate(new Date(doc.dt))}</TableCell>
+                  <TableCell className="py-0.5">{doc.dtvenc ? formatDate(new Date(doc.dtvenc)) : ''}</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">{doc.periodocidade}</TableCell>
+                  <TableCell className="py-0.5">{doc.graurisco}</TableCell>
+                  <TableCell className="py-0.5">{doc.providencia}</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
+                  <TableCell className="py-0.5">-</TableCell>
                 </TableRow>
               ))}
             </TableBody>

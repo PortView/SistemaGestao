@@ -32,10 +32,10 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
   };
 
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md">
-      <CardContent className="p-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+      <CardContent className="p-2">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="codServ" 
@@ -44,7 +44,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('codServ', checked as boolean)
                 }
               />
-              <Label htmlFor="codServ" className="text-sm">Cód Serv</Label>
+              <Label htmlFor="codServ" className="text-xs">Cód Serv</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -55,7 +55,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('status', checked as boolean)
                 }
               />
-              <Label htmlFor="status" className="text-sm">Status</Label>
+              <Label htmlFor="status" className="text-xs">Status</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -66,11 +66,11 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('dtLimite', checked as boolean)
                 }
               />
-              <Label htmlFor="dtLimite" className="text-sm">Dt.Limite</Label>
+              <Label htmlFor="dtLimite" className="text-xs">Dt.Limite</Label>
             </div>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="servNaoConcluidos" 
@@ -79,7 +79,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('servNaoConcluidos', checked as boolean)
                 }
               />
-              <Label htmlFor="servNaoConcluidos" className="text-sm">Só Serv. não Concluídos</Label>
+              <Label htmlFor="servNaoConcluidos" className="text-xs">Só Serv. não Concluídos</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -90,7 +90,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('novos', checked as boolean)
                 }
               />
-              <Label htmlFor="novos" className="text-sm">Novos</Label>
+              <Label htmlFor="novos" className="text-xs">Novos</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -101,7 +101,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('suspensos', checked as boolean)
                 }
               />
-              <Label htmlFor="suspensos" className="text-sm">Suspensos</Label>
+              <Label htmlFor="suspensos" className="text-xs">Suspensos</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -112,11 +112,11 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('semNota', checked as boolean)
                 }
               />
-              <Label htmlFor="semNota" className="text-sm">Sem Nota</Label>
+              <Label htmlFor="semNota" className="text-xs">Sem Nota</Label>
             </div>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="pendencia" 
@@ -125,7 +125,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('pendencia', checked as boolean)
                 }
               />
-              <Label htmlFor="pendencia" className="text-sm">Pendência</Label>
+              <Label htmlFor="pendencia" className="text-xs">Pendência</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -136,7 +136,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('dicInternet', checked as boolean)
                 }
               />
-              <Label htmlFor="dicInternet" className="text-sm">Dic. Internet</Label>
+              <Label htmlFor="dicInternet" className="text-xs">Dic. Internet</Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -147,45 +147,45 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
                   handleFilterChange('soOS', checked as boolean)
                 }
               />
-              <Label htmlFor="soOS" className="text-sm">Só O.S.</Label>
+              <Label htmlFor="soOS" className="text-xs">Só O.S.</Label>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-7 gap-2 mt-4">
+        <div className="grid grid-cols-7 gap-1 mt-2">
           <div className="space-y-1">
             <Label htmlFor="gerente" className="text-xs font-medium">Gerente</Label>
-            <Input id="gerente" className="h-8 text-sm" placeholder="Gerente" />
+            <Input id="gerente" className="h-7 text-xs" placeholder="Gerente" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="servico" className="text-xs font-medium">Serviço</Label>
-            <Input id="servico" className="h-8 text-sm" placeholder="Serviço" />
+            <Input id="servico" className="h-7 text-xs" placeholder="Serviço" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="hTramit" className="text-xs font-medium">H. Tramit</Label>
-            <Input id="hTramit" className="h-8 text-sm" placeholder="H. Tramit" />
+            <Input id="hTramit" className="h-7 text-xs" placeholder="H. Tramit" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="hAssoc" className="text-xs font-medium">H. Assoc</Label>
-            <Input id="hAssoc" className="h-8 text-sm" placeholder="H. Assoc" />
+            <Input id="hAssoc" className="h-7 text-xs" placeholder="H. Assoc" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="tarefas" className="text-xs font-medium">Tarefas</Label>
-            <Input id="tarefas" className="h-8 text-sm" placeholder="Tarefas" />
+            <Input id="tarefas" className="h-7 text-xs" placeholder="Tarefas" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="teTramit" className="text-xs font-medium">TE tramit</Label>
-            <Input id="teTramit" className="h-8 text-sm" placeholder="TE tramit" />
+            <Input id="teTramit" className="h-7 text-xs" placeholder="TE tramit" />
           </div>
           
           <div className="space-y-1">
             <Label htmlFor="teAssoc" className="text-xs font-medium">TE assoc</Label>
-            <Input id="teAssoc" className="h-8 text-sm" placeholder="TE assoc" />
+            <Input id="teAssoc" className="h-7 text-xs" placeholder="TE assoc" />
           </div>
         </div>
       </CardContent>

@@ -27,30 +27,36 @@ export default function ProcessControlPage() {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      {/* Conteúdo principal */}
-      <div className="container mx-auto px-2 pb-2 ">
+      {/* Conteúdo principal com largura total de 1920px e scroll vertical */}
+      <div className="max-w-[1920px] mx-auto px-2 pb-2 overflow-y-auto">
         <div className="text-xs font-light mb-1">Controle de Processos</div>
 
-        {/* Área superior: command panel + filter panel */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+        {/* Área superior: command panel + filter panel (blocos com 940px de largura, 150px de altura) */}
+        <div className="flex flex-wrap justify-center gap-2 mb-2">
           <ProcessCommandPanel
             onClientChange={handleClientChange}
             onUnitChange={setSelectedUnit}
           />
-          <ProcessFilterPanel />
+          <div className="w-[940px] h-[150px]">
+            <ProcessFilterPanel />
+          </div>
         </div>
 
-        {/* Área do meio: serviços + tarefas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-          <ServicesGrid
-            selectedUnit={selectedUnit}
-            onServiceSelect={setSelectedService}
-          />
-          <TasksGrid selectedService={selectedService} />
+        {/* Área do meio: serviços + tarefas (blocos com 940px de largura, 460px de altura) */}
+        <div className="flex flex-wrap justify-center gap-2 mb-2">
+          <div className="w-[940px] h-[460px] overflow-auto">
+            <ServicesGrid
+              selectedUnit={selectedUnit}
+              onServiceSelect={setSelectedService}
+            />
+          </div>
+          <div className="w-[940px] h-[460px] overflow-auto">
+            <TasksGrid selectedService={selectedService} />
+          </div>
         </div>
 
-        {/* Área inferior: abas */}
-        <div>
+        {/* Área inferior: abas (bloco com largura total, 460px de altura) */}
+        <div className="w-full h-[460px] overflow-auto">
           <ProcessTabs selectedClient={selectedClient} />
         </div>
       </div>

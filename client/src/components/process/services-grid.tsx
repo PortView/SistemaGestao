@@ -34,24 +34,24 @@ export function ServicesGrid({ selectedUnit, onServiceSelect }: ServicesGridProp
   };
   
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md">
-      <CardContent className="p-4">
-        <div className="rounded-md border overflow-hidden">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+      <CardContent className="p-2">
+        <div className="rounded-md border overflow-hidden h-[445px]">
           <Table>
-            <TableHeader className="bg-blue-600">
+            <TableHeader className="bg-blue-600 sticky top-0">
               <TableRow>
-                <TableHead className="text-white font-semibold text-sm w-16">Cód Ser</TableHead>
-                <TableHead className="text-white font-semibold text-sm">Desc. Serv</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Pr</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Pd</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Pr</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">At</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Ex</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Ar</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-10">Cp</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-24">Status</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-24">Dt.Limite</TableHead>
-                <TableHead className="text-white font-semibold text-sm w-24">Val.Serv</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-12">Cód Ser</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1">Desc. Serv</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Pr</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Pd</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Pr</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">At</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Ex</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Ar</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-8">Cp</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-20">Status</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-20">Dt.Limite</TableHead>
+                <TableHead className="text-white font-semibold text-xs py-1 w-20">Val.Serv</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -82,39 +82,39 @@ export function ServicesGrid({ selectedUnit, onServiceSelect }: ServicesGridProp
                   } hover:bg-blue-50 cursor-pointer`}
                   onClick={() => handleServiceClick(service)}
                 >
-                  <TableCell className="text-sm font-medium">{service.codServ}</TableCell>
-                  <TableCell className="text-sm">{service.descserv}</TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-xs font-medium py-1">{service.codServ}</TableCell>
+                  <TableCell className="text-xs py-1">{service.descserv}</TableCell>
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Checkbox checked={false} />
+                  <TableCell className="text-center py-1">
+                    <Checkbox checked={false} className="h-3 w-3" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-1">
                     <Badge 
                       variant={service.concluido ? "outline" : service.pendente ? "destructive" : "default"}
-                      className="text-xs"
+                      className="text-[10px] py-0 px-1"
                     >
                       {service.concluido ? "Concluído" : service.pendente ? "Pendente" : "Em andamento"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm">{formatDate(new Date(service.dtLimite))}</TableCell>
-                  <TableCell className="text-sm">{service.valserv}</TableCell>
+                  <TableCell className="text-xs py-1">{formatDate(new Date(service.dtLimite))}</TableCell>
+                  <TableCell className="text-xs py-1">{service.valserv}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
