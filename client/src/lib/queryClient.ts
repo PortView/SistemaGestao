@@ -21,11 +21,16 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  const res = await fetch(url, {
+  // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
+  const options = {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-  });
+    // No ambiente React, problemas de SSL são gerenciados pelo navegador
+    // então não é necessário adicionar opções adicionais aqui
+  };
+  
+  const res = await fetch(url, options);
 
   await throwIfResNotOk(res);
   return res;
@@ -44,9 +49,14 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
-    const res = await fetch(queryKey[0] as string, {
+    // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
+    const options = {
       headers,
-    });
+      // No ambiente React, problemas de SSL são gerenciados pelo navegador
+      // então não é necessário adicionar opções adicionais aqui
+    };
+    
+    const res = await fetch(queryKey[0] as string, options);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;

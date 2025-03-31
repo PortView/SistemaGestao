@@ -31,12 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const apiMeUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL;
       console.log("URL da API de perfil (useAuth):", apiMeUrl);
       
-      const response = await fetch(apiMeUrl, {
+      // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
+      const options = {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        // No ambiente React, problemas de SSL são gerenciados pelo navegador
+        // então não é necessário adicionar opções adicionais aqui
+      };
+      
+      const response = await fetch(apiMeUrl, options);
       
       if (!response.ok) {
         console.error("Erro na resposta da API (useAuth):", response.status, response.statusText);

@@ -593,6 +593,7 @@ export class MemStorage implements IStorage {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        agent: httpsAgent // Ignora erros de certificado
       });
       
       if (!response.ok) {
@@ -618,6 +619,7 @@ export class MemStorage implements IStorage {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        agent: httpsAgent // Ignora erros de certificado
       });
       
       if (!response.ok) {
@@ -643,6 +645,7 @@ export class MemStorage implements IStorage {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        agent: httpsAgent // Ignora erros de certificado
       });
       
       if (!response.ok) {
@@ -668,6 +671,7 @@ export class MemStorage implements IStorage {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        agent: httpsAgent // Ignora erros de certificado
       });
       
       if (!response.ok) {

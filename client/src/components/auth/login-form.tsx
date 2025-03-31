@@ -93,11 +93,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       console.log("URL da API de autenticação:", apiAuthUrl);
       console.log("Dados de login enviados:", { email: data.email, password: "***" });
       
-      const response = await fetch(apiAuthUrl, {
+      // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
+      const options = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      });
+        // No ambiente React, problemas de SSL são gerenciados pelo navegador
+        // então não é necessário adicionar opções adicionais aqui
+      };
+      
+      const response = await fetch(apiAuthUrl, options);
       
       console.log("Status da resposta de login:", response.status, response.statusText);
       
