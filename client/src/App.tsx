@@ -47,6 +47,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
+      <Route path="/">
+        <Redirect to="/login" />
+      </Route>
       <Route path="/:rest*">
         <ProtectedRouter />
       </Route>

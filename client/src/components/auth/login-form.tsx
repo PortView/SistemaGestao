@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants";
 
 // Esquema de validação do formulário de login
 const loginSchema = z.object({
@@ -72,6 +73,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
       // Salva os dados do usuário no localStorage
       if (userData) {
+        // Armazena dados individuais para compatibilidade com código existente
         localStorage.setItem("user_name", userData.name || "");
         localStorage.setItem("user_tipo", userData.tipo || userData.role);
 
@@ -84,6 +86,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         if (userData.mvvm) {
           localStorage.setItem("user_mvvm", userData.mvvm || "");
         }
+
+        // Armazena todos os dados do usuário em um único item como JSON
+        localStorage.setItem("siscop_user", JSON.stringify(userData));
       }
 
       // Invalida as queries relacionadas ao usuário para garantir

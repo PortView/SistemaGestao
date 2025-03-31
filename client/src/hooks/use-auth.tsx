@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import { SiscopUser } from "@/lib/types";
+import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants";
 
 interface AuthContextType {
   user: User | SiscopUser | null;
@@ -19,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Verifica se há um token no localStorage
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     if (token) {
       setIsAuthenticated(true);
     }
@@ -81,33 +82,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/user/profile"],
     queryFn: async () => {
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
       if (!token) return null;
       
       // Tentamos obter os dados do usuário da API externa
       const userProfile = await fetchUserProfile(token);
       return userProfile;
     },
-    enabled: !!localStorage.getItem("auth_token"),
+    enabled: !!localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY),
     staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 1,
   });
 
   // Função para login
   const login = (token: string) => {
-    localStorage.setItem("auth_token", token);
+    localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
     setIsAuthenticated(true);
     queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
   };
 
   // Função para logout
   const logout = () => {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_tipo");
     localStorage.removeItem("user_cod");
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_mvvm");
+    localStorage.removeItem("siscop_user"); // Remove também os dados do usuário armazenados
     setIsAuthenticated(false);
     queryClient.invalidateQueries();
     queryClient.clear();
