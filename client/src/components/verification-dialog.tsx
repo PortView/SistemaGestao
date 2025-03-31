@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Server } from "lucide-react";
-import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants";
+import { LOCAL_STORAGE_TOKEN_KEY } from "../lib/constants";
 
 export function VerificationDialog({
   open,
