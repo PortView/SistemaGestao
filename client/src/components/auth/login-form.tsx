@@ -80,8 +80,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: import.meta.env.VITE_TEST_USER_EMAIL || "",
+      password: import.meta.env.VITE_TEST_USER_PASSWORD || "",
     },
   });
 
