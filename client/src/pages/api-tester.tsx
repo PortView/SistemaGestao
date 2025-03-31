@@ -68,10 +68,10 @@ export default function ApiTesterPage() {
       const baseApiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL || 
                         `${import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL}/ger-clientes/clientes`;
       
-      const apiUrl = `${baseApiUrl}?codCoor=${codCoor}`;
+      const apiUrl = `${baseApiUrl}?codcoor=${codCoor}`;
       
       console.log('Testando API de clientes:', apiUrl);
-      console.log('Parâmetros: codCoor =', codCoor);
+      console.log('Parâmetros: codcoor =', codCoor);
       
       const headers = {
         'Content-Type': 'application/json',
@@ -448,7 +448,7 @@ export default function ApiTesterPage() {
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
                   <h3 className="text-sm font-medium mb-2">Informações</h3>
                   <p className="text-xs text-gray-600">
-                    Este teste obtém a lista de clientes usando o token de autenticação e o código do coordenador (codCoor)
+                    Este teste obtém a lista de clientes usando o token de autenticação e o código do coordenador (codcoor)
                     presente nos dados do usuário.
                   </p>
                 </div>
