@@ -15,42 +15,42 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
-  
+
   // Fetch clients
   const { data: clients, isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
     queryKey: ['/api/clientes'],
     enabled: true,
   });
-  
+
   // Fetch UFs based on selected client
   const { data: ufs = [] } = useQuery<string[]>({
     queryKey: ['/api/clientes', selectedClient, 'ufs'],
     enabled: !!selectedClient,
   });
-  
+
   // Fetch units based on selected client and UF
   const { data: units = [] } = useQuery<SiscopUnidade[]>({
     queryKey: ['/api/unidades', selectedClient, selectedUF],
     enabled: !!selectedClient && !!selectedUF,
   });
-  
+
   // When client changes, reset UF and unit
   useEffect(() => {
     setSelectedUF(null);
     setSelectedUnit(null);
-    
+
     if (selectedClient && onClientChange) {
       onClientChange(selectedClient);
     }
   }, [selectedClient, onClientChange]);
-  
+
   // When unit changes, notify parent
   useEffect(() => {
     if (selectedUnit && onUnitChange) {
       onUnitChange(selectedUnit);
     }
   }, [selectedUnit, onUnitChange]);
-  
+
   return (
     <Card className="bg-[#d0e0f0] border-none shadow-md">
       <CardContent className="p-2">
@@ -66,12 +66,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               </SelectTrigger>
               <SelectContent>
                 {clients?.map((client) => (
-                    <SelectItem key={client.codcli} value={client.codcli.toString()}>
-                      {client.fantasia}
-                    </SelectItem>
-                    // This dropdown is populated from the API result in "NEXT_PUBLIC_API_CLIENTES_URL",
-                    // sending the token and the parameter codcoor = usuario.cod.
-                    // It returns data where each item has 'fantasia' displayed and uses 'codcli' as the selected value.
                   <SelectItem key={client.codcli} value={client.codcli.toString()}>
                     {client.fantasia}
                   </SelectItem>
@@ -79,7 +73,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-1">
             {/* <Label htmlFor="uf" className="text-xs font-medium">UF</Label> */}
             <Select
@@ -98,7 +92,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-1">
             {/* <Label htmlFor="unit" className="text-xs font-medium">Unidade</Label> */}
             <Select
@@ -123,7 +117,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             </Select>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             Editar
