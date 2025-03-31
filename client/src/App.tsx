@@ -19,7 +19,6 @@ import { queryClient } from "./lib/queryClient";
 import { VerificationDialog } from "./components/verification-dialog"; // Added import
 import { useState, useEffect } from "react"; // Added import
 
-
 function ProtectedRouter() {
   return (
     <ProtectedRoute>
@@ -60,14 +59,18 @@ function App() {
 
   useEffect(() => {
     const handler = () => setVerificationOpen(true);
-    window.addEventListener('open-verification', handler);
-    return () => window.removeEventListener('open-verification', handler);
+    window.addEventListener("open-verification", handler);
+    return () => window.removeEventListener("open-verification", handler);
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <VerificationDialog open={verificationOpen} onOpenChange={setVerificationOpen} /> {/* Added VerificationDialog */}
+        <VerificationDialog
+          open={verificationOpen}
+          onOpenChange={setVerificationOpen}
+        />{" "}
+        {/* Added VerificationDialog */}
         <Router />
         <Toaster />
       </AuthProvider>

@@ -4,8 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,54 +42,58 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { login } = useAuth();
-  
+
   // Função para buscar o perfil do usuário usando a API externa
   const fetchUserProfile = async (token: string) => {
     try {
       const apiMeUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL;
       console.log("URL da API de perfil:", apiMeUrl);
-      
+
       const response = await fetch(apiMeUrl, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (!response.ok) {
-        console.error("Erro na resposta da API:", response.status, response.statusText);
+        console.error(
+          "Erro na resposta da API:",
+          response.status,
+          response.statusText,
+        );
         const errorText = await response.text();
         console.error("Detalhe do erro:", errorText);
         throw new Error("Erro ao buscar perfil do usuário");
       }
-      
+
       const userData = await response.json();
       console.log("Dados do usuário obtidos:", userData);
-      
+
       // Salva os dados do usuário no localStorage
       if (userData) {
-        localStorage.setItem('user_name', userData.name || '');
-        localStorage.setItem('user_tipo', userData.tipo || userData.role || 'Analista');
-        
+        localStorage.setItem("user_name", userData.name || "");
+        localStorage.setItem("user_tipo", userData.tipo || userData.role);
+
         if (userData.cod) {
-          localStorage.setItem('user_cod', userData.cod.toString() || '');
+          localStorage.setItem("user_cod", userData.cod.toString() || "");
         }
-        
-        localStorage.setItem('user_email', userData.email || '');
-        
+
+        localStorage.setItem("user_email", userData.email || "");
+
         if (userData.mvvm) {
-          localStorage.setItem('user_mvvm', userData.mvvm || '');
+          localStorage.setItem("user_mvvm", userData.mvvm || "");
         }
       }
-      
-      // Invalida as queries relacionadas ao usuário para garantir 
+
+      // Invalida as queries relacionadas ao usuário para garantir
       // que os dados sejam atualizados
       queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
     } catch (error) {
       console.error("Erro ao buscar perfil do usuário:", error);
     }
   };
-  
+
   // Inicializa o formulário com o esquema de validação
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -91,8 +109,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       // Usa a URL de autenticação da API externa
       const apiAuthUrl = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL;
       console.log("URL da API de autenticação:", apiAuthUrl);
-      console.log("Dados de login enviados:", { email: data.email, password: "***" });
-      
+      console.log("Dados de login enviados:", {
+        email: data.email,
+        password: "***",
+      });
+
       // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
       const options = {
         method: "POST",
@@ -101,11 +122,15 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         // No ambiente React, problemas de SSL são gerenciados pelo navegador
         // então não é necessário adicionar opções adicionais aqui
       };
-      
+
       const response = await fetch(apiAuthUrl, options);
-      
-      console.log("Status da resposta de login:", response.status, response.statusText);
-      
+
+      console.log(
+        "Status da resposta de login:",
+        response.status,
+        response.statusText,
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Erro no texto da resposta:", errorText);
@@ -113,29 +138,31 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           const errorData = JSON.parse(errorText);
           throw new Error(errorData.error || "Erro ao fazer login");
         } catch (e) {
-          throw new Error("Erro ao fazer login: " + (response.statusText || errorText));
+          throw new Error(
+            "Erro ao fazer login: " + (response.statusText || errorText),
+          );
         }
       }
-      
+
       const responseData = await response.json();
       console.log("Resposta completa do login:", responseData);
       return responseData;
     },
     onSuccess: (data) => {
-      console.log("Dados de autenticação:", data);
-      
+      console.log("Dados de autenticação:->", data);
+
       if (data?.access_token) {
         // Salva o token de acesso
         login(data.access_token);
-        
+
         // Busca os dados do usuário imediatamente após o login
         fetchUserProfile(data.access_token);
-        
+
         toast({
           title: "Login realizado com sucesso",
-          description: "Você será redirecionado para o dashboard",
+          description: "Redirecionando para a tela principal",
         });
-        
+
         // Callback de sucesso
         onSuccess();
       } else {
@@ -151,7 +178,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       console.error("Erro no login:", error);
       toast({
         title: "Erro ao fazer login",
-        description: error?.message || "Verifique suas credenciais e tente novamente",
+        description:
+          error?.message || "Verifique suas credenciais e tente novamente",
         variant: "destructive",
       });
     },
@@ -180,9 +208,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 <FormItem>
                   <FormLabel className="text-white">E-mail</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="seu.email@exemplo.com" 
-                      {...field} 
+                    <Input
+                      placeholder="seu.email@exemplo.com"
+                      {...field}
                       disabled={loginMutation.isPending}
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
@@ -198,10 +226,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 <FormItem>
                   <FormLabel className="text-white">Senha</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="******" 
-                      {...field} 
+                    <Input
+                      type="password"
+                      placeholder="******"
+                      {...field}
                       disabled={loginMutation.isPending}
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
@@ -210,9 +238,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 </FormItem>
               )}
             />
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? (
