@@ -10,7 +10,8 @@ const API_SERVICOS_URL = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || `$
 const API_CONFORMIDADE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL || `${API_BASE_URL}/ger-clientes/conformidades`;
 
 // Configurações de CORS
-const USE_CORS_PROXY = import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY === 'true';
+// Desativando temporariamente para debug
+const USE_CORS_PROXY = false; // import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY === 'true';
 const CORS_PROXY_URL = import.meta.env.VITE_NEXT_PUBLIC_CORS_PROXY_URL || 'https://corsproxy.io/?';
 
 // Cache expiration
@@ -38,23 +39,39 @@ export class ApiService {
    * Faz uma requisição GET à API com suporte a cache
    */
   static async get<T>(url: string, options: FetchOptions = {}, cacheTime?: number): Promise<T> {
-    // Tentar obter dados do cache para requisições GET
-    if (typeof window !== 'undefined' && cacheTime) {
-      const cachedData = this.getFromCache<T>(url);
-      if (cachedData) {
-        console.log(`Usando dados em cache para: ${url}`);
-        return cachedData;
+    console.log(`ApiService.get - Iniciando requisição para: ${url}`);
+    console.log(`ApiService.get - Opções recebidas:`, options);
+    
+    // Desativando cache temporariamente para debug
+    if (url.includes('codCoor')) {
+      console.log(`ApiService.get - Requisição para clientes detectada, ignorando cache temporariamente`);
+    } else {
+      // Tentar obter dados do cache para requisições GET
+      if (typeof window !== 'undefined' && cacheTime) {
+        const cachedData = this.getFromCache<T>(url);
+        if (cachedData) {
+          console.log(`ApiService.get - Usando dados em cache para: ${url}`);
+          return cachedData;
+        }
       }
     }
     
-    const result = await this.request<T>('GET', url, null, options);
-    
-    // Salvar no cache se cacheTime estiver definido
-    if (typeof window !== 'undefined' && cacheTime) {
-      this.saveToCache(url, result, cacheTime);
+    try {
+      console.log(`ApiService.get - Enviando requisição para servidor: ${url}`);
+      const result = await this.request<T>('GET', url, null, options);
+      console.log(`ApiService.get - Resposta recebida para ${url}:`, result);
+      
+      // Salvar no cache se cacheTime estiver definido
+      if (typeof window !== 'undefined' && cacheTime) {
+        this.saveToCache(url, result, cacheTime);
+        console.log(`ApiService.get - Dados salvos no cache com expiração de ${cacheTime}ms`);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(`ApiService.get - Erro na requisição para ${url}:`, error);
+      throw error;
     }
-    
-    return result;
   }
 
   /**
@@ -175,12 +192,34 @@ export class ApiService {
     };
     
     try {
+      console.log(`ApiService.request - Iniciando fetch para ${fullUrl} com opções:`, {
+        method: fetchOptions.method,
+        headersKeys: Object.keys(headers),
+        useProxy: USE_CORS_PROXY,
+        credentials: fetchOptions.credentials
+      });
+      
       // Fazer a requisição
       const response = await fetch(fullUrl, fetchOptions);
+      console.log(`ApiService.request - Resposta recebida de ${fullUrl}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        // Simplificar o log de headers para evitar erro de typescript
+        headers: 'Headers disponíveis no objeto response'
+      });
       
       // Verificar se a resposta foi bem-sucedida
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        console.error(`ApiService.request - Erro na resposta: Status ${response.status} ${response.statusText}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error('ApiService.request - Detalhes do erro:', errorData);
+        } catch (e) {
+          errorData = {};
+          console.error('ApiService.request - Não foi possível obter detalhes do erro');
+        }
+        
         const error = new Error(errorData.message || `Erro na requisição: ${response.status}`);
         Object.assign(error, { status: response.status, data: errorData });
         throw error;
@@ -188,13 +227,19 @@ export class ApiService {
       
       // Verificar se há conteúdo na resposta
       const contentType = response.headers.get('content-type');
+      console.log(`ApiService.request - Content-Type da resposta: ${contentType}`);
+      
       if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        const jsonData = await response.json();
+        console.log(`ApiService.request - Dados JSON recebidos:`, 
+          Array.isArray(jsonData) ? `Array com ${jsonData.length} itens` : jsonData);
+        return jsonData;
       }
       
+      console.log(`ApiService.request - Retornando objeto vazio para resposta não-JSON`);
       return {} as T;
     } catch (error) {
-      console.error('Erro na requisição à API:', error);
+      console.error('ApiService.request - Erro completo na requisição à API:', error);
       throw error;
     }
   }
@@ -245,10 +290,30 @@ export async function fetchUserProfile(): Promise<SiscopUser> {
  * Função para buscar clientes com cache
  */
 export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
+  // Validação do parâmetro codCoor
+  if (!codCoor) {
+    console.error('Erro: codCoor é obrigatório para buscar clientes.');
+    return [];
+  }
+  
+  console.log('fetchClientes - Iniciando com codCoor:', codCoor);
+  
   const cacheKey = `${LOCAL_STORAGE_CLIENTES_KEY}_${codCoor}`;
   const url = `${API_CLIENTES_URL}?codCoor=${codCoor}`;
-
+  
+  console.log('fetchClientes - URL completa:', url);
+  
+  // Verificar token antes de fazer requisição
+  const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+  if (!token) {
+    console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
+    return [];
+  }
+  
   try {
+    // Desativar cache temporariamente para debug
+    // Para produção, descomentar o código abaixo
+    /*
     // Buscar do cache primeiro
     if (typeof window !== 'undefined') {
       const cachedClientes = localStorage.getItem(cacheKey);
@@ -263,10 +328,24 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
         localStorage.removeItem(cacheKey);
       }
     }
+    */
     
-    // Se não estiver em cache ou expirado, buscar da API
-    // Usar a URL completa para aplicar o proxy CORS
-    const clientesData = await ApiService.get<SiscopCliente[]>(url, {}, CACHE_EXPIRATION.MEDIUM);
+    // Buscar da API com headers explícitos incluindo o token Bearer
+    console.log('fetchClientes - Fazendo requisição para API com token');
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    
+    const clientesData = await ApiService.get<SiscopCliente[]>(
+      url, 
+      { headers }, // Passando headers explicitamente
+      CACHE_EXPIRATION.MEDIUM
+    );
+    
+    console.log('fetchClientes - Dados recebidos da API:', clientesData);
     
     // Salvar no cache
     if (typeof window !== 'undefined' && clientesData) {
@@ -275,21 +354,30 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
         expiration: Date.now() + CACHE_EXPIRATION.MEDIUM
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      console.log('fetchClientes - Dados salvos no cache');
     }
     
     return clientesData;
   } catch (error) {
-    console.error('Erro ao buscar clientes:', error);
-    // Em caso de falha, usar dados em cache mesmo que expirados
+    console.error('Erro detalhado ao buscar clientes:', error);
+    
+    // Em caso de falha, usar dados em cache mesmo que expirados como fallback
     if (typeof window !== 'undefined') {
       const cachedClientes = localStorage.getItem(cacheKey);
       if (cachedClientes) {
-        const { data } = JSON.parse(cachedClientes);
-        console.log('Usando dados de clientes em cache (fallback após erro)');
-        return data;
+        try {
+          const { data } = JSON.parse(cachedClientes);
+          console.log('fetchClientes - Usando dados em cache como fallback após erro');
+          return data;
+        } catch (e) {
+          console.error('Erro ao ler cache:', e);
+        }
       }
     }
-    throw error;
+    
+    // Se não há dados em cache, retornar array vazio em vez de lançar erro
+    console.log('fetchClientes - Sem dados em cache para fallback, retornando array vazio');
+    return [];
   }
 }
 

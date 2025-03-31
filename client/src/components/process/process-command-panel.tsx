@@ -16,6 +16,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
+  const [debugMessage, setDebugMessage] = useState<string>('');
   
   // Obter o usuário do localStorage para pegar o codCoor
   const getUserFromStorage = (): { cod: number } | null => {
@@ -23,30 +24,49 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       const userJson = localStorage.getItem('siscop_user');
       if (userJson) {
         try {
+          console.log('Dados do usuário em localStorage:', userJson);
           return JSON.parse(userJson);
         } catch (e) {
           console.error('Erro ao fazer parse do usuário do localStorage:', e);
+          setDebugMessage('Erro ao extrair dados do usuário - verifique o console');
         }
+      } else {
+        console.warn('Nenhum dado do usuário encontrado no localStorage');
+        setDebugMessage('Usuário não encontrado no localStorage');
       }
     }
     return null;
   };
   
-  const user = getUserFromStorage();
+  // Para depuração: pegar diretamente do usuário logado nos logs
+  const user = getUserFromStorage() || { cod: 110 }; // Se não achar, usar o código fixo do usuário Mauro (110)
   const codCoor = user?.cod || 0;
   
-  // Buscar clientes da API usando o codCoor do usuário
-  const { data: clients = [], isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
+  console.log('ProcessCommandPanel - Usando codCoor:', codCoor);
+  
+  // Obter clientes direto da API externa usando o codCoor do usuário
+  const { data: clients = [], isLoading: isLoadingClients, error: clientsError } = useQuery<SiscopCliente[]>({
     queryKey: ['siscop-clientes', codCoor],
     queryFn: async () => {
       if (!codCoor) {
         console.warn('codCoor não disponível, não é possível buscar clientes');
         return [];
       }
+      
       console.log('Buscando clientes para codCoor:', codCoor);
-      return await fetchClientes(codCoor);
+      // Log para depuração detalhado
+      try {
+        const clientData = await fetchClientes(codCoor);
+        console.log('Dados de clientes retornados:', clientData);
+        return clientData;
+      } catch (error) {
+        console.error('Erro ao buscar clientes:', error);
+        throw error;
+      }
     },
     enabled: !!codCoor,
+    // Não usar cache do React Query para garantir dados atualizados
+    staleTime: 0,
   });
 
   // Determinar UFs disponíveis baseado no cliente selecionado
