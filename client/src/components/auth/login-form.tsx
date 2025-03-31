@@ -29,6 +29,53 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const queryClient = useQueryClient();
   const { login } = useAuth();
   
+  // Função para buscar o perfil do usuário usando a API externa
+  const fetchUserProfile = async (token: string) => {
+    try {
+      const apiMeUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL;
+      console.log("URL da API de perfil:", apiMeUrl);
+      
+      const response = await fetch(apiMeUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        console.error("Erro na resposta da API:", response.status, response.statusText);
+        const errorText = await response.text();
+        console.error("Detalhe do erro:", errorText);
+        throw new Error("Erro ao buscar perfil do usuário");
+      }
+      
+      const userData = await response.json();
+      console.log("Dados do usuário obtidos:", userData);
+      
+      // Salva os dados do usuário no localStorage
+      if (userData) {
+        localStorage.setItem('user_name', userData.name || '');
+        localStorage.setItem('user_tipo', userData.tipo || userData.role || 'Analista');
+        
+        if (userData.cod) {
+          localStorage.setItem('user_cod', userData.cod.toString() || '');
+        }
+        
+        localStorage.setItem('user_email', userData.email || '');
+        
+        if (userData.mvvm) {
+          localStorage.setItem('user_mvvm', userData.mvvm || '');
+        }
+      }
+      
+      // Invalida as queries relacionadas ao usuário para garantir 
+      // que os dados sejam atualizados
+      queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário:", error);
+    }
+  };
+  
   // Inicializa o formulário com o esquema de validação
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,35 +85,46 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     },
   });
 
-  // Mutação para fazer login
+  // Mutação para fazer login usando a API externa
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormValues) => {
-      const response = await fetch("/api/login", {
+      // Usa a URL de autenticação da API externa
+      const apiAuthUrl = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL;
+      console.log("URL da API de autenticação:", apiAuthUrl);
+      console.log("Dados de login enviados:", { email: data.email, password: "***" });
+      
+      const response = await fetch(apiAuthUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       
+      console.log("Status da resposta de login:", response.status, response.statusText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Erro ao fazer login");
+        const errorText = await response.text();
+        console.error("Erro no texto da resposta:", errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.error || "Erro ao fazer login");
+        } catch (e) {
+          throw new Error("Erro ao fazer login: " + (response.statusText || errorText));
+        }
       }
       
-      return response.json();
+      const responseData = await response.json();
+      console.log("Resposta completa do login:", responseData);
+      return responseData;
     },
     onSuccess: (data) => {
-      if (data?.access_token) {
+      console.log("Dados de autenticação:", data);
+      
+      if (data?.token) {
         // Salva o token de acesso
-        login(data.access_token);
+        login(data.token);
         
-        // Salva dados do usuário para exibição no header
-        if (data.user) {
-          localStorage.setItem('user_name', data.user.name || '');
-          localStorage.setItem('user_tipo', data.user.tipo || '');
-          localStorage.setItem('user_cod', data.user.cod?.toString() || '');
-          localStorage.setItem('user_email', data.user.email || '');
-          localStorage.setItem('user_mvvm', data.user.mvvm || '');
-        }
+        // Busca os dados do usuário imediatamente após o login
+        fetchUserProfile(data.token);
         
         toast({
           title: "Login realizado com sucesso",
@@ -75,6 +133,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         
         // Callback de sucesso
         onSuccess();
+      } else {
+        console.error("Token não encontrado na resposta da API");
+        toast({
+          title: "Erro no login",
+          description: "Resposta da API não contém token válido",
+          variant: "destructive",
+        });
       }
     },
     onError: (error: any) => {

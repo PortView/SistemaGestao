@@ -20,7 +20,7 @@ const Header = () => {
   const { user, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
   // Cast para SiscopUser se necessário - se os dados vierem da API do Siscop
-  const siscopUser = user as unknown as SiscopUser;
+  const siscopUser = user as SiscopUser;
   const [activeMenu, setActiveMenu] = useState("");
   
   // Fetch unread notifications
@@ -150,7 +150,7 @@ const Header = () => {
           
           <Avatar className="h-8 w-8 mr-2">
             <AvatarFallback className="bg-gray-700">
-              {localStorage.getItem('user_name')?.[0] || 'U'}
+              {(localStorage.getItem('user_name') || 'U')[0]}
             </AvatarFallback>
           </Avatar>
           
