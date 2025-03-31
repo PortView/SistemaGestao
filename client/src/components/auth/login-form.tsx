@@ -124,12 +124,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     onSuccess: (data) => {
       console.log("Dados de autenticação:", data);
       
-      if (data?.token) {
+      if (data?.access_token) {
         // Salva o token de acesso
-        login(data.token);
+        login(data.access_token);
         
         // Busca os dados do usuário imediatamente após o login
-        fetchUserProfile(data.token);
+        fetchUserProfile(data.access_token);
         
         toast({
           title: "Login realizado com sucesso",
