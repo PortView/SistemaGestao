@@ -1,7 +1,8 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { useAuth } from '../../hooks/use-auth';
+import { cn } from '../../lib/utils';
 import { 
   BarChart, 
   FileText, 

@@ -1,7 +1,8 @@
 import './globals.css';
 import { Providers } from './providers';
-import { cn } from '@/lib/utils';
-import { Toaster } from '@/components/ui/toaster';
+import { cn } from './lib/utils';
+import { Toaster } from './components/ui/toaster';
+import React from 'react';
 
 interface RootLayoutProps {
   children: React.ReactNode;

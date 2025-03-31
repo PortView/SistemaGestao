@@ -1,19 +1,19 @@
 import { Switch, Route, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import MainLayout from "@/components/layout/main-layout";
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
-import Documents from "@/pages/documents";
-import DocumentDetail from "@/pages/document/[id]";
-import DocumentUploadPage from "@/pages/document/upload";
-import Properties from "@/pages/properties";
-import Notifications from "@/pages/notifications";
-import Settings from "@/pages/settings";
-import ProcessControl from "@/pages/process-control";
-import LoginPage from "@/pages/login";
-import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+import { Toaster } from "./components/ui/toaster";
+import MainLayout from "./components/layout/main-layout";
+import NotFound from "./pages/not-found";
+import Dashboard from "./pages/dashboard";
+import Documents from "./pages/documents";
+import DocumentDetail from "./pages/document/[id]";
+import DocumentUploadPage from "./pages/document/upload";
+import Properties from "./pages/properties";
+import Notifications from "./pages/notifications";
+import Settings from "./pages/settings";
+import ProcessControl from "./pages/process-control";
+import LoginPage from "./pages/login";
+import { AuthProvider } from "./hooks/use-auth";
+import { ProtectedRoute } from "./components/auth/protected-route";
 import { queryClient } from "./lib/queryClient";
 
 function ProtectedRouter() {

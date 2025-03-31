@@ -7,11 +7,18 @@ import { QueryClient } from '@tanstack/react-query';
  */
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const errorData = await res.json().catch(() => {
-      return { message: 'Erro desconhecido' };
-    });
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Erro ${res.status}: ${res.statusText}`;
     
-    const errorMessage = errorData.message || `Erro ${res.status}: ${res.statusText}`;
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        const data = await res.json();
+        errorMessage = data.message || errorMessage;
+      } catch (e) {
+        console.error('Erro ao analisar resposta de erro:', e);
+      }
+    }
+    
     throw new Error(errorMessage);
   }
 }
@@ -20,42 +27,38 @@ async function throwIfResNotOk(res: Response) {
  * Função para fazer requisições à API
  */
 export async function apiRequest(
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  method: string,
   url: string,
-  body?: any,
+  data?: any,
   extraOptions: RequestInit = {}
 ) {
-  // Desativa verificação SSL para APIs que usam certificados auto-assinados
-  const agent = new (require('https').Agent)({
-    rejectUnauthorized: false
-  });
-
   const options: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...extraOptions.headers,
+      ...(extraOptions.headers || {}),
     },
-    agent,
     ...extraOptions,
   };
-
-  // Adiciona o corpo da requisição para métodos não-GET
-  if (method !== 'GET' && body) {
-    options.body = JSON.stringify(body);
+  
+  // Adiciona o token de autenticação se existir
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  if (token) {
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+    };
   }
-
-  // Se temos um token de acesso no localStorage, adiciona ao cabeçalho
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('access_token');
-    if (token && options.headers) {
-      (options.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    }
+  
+  // Adiciona o corpo da requisição se não for GET
+  if (method !== 'GET' && data) {
+    options.body = JSON.stringify(data);
   }
-
-  const response = await fetch(url, options);
-  await throwIfResNotOk(response);
-  return response;
+  
+  const res = await fetch(url, options);
+  await throwIfResNotOk(res);
+  
+  return res;
 }
 
 /**
@@ -69,19 +72,21 @@ type UnauthorizedBehavior = 'returnNull' | 'throw';
 export const getQueryFn = <T>(options: {
   on401: UnauthorizedBehavior;
 }) => {
-  return async ({ queryKey }: { queryKey: string[] }): Promise<T | null> => {
-    const [url] = queryKey;
+  return async ({ queryKey }: { queryKey: string[] }): Promise<T | undefined> => {
     try {
-      const res = await apiRequest('GET', url);
-      return await res.json();
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('401') &&
-        options.on401 === 'returnNull'
-      ) {
-        return null;
+      const res = await apiRequest('GET', queryKey[0]);
+      
+      if (res.status === 204) {
+        return undefined;
       }
+      
+      return await res.json();
+    } catch (error: any) {
+      // Se for erro 401 e o comportamento for returnNull, retorna null
+      if (error.message.includes('401') && options.on401 === 'returnNull') {
+        return undefined;
+      }
+      
       throw error;
     }
   };
@@ -93,9 +98,9 @@ export const getQueryFn = <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 1000 * 60 * 5, // 5 minutos
+      refetchOnWindowFocus: true,
+      retry: 1,
     },
   },
 });

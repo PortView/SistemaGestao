@@ -53,19 +53,25 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   
   return (
     <Card className="bg-[#d0e0f0] border-none shadow-md">
-      <CardContent className="p-4">
+      <CardContent className="p-2">
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="space-y-1">
-            <Label htmlFor="client" className="text-xs font-medium">Cliente</Label>
+            {/* <Label htmlFor="client" className="text-xs font-medium">Cliente</Label> */}
             <Select
               disabled={isLoadingClients}
               onValueChange={(value) => setSelectedClient(Number(value))}
             >
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Selecione um cliente" />
+                <SelectValue placeholder="Cliente" />
               </SelectTrigger>
               <SelectContent>
                 {clients?.map((client) => (
+                    <SelectItem key={client.codcli} value={client.codcli.toString()}>
+                      {client.fantasia}
+                    </SelectItem>
+                    // This dropdown is populated from the API result in "NEXT_PUBLIC_API_CLIENTES_URL",
+                    // sending the token and the parameter codcoor = usuario.cod.
+                    // It returns data where each item has 'fantasia' displayed and uses 'codcli' as the selected value.
                   <SelectItem key={client.codcli} value={client.codcli.toString()}>
                     {client.fantasia}
                   </SelectItem>
@@ -75,13 +81,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </div>
           
           <div className="space-y-1">
-            <Label htmlFor="uf" className="text-xs font-medium">UF</Label>
+            {/* <Label htmlFor="uf" className="text-xs font-medium">UF</Label> */}
             <Select
               disabled={!selectedClient || ufs.length === 0}
               onValueChange={(value) => setSelectedUF(value)}
             >
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Selecione uma UF" />
+                <SelectValue placeholder="UF" />
               </SelectTrigger>
               <SelectContent>
                 {ufs.map((uf) => (
@@ -94,7 +100,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </div>
           
           <div className="space-y-1">
-            <Label htmlFor="unit" className="text-xs font-medium">Unidade</Label>
+            {/* <Label htmlFor="unit" className="text-xs font-medium">Unidade</Label> */}
             <Select
               disabled={!selectedUF || units.length === 0}
               onValueChange={(value) => {
@@ -105,7 +111,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               }}
             >
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Selecione uma unidade" />
+                <SelectValue placeholder="Unidade" />
               </SelectTrigger>
               <SelectContent>
                 {units.map((unit) => (

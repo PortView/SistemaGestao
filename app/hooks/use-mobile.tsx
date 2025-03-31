@@ -1,24 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Função para verificar o tamanho da tela
-    const checkIfMobile = () => {
+    // Verifica inicialmente
+    function checkMobile() {
       setIsMobile(window.innerWidth < 768);
-    };
-
-    // Verificar na montagem do componente
-    checkIfMobile();
-
-    // Adicionar listener para quando o tamanho da tela mudar
-    window.addEventListener('resize', checkIfMobile);
-
-    // Limpar listener na desmontagem
-    return () => window.removeEventListener('resize', checkIfMobile);
+    }
+    
+    // Adiciona o evento de resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Checa no primeiro render
+    checkMobile();
+    
+    // Limpa o evento
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   return isMobile;

@@ -1,11 +1,15 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import React, { useState } from 'react';
+import { useAuth } from '../../hooks/use-auth';
 import { BellIcon, LogOut, MenuIcon, Settings, UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
@@ -19,6 +23,7 @@ export function Header() {
       <div className="flex items-center">
         <button
           type="button"
+          onClick={onMenuClick}
           className="bg-transparent md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground"
         >
           <MenuIcon className="h-6 w-6" />

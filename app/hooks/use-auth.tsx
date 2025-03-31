@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { SiscopUser } from '@/lib/types';
-import { apiRequest } from '@/lib/queryClient';
+import { SiscopUser } from '../lib/types';
+import { ApiService } from '../lib/api-service';
+import { useToast } from './use-toast';
 
 interface AuthContextType {
   user: SiscopUser | null;
@@ -12,63 +13,55 @@ interface AuthContextType {
   logout: () => void;
 }
 
+const LOCAL_STORAGE_TOKEN_KEY = 'siscop_token';
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SiscopUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Função para fazer login
-  const login = async (token: string) => {
-    try {
-      // Salva o token no localStorage
-      localStorage.setItem('access_token', token);
-      
-      // Busca os dados do usuário
-      await fetchUserProfile();
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      logout();
-    }
-  };
-
-  // Função para fazer logout
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    setUser(null);
-  };
+  const { toast } = useToast();
 
   // Função para buscar o perfil do usuário
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = async (token: string) => {
     try {
-      setIsLoading(true);
-      
-      // Busca os dados do usuário na API
-      const response = await apiRequest(
-        'GET',
-        process.env.VITE_NEXT_PUBLIC_API_ME_URL || '',
-      );
-      
-      const data = await response.json();
-      setUser(data);
+      const userData = await ApiService.get<SiscopUser>('/auth/me');
+      setUser(userData);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
-      logout();
+      // Se houver erro, remover o token do localStorage
+      localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Verifica a autenticação ao carregar
+  // Verificar token no localStorage ao montar o componente
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     if (token) {
-      fetchUserProfile();
+      fetchUserProfile(token);
     } else {
       setIsLoading(false);
     }
   }, []);
+
+  // Função para login
+  const login = (token: string) => {
+    localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
+    fetchUserProfile(token);
+  };
+
+  // Função para logout
+  const logout = () => {
+    localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+    setUser(null);
+    toast({
+      title: 'Logout realizado',
+      description: 'Você foi desconectado com sucesso.',
+    });
+  };
 
   const value: AuthContextType = {
     user,
@@ -83,10 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
   if (!context) {
     throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
-  
   return context;
 }

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '../../hooks/use-mobile';
 
 interface MainLayoutProps {
   children: React.ReactNode;
