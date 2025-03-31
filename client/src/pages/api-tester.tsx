@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { AlertCircle, CheckCircle2, ServerCrash, RefreshCw, Database, Server } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 
 export default function ApiTesterPage() {
   const [tokenInfo, setTokenInfo] = useState<{ exists: boolean, value: string | null }>({ exists: false, value: null });
@@ -23,7 +24,7 @@ export default function ApiTesterPage() {
 
   // Verificar token no localStorage
   const checkToken = () => {
-    const token = localStorage.getItem('siscop_token');
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     setTokenInfo({
       exists: !!token,
       value: token
@@ -141,7 +142,7 @@ export default function ApiTesterPage() {
       
       // Salvar token e atualizar estado
       if (data.access_token) {
-        localStorage.setItem('siscop_token', data.access_token);
+        localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, data.access_token);
         toast({
           title: "Sucesso",
           description: "Token salvo com sucesso no localStorage",
@@ -224,7 +225,7 @@ export default function ApiTesterPage() {
 
   // Função para limpar dados de autenticação
   const clearAuthData = () => {
-    localStorage.removeItem('siscop_token');
+    localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
     localStorage.removeItem('siscop_user');
     checkToken();
     toast({

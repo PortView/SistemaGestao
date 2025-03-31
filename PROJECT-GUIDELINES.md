@@ -11,24 +11,25 @@
    - Todas as requisições de dados devem ser feitas diretamente para as APIs existentes
    - Autenticação via JWT usando o endpoint de login, que retorna `access_token`
    - Usar o token para autenticar chamadas subsequentes via cabeçalho `Authorization: Bearer <token>`
-   - Armazenar o token e dados do usuário logado no localStorage
+   - Armazenar o token em localStorage usando a chave `siscop_token` (definida em LOCAL_STORAGE_TOKEN_KEY)
+   - Armazenar o objeto de usuário em localStorage usando a chave `siscop_user`
 
 3. **Principais Endpoints da API**
    - `VITE_NEXT_PUBLIC_API_AUTH_URL`: Autenticação (login)
    - `VITE_NEXT_PUBLIC_API_ME_URL`: Dados do usuário logado
-   - `VITE_NEXT_PUBLIC_API_CLIENTES_URL`: Lista de clientes (requer parâmetro `codCoor` do usuário logado)
+   - `VITE_NEXT_PUBLIC_API_CLIENTES_URL`: Lista de clientes (requer parâmetro `codcoor` em minúsculo do usuário logado)
    - `VITE_NEXT_PUBLIC_API_UNIDADES_URL`: Unidades por cliente e UF
    - `VITE_NEXT_PUBLIC_API_SERVICOS_URL`: Serviços
    - `VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL`: Documentos de conformidade
 
 4. **Otimizações**
    - Implementar cache no localStorage para requisições frequentes
-   - Usar proxy CORS quando necessário para contornar problemas de CORS
-   - Implementar retry e timeout para chamadas à API quando necessário
+   - Sistema de retry e timeout para chamadas à API para maior robustez
+   - Evitar usar a opção `credentials: 'include'` em requisições fetch para prevenir erros de CORS
 
 5. **UI/UX**
-   - Tema escuro em toda a aplicação
-   - Design responsivo para mobile e desktop
+   - Tema escuro em toda a aplicação, inclusive formulários
+   - Design responsivo para monitores 1920x1080, tablets e telas menores
    - Upload de documentos com drag-and-drop
    - Validação de arquivos (PDF, JPEG, PNG)
    - Limite de 10MB por arquivo e máximo de 5 arquivos
@@ -38,25 +39,28 @@
 1. Usuário faz login com email e senha
 2. API retorna `access_token` que é armazenado no localStorage
 3. Requisições subsequentes usam este token no cabeçalho Authorization
-4. Para consultar clientes, sempre usar o parâmetro `codCoor` que é o `cod` do usuário logado
-5. Permissões e acesso são controlados pelo backend, frontend apenas exibe ou oculta elementos
+4. Dados do usuário são obtidos da API após login e armazenados no localStorage
+5. Para consultar clientes, sempre usar o parâmetro `codcoor` (em minúsculo) que é o `cod` do usuário logado
+6. Permissões e acesso são controlados pelo backend, frontend apenas exibe ou oculta elementos
+7. Em caso de erro na API ou token expirado, redirecionar para login
+8. Implementar redirecionamento da rota raiz ("/") para a página de login
 
 ## Stack Técnico
 
-- React como framework principal
+- React com Vite como framework principal
 - TailwindCSS para estilização
 - ShadCN UI para componentes
-- React Query para gerenciamento de chamadas à API
-- PrimeReact como biblioteca adicional de componentes
-- localStorage para cache e armazenamento de tokens
+- TanStack Query (React Query) para gerenciamento de chamadas à API
+- localStorage para cache e armazenamento de tokens e dados
+- ApiService para centralizar chamadas à API com tratamento de erros e cache
 
 ## Endpoints Específicos
 
 ### Endpoint de Clientes
 - URL: `https://amenirealestate.com.br:5601/ger-clientes/clientes`
 - Método: GET
-- Parâmetro obrigatório: `codCoor` (deve ser o código do usuário logado)
-- Exemplo: `https://amenirealestate.com.br:5601/ger-clientes/clientes?codCoor=110`
+- Parâmetro obrigatório: `codcoor` (em minúsculo, deve ser o código do usuário logado)
+- Exemplo: `https://amenirealestate.com.br:5601/ger-clientes/clientes?codcoor=110`
 
 ### Endpoint de Unidades
 - URL: `https://amenirealestate.com.br:5601/ger-clientes/unidades`
@@ -67,5 +71,13 @@
 
 ## Implementação Específica de Clientes
 - O dropdown de clientes deve ser populado com dados da API via endpoint `VITE_NEXT_PUBLIC_API_CLIENTES_URL`
-- Utilizar o `codCoor` (código do coordenador) do usuário logado como parâmetro para esta requisição
+- Utilizar o `codcoor` (código do coordenador, em minúsculo) do usuário logado como parâmetro para esta requisição
 - Implementar cache para reduzir o número de requisições frequentes
+- Implementar fallback para usar dados em cache caso a API falhe temporariamente
+
+## Padrões de Tratamento de Erros
+- Implementar timeout para requisições para evitar esperas infinitas (máximo 15 segundos)
+- Implementar sistema de retry para repetir requisições que falham (máximo 1 retry com delay)
+- Sempre mostrar mensagens de erro ao usuário usando toast ou notificações
+- Capturar e logar detalhes de erros para debug
+- Em caso de falha na API, tentar usar dados em cache mesmo que expirados como fallback
