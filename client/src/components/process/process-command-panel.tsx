@@ -134,7 +134,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
                 {clients?.map((client) => (
                   <SelectItem key={client.codcli} value={client.codcli.toString()}>
                     {client.fantasia}
@@ -152,7 +152,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue placeholder="UF" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
                 {ufs.map((uf) => (
                   <SelectItem key={uf} value={uf}>
                     {uf}
@@ -175,10 +175,10 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue placeholder="Unidade" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 fixed w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
                 {units.map((unit) => (
                   <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
-                    {`${unit.contrato} - ${unit.cadimov?.uf || unit.uf || ''} - ${unit.codend}`}
+                    {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
                   </SelectItem>
                 ))}
               </SelectContent>
