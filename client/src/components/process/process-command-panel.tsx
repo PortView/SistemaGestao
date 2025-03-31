@@ -45,17 +45,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   
   // Obter clientes da API Externa usando token e codCoor
   const { data: clients = [], isLoading: isLoadingClients, error: clientsError } = useQuery<SiscopCliente[]>({
-    queryKey: ['siscop-clientes', codCoor, authToken],
+    queryKey: ['siscop-clientes', codCoor],
     queryFn: async () => {
       if (!codCoor) {
         console.warn('codCoor não disponível, não é possível buscar clientes');
         return [];
       }
       
-      if (!authToken) {
+      const token = localStorage.getItem('siscop_token');
+      if (!token) {
         console.warn('Token de autenticação não disponível, não é possível buscar clientes');
         return [];
       }
+
+      console.log('Buscando clientes com token:', token);
       
       console.log('Buscando clientes para codCoor:', codCoor);
       try {
