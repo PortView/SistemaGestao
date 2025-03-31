@@ -11,48 +11,63 @@ interface ProcessCommandPanelProps {
   onUnitChange?: (unit: SiscopUnidade) => void;
 }
 
-// Dados simulados para teste - apenas para garantir que o componente renderize
-const mockClientes: SiscopCliente[] = [
-  { 
-    codcli: 1, 
-    fantasia: "Cliente Teste 1", 
-    lc_ufs: [{ uf: "SP" }, { uf: "RJ" }] 
-  },
-  { 
-    codcli: 2, 
-    fantasia: "Cliente Teste 2", 
-    lc_ufs: [{ uf: "MG" }, { uf: "ES" }] 
-  }
-];
-
 export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCommandPanelProps) {
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
   
-  // Código fixo do usuário Mauro
-  const codCoor = 110;
+  // Código do usuário obtido de localStorage durante getUserData
+  const [codCoor, setCodCoor] = useState<number>(0);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   
-  // Obter clientes da API (para debug usando dados mockados)
-  const { data: clients = mockClientes, isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
-    queryKey: ['siscop-clientes', codCoor],
+  // Carregar token e dados do usuário do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Obter token
+      const token = localStorage.getItem('siscop_token');
+      setAuthToken(token);
+      
+      // Obter dados do usuário
+      const userJson = localStorage.getItem('siscop_user');
+      if (userJson) {
+        try {
+          const userData = JSON.parse(userJson);
+          if (userData && userData.cod) {
+            console.log('Dados do usuário carregados:', userData.cod);
+            setCodCoor(userData.cod);
+          }
+        } catch (e) {
+          console.error('Erro ao carregar dados do usuário:', e);
+        }
+      }
+    }
+  }, []);
+  
+  // Obter clientes da API Externa usando token e codCoor
+  const { data: clients = [], isLoading: isLoadingClients, error: clientsError } = useQuery<SiscopCliente[]>({
+    queryKey: ['siscop-clientes', codCoor, authToken],
     queryFn: async () => {
+      if (!codCoor) {
+        console.warn('codCoor não disponível, não é possível buscar clientes');
+        return [];
+      }
+      
+      if (!authToken) {
+        console.warn('Token de autenticação não disponível, não é possível buscar clientes');
+        return [];
+      }
+      
       console.log('Buscando clientes para codCoor:', codCoor);
       try {
-        // Tentar buscar da API
         const clientData = await fetchClientes(codCoor);
-        if (clientData && clientData.length > 0) {
-          console.log('Dados de clientes retornados da API:', clientData);
-          return clientData;
-        }
-        // Se não retornar dados ou lista vazia, usar mockados
-        console.log('Usando dados mockados para clientes');
-        return mockClientes;
+        console.log('Dados recebidos da API:', clientData);
+        return clientData;
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
-        return mockClientes;
+        throw error;
       }
     },
+    enabled: !!codCoor && !!authToken,
     staleTime: 0,
   });
 
@@ -60,6 +75,35 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const ufs = selectedClient ? 
     clients.find(c => c.codcli === selectedClient)?.lc_ufs.map(u => u.uf) || [] : 
     [];
+
+  // Buscar unidades da API quando cliente e UF estiverem selecionados
+  const { data: units = [], isLoading: isLoadingUnits, error: unitsError } = useQuery<SiscopUnidade[]>({
+    queryKey: ['siscop-unidades', selectedClient, selectedUF, authToken],
+    queryFn: async () => {
+      if (!selectedClient || !selectedUF || !authToken) {
+        console.warn('Cliente, UF ou token não disponíveis para buscar unidades');
+        return [];
+      }
+      
+      console.log('Buscando unidades para cliente:', selectedClient, 'UF:', selectedUF);
+      const params = { 
+        codcli: selectedClient, 
+        uf: selectedUF,
+        pagina: 1,
+        quantidade: 100
+      };
+      
+      try {
+        const response = await fetchUnidades(params);
+        console.log('Dados de unidades recebidos:', response);
+        return response.folowups || [];
+      } catch (error) {
+        console.error('Erro ao buscar unidades:', error);
+        throw error;
+      }
+    },
+    enabled: !!selectedClient && !!selectedUF && !!authToken,
+  });
 
   // Quando o cliente mudar, resetar UF e unidade
   useEffect(() => {
@@ -70,6 +114,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       onClientChange(selectedClient);
     }
   }, [selectedClient, onClientChange]);
+
+  // Quando a unidade mudar, notificar o componente pai
+  useEffect(() => {
+    if (selectedUnit && onUnitChange) {
+      onUnitChange(selectedUnit);
+    }
+  }, [selectedUnit, onUnitChange]);
 
   return (
     <Card className="bg-[#d0e0f0] border-none shadow-md">
@@ -112,14 +163,24 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </div>
 
           <div className="space-y-1">
-            <Select disabled={!selectedUF}>
+            <Select
+              disabled={!selectedUF || isLoadingUnits || units.length === 0}
+              onValueChange={(value) => {
+                const unit = units.find(u => u.contrato + '-' + u.codend === value);
+                if (unit) {
+                  setSelectedUnit(unit);
+                }
+              }}
+            >
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue placeholder="Unidade" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unidade-exemplo">
-                  Unidade Exemplo
-                </SelectItem>
+                {units.map((unit) => (
+                  <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
+                    {`${unit.contrato} - ${unit.cadimov?.uf || unit.uf || ''} - ${unit.codend}`}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

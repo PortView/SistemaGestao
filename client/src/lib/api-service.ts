@@ -293,7 +293,7 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
   // Validação do parâmetro codCoor
   if (!codCoor) {
     console.error('Erro: codCoor é obrigatório para buscar clientes.');
-    return [];
+    throw new Error('codCoor é obrigatório para buscar clientes');
   }
   
   console.log('fetchClientes - Iniciando com codCoor:', codCoor);
@@ -307,41 +307,38 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
   const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
   if (!token) {
     console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
-    return [];
+    throw new Error('Token de autenticação não encontrado. Faça login novamente.');
   }
   
   try {
-    // Desativar cache temporariamente para debug
-    // Para produção, descomentar o código abaixo
-    /*
-    // Buscar do cache primeiro
+    // Buscar do cache primeiro para economizar requisições
     if (typeof window !== 'undefined') {
       const cachedClientes = localStorage.getItem(cacheKey);
       if (cachedClientes) {
-        const { data, expiration } = JSON.parse(cachedClientes);
-        // Verificar se o cache ainda é válido
-        if (Date.now() < expiration) {
-          console.log('Usando dados de clientes em cache');
-          return data;
+        try {
+          const { data, expiration } = JSON.parse(cachedClientes);
+          // Verificar se o cache ainda é válido
+          if (Date.now() < expiration) {
+            console.log('Usando dados de clientes em cache');
+            return data;
+          }
+          // Remover cache expirado
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('Erro ao ler cache de clientes:', e);
         }
-        // Remover cache expirado
-        localStorage.removeItem(cacheKey);
       }
     }
-    */
     
-    // Buscar da API com headers explícitos incluindo o token Bearer
+    // Buscar da API com token de autorização
     console.log('fetchClientes - Fazendo requisição para API com token');
     
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-    
+    // Usar o sistema padrão de autorização do ApiService, não precisamos
+    // passar headers explicitamente pois o token já está no localStorage
+    // e o ApiService o utilizará automaticamente
     const clientesData = await ApiService.get<SiscopCliente[]>(
-      url, 
-      { headers }, // Passando headers explicitamente
+      url,
+      {}, // Não precisamos passar headers, o ApiService já incluirá o token
       CACHE_EXPIRATION.MEDIUM
     );
     
@@ -361,7 +358,7 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
   } catch (error) {
     console.error('Erro detalhado ao buscar clientes:', error);
     
-    // Em caso de falha, usar dados em cache mesmo que expirados como fallback
+    // Em caso de falha, usar dados em cache mesmo que expirados
     if (typeof window !== 'undefined') {
       const cachedClientes = localStorage.getItem(cacheKey);
       if (cachedClientes) {
@@ -370,14 +367,13 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
           console.log('fetchClientes - Usando dados em cache como fallback após erro');
           return data;
         } catch (e) {
-          console.error('Erro ao ler cache:', e);
+          console.error('Erro ao ler cache para fallback:', e);
         }
       }
     }
     
-    // Se não há dados em cache, retornar array vazio em vez de lançar erro
-    console.log('fetchClientes - Sem dados em cache para fallback, retornando array vazio');
-    return [];
+    // Se não há dados em cache, propagar o erro para tratamento adequado
+    throw error;
   }
 }
 
@@ -385,8 +381,16 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
  * Função para buscar unidades com cache
  */
 export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse> {
-  const queryParams = new URLSearchParams();
+  // Validação dos parâmetros essenciais
+  if (!params.codcli || !params.uf) {
+    console.error('Erro: Parâmetros codcli e uf são obrigatórios para buscar unidades');
+    throw new Error('Parâmetros codcli e uf são obrigatórios para buscar unidades');
+  }
   
+  console.log('fetchUnidades - Iniciando com params:', params);
+  
+  // Construir queryString
+  const queryParams = new URLSearchParams();
   for (const key in params) {
     if (params[key] !== undefined && params[key] !== null) {
       queryParams.append(key, params[key]);
@@ -395,8 +399,26 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
   
   const queryString = queryParams.toString();
   const url = `${API_UNIDADES_URL}?${queryString}`;
+  const cacheKey = `units_${params.codcli}_${params.uf}_${params.pagina || 1}`;
   
-  return ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
+  console.log('fetchUnidades - URL completa:', url);
+  
+  // Verificar token antes de fazer requisição
+  const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+  if (!token) {
+    console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
+    throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+  }
+  
+  try {
+    // Buscar dados da API - o ApiService já vai incluir o token nas headers
+    const unidadesData = await ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
+    console.log('fetchUnidades - Dados recebidos da API:', unidadesData);
+    return unidadesData;
+  } catch (error) {
+    console.error('Erro ao buscar unidades:', error);
+    throw error;
+  }
 }
 
 /**
