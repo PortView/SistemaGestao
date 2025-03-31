@@ -64,7 +64,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 relative bg-white">
                 {clients?.map((client) => (
                   <SelectItem key={client.codcli} value={client.codcli.toString()}>
                     {client.fantasia}
