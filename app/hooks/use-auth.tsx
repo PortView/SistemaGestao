@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { SiscopUser } from '../lib/types';
-import { ApiService } from '../lib/api-service';
+import { fetchUserProfile as fetchProfile } from '../lib/api-service';
+import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from '../lib/constants';
 import { useToast } from './use-toast';
 
 interface AuthContextType {
@@ -13,8 +14,6 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const LOCAL_STORAGE_TOKEN_KEY = 'siscop_token';
-
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -23,14 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   // Função para buscar o perfil do usuário
-  const fetchUserProfile = async (token: string) => {
+  const getUserProfile = async (token: string) => {
     try {
-      const userData = await ApiService.get<SiscopUser>('/auth/me');
+      // Usando a função importada do api-service
+      const userData = await fetchProfile();
+      console.log('Dados do usuário obtidos (useAuth):', userData);
       setUser(userData);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
       // Se houver erro, remover o token do localStorage
       localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+      localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -41,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     if (token) {
-      fetchUserProfile(token);
+      getUserProfile(token);
     } else {
       setIsLoading(false);
     }
@@ -50,12 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para login
   const login = (token: string) => {
     localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
-    fetchUserProfile(token);
+    getUserProfile(token);
   };
 
   // Função para logout
   const logout = () => {
     localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
     setUser(null);
     toast({
       title: 'Logout realizado',
@@ -71,7 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
