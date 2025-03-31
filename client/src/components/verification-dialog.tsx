@@ -30,7 +30,7 @@ export function VerificationDialog({
     setError(null);
 
     try {
-      const token = localStorage.getItem("siscop_token");
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
       const userDataStr = localStorage.getItem("siscop_user");
 
