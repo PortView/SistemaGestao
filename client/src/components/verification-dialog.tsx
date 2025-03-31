@@ -19,29 +19,53 @@ export function VerificationDialog({ open, onOpenChange }: { open: boolean; onOp
     
     try {
       const token = localStorage.getItem('siscop_token');
-      const userData = localStorage.getItem('siscop_user');
+      const userDataStr = localStorage.getItem('siscop_user');
       
-      if (!token || !userData) {
-        throw new Error('Token ou dados do usuário não encontrados');
+      if (!token) {
+        throw new Error('Token não encontrado. Por favor, faça login novamente.');
       }
-      
-      const { cod } = JSON.parse(userData);
+
+      if (!userDataStr) {
+        throw new Error('Dados do usuário não encontrados. Por favor, faça login novamente.');
+      }
+
+      let userData;
+      try {
+        userData = JSON.parse(userDataStr);
+      } catch (e) {
+        throw new Error('Erro ao processar dados do usuário. Por favor, faça login novamente.');
+      }
+
+      if (!userData?.cod) {
+        throw new Error('Código do usuário não encontrado. Por favor, faça login novamente.');
+      }
+
       const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL;
+      if (!apiUrl) {
+        throw new Error('URL da API não configurada corretamente.');
+      }
+
+      console.log('Fazendo requisição para:', `${apiUrl}?codcorr=${userData.cod}`);
+      console.log('Token:', token);
+      console.log('Código do usuário:', userData.cod);
       
-      const response = await fetch(`${apiUrl}?codcorr=${cod}`, {
+      const response = await fetch(`${apiUrl}?codcorr=${userData.cod}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Erro ao buscar dados da API');
+        throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('Resposta da API:', data);
       setClientCount(Array.isArray(data) ? data.length : 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      console.error('Erro na verificação:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido ao acessar a API');
     } finally {
       setLoading(false);
     }
@@ -55,7 +79,11 @@ export function VerificationDialog({ open, onOpenChange }: { open: boolean; onOp
         </DialogHeader>
         <div className="p-4">
           {loading && <p>Carregando...</p>}
-          {error && <p className="text-red-400">Erro: {error}</p>}
+          {error && (
+            <div className="text-red-400 mb-2">
+              <p>Erro: {error}</p>
+            </div>
+          )}
           {clientCount !== null && !loading && !error && (
             <p>Quantidade de clientes encontrados: {clientCount}</p>
           )}
