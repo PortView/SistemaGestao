@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClientes, fetchUnidades } from '@/lib/api-service';
+import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 
 interface ProcessCommandPanelProps {
   onClientChange?: (clientId: number) => void;
@@ -24,7 +25,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Obter token
-      const token = localStorage.getItem('siscop_token');
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
       setAuthToken(token);
       
       // Obter dados do usuário
@@ -52,7 +53,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         return [];
       }
       
-      const token = localStorage.getItem('siscop_token');
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
       if (!token) {
         console.warn('Token de autenticação não disponível, não é possível buscar clientes');
         return [];

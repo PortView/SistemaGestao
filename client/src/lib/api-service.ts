@@ -186,26 +186,56 @@ export class ApiService {
     const fetchOptions: RequestInit = {
       method,
       headers,
-      credentials: 'include',
       ...options,
       body: data ? JSON.stringify(data) : undefined,
     };
+
+    // Remover a opção credentials para evitar problemas de CORS
+    if (fetchOptions.credentials === 'include') {
+      delete fetchOptions.credentials;
+    }
 
     try {
       console.log(`ApiService.request - Iniciando fetch para ${fullUrl} com opções:`, {
         method: fetchOptions.method,
         headersKeys: Object.keys(headers),
-        useProxy: USE_CORS_PROXY,
-        credentials: fetchOptions.credentials
+        useProxy: USE_CORS_PROXY
       });
 
-      // Fazer a requisição
-      const response = await fetch(fullUrl, fetchOptions);
+      // Fazer a requisição com retry e timeout
+      let response;
+      const MAX_RETRIES = 1;
+      const RETRY_DELAY = 1000;
+      
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          // Usar Promise.race para implementar timeout
+          const fetchPromise = fetch(fullUrl, fetchOptions);
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout na requisição')), 15000);
+          });
+
+          response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+          break; // Se a requisição for bem-sucedida, sair do loop
+        } catch (fetchError) {
+          console.error(`ApiService.request - Tentativa ${attempt + 1} falhou:`, fetchError);
+          
+          if (attempt === MAX_RETRIES) {
+            throw fetchError; // Propagar o erro após todas as tentativas
+          }
+          
+          // Aguardar antes da próxima tentativa
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        }
+      }
+
+      if (!response) {
+        throw new Error('Falha na requisição após tentativas');
+      }
+
       console.log(`ApiService.request - Resposta recebida de ${fullUrl}:`, {
         status: response.status,
-        statusText: response.statusText,
-        // Simplificar o log de headers para evitar erro de typescript
-        headers: 'Headers disponíveis no objeto response'
+        statusText: response.statusText
       });
 
       // Verificar se a resposta foi bem-sucedida
@@ -236,8 +266,15 @@ export class ApiService {
         return jsonData;
       }
 
-      console.log(`ApiService.request - Retornando objeto vazio para resposta não-JSON`);
-      return {} as T;
+      // Se a resposta não for JSON, tentar retornar texto
+      try {
+        const textData = await response.text();
+        console.log(`ApiService.request - Dados de texto recebidos: ${textData.substring(0, 100)}${textData.length > 100 ? '...' : ''}`);
+        return {} as T;
+      } catch (e) {
+        console.log(`ApiService.request - Retornando objeto vazio para resposta não processável`);
+        return {} as T;
+      }
     } catch (error) {
       console.error('ApiService.request - Erro completo na requisição à API:', error);
       throw error;
