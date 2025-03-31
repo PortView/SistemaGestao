@@ -13,7 +13,8 @@ import {
   FileWarning,
   FileX,
   LogOut,
-  ListTodo
+  ListTodo,
+  ServerCog // Ícone para tester de API
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
@@ -57,6 +58,7 @@ const Sidebar = ({ isMobile = false, isOpen = false, onClose }: SidebarProps) =>
       badge: unreadCount > 0 ? unreadCount : undefined 
     },
     { href: "/configuracoes", label: "Configurações", icon: <Settings className="h-5 w-5" /> },
+    { href: "/api-tester", label: "Verificação da API", icon: <ServerCog className="h-5 w-5" /> },
   ];
 
   const documentTypes = [

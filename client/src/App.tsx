@@ -11,6 +11,7 @@ import Properties from "./pages/properties";
 import Notifications from "./pages/notifications";
 import Settings from "./pages/settings";
 import ProcessControl from "./pages/process-control";
+import ApiTesterPage from "./pages/api-tester";
 import LoginPage from "./pages/login";
 import { AuthProvider } from "./hooks/use-auth";
 import { ProtectedRoute } from "./components/auth/protected-route";
@@ -32,6 +33,7 @@ function ProtectedRouter() {
           <Route path="/notificacoes" component={Notifications} />
           <Route path="/configuracoes" component={Settings} />
           <Route path="/controle-processos" component={ProcessControl} />
+          <Route path="/api-tester" component={ApiTesterPage} />
           <Route path="/">
             <Redirect to="/dashboard" />
           </Route>
