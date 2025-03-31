@@ -275,6 +275,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API para Clientes
+  app.get("/api/clientes", async (req, res) => {
+    try {
+      // Para ambiente de desenvolvimento local, usamos dados mockados
+      const clientes = [
+        { 
+          codcli: 1, 
+          fantasia: "Supermercado ABC", 
+          lc_ufs: [{ uf: "SP" }, { uf: "RJ" }, { uf: "MG" }] 
+        },
+        { 
+          codcli: 2, 
+          fantasia: "Loja XYZ", 
+          lc_ufs: [{ uf: "SP" }, { uf: "PR" }] 
+        },
+        { 
+          codcli: 3, 
+          fantasia: "Distribuidora 123", 
+          lc_ufs: [{ uf: "RS" }, { uf: "SC" }] 
+        },
+        { 
+          codcli: 4, 
+          fantasia: "Comércio Geral", 
+          lc_ufs: [{ uf: "BA" }, { uf: "PE" }, { uf: "CE" }] 
+        }
+      ];
+      
+      return res.json(clientes);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
+  // API para UFs de um cliente específico
+  app.get("/api/clientes/:clientId/ufs", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      
+      // Simulação de UFs para testes
+      const ufsPorCliente = {
+        1: ["SP", "RJ", "MG"],
+        2: ["SP", "PR"],
+        3: ["RS", "SC"],
+        4: ["BA", "PE", "CE"]
+      };
+      
+      // @ts-ignore
+      const ufs = ufsPorCliente[clientId] || [];
+      return res.json(ufs);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
+  // API para unidades
+  app.get("/api/unidades", async (req, res) => {
+    try {
+      const { codcli, uf } = req.query;
+      
+      // Simulação de unidades para testes
+      let unidades = [
+        { contrato: 1001, codend: 101, cadimov: { tipo: "Escritório", uf: "SP" } },
+        { contrato: 1002, codend: 102, cadimov: { tipo: "Loja", uf: "SP" } },
+        { contrato: 1003, codend: 103, cadimov: { tipo: "Depósito", uf: "RJ" } },
+        { contrato: 1004, codend: 104, cadimov: { tipo: "Shopping", uf: "MG" } },
+        { contrato: 2001, codend: 201, cadimov: { tipo: "Loja", uf: "SP" } },
+        { contrato: 2002, codend: 202, cadimov: { tipo: "Centro", uf: "PR" } },
+        { contrato: 3001, codend: 301, cadimov: { tipo: "Galpão", uf: "RS" } },
+        { contrato: 3002, codend: 302, cadimov: { tipo: "Shopping", uf: "SC" } },
+        { contrato: 4001, codend: 401, cadimov: { tipo: "Loja", uf: "BA" } },
+        { contrato: 4002, codend: 402, cadimov: { tipo: "Centro", uf: "PE" } },
+        { contrato: 4003, codend: 403, cadimov: { tipo: "Escritório", uf: "CE" } }
+      ];
+      
+      // Filtra por cliente se fornecido
+      if (codcli) {
+        const clienteId = parseInt(codcli as string);
+        // Simula que os contratos começam com o ID do cliente
+        const prefixoContrato = clienteId * 1000;
+        unidades = unidades.filter(u => 
+          u.contrato >= prefixoContrato && 
+          u.contrato < (prefixoContrato + 1000)
+        );
+      }
+      
+      // Filtra por UF se fornecida
+      if (uf) {
+        unidades = unidades.filter(u => u.cadimov.uf === uf);
+      }
+
+      return res.json({
+        folowups: unidades,
+        pagination: {
+          totalItems: unidades.length,
+          currentPage: 1,
+          itemsPerPage: unidades.length,
+          lastPage: 1
+        }
+      });
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

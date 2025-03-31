@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface ProcessCommandPanelProps {
   onClientChange?: (clientId: number) => void;
@@ -15,26 +16,37 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
-
-  // Fetch clients
-  const { data: clients, isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
+  
+  // Buscar clientes
+  const { data: clients = [], isLoading: isLoadingClients } = useQuery<SiscopCliente[]>({
     queryKey: ['/api/clientes'],
     enabled: true,
   });
 
-  // Fetch UFs based on selected client
+  // Determinar UFs disponíveis baseado no cliente selecionado
   const { data: ufs = [] } = useQuery<string[]>({
     queryKey: ['/api/clientes', selectedClient, 'ufs'],
-    enabled: !!selectedClient,
+    queryFn: async () => {
+      const cliente = clients.find(c => c.codcli === selectedClient);
+      if (!cliente || !cliente.lc_ufs) return [];
+      
+      // Extrair UFs únicas
+      const uniqueUfs = Array.from(
+        new Set(cliente.lc_ufs.map(u => u.uf))
+      );
+      console.log('UFs disponíveis:', uniqueUfs);
+      return uniqueUfs;
+    },
+    enabled: !!selectedClient && clients.length > 0,
   });
 
-  // Fetch units based on selected client and UF
+  // Buscar unidades baseado no cliente e UF
   const { data: units = [] } = useQuery<SiscopUnidade[]>({
     queryKey: ['/api/unidades', selectedClient, selectedUF],
     enabled: !!selectedClient && !!selectedUF,
   });
 
-  // When client changes, reset UF and unit
+  // Quando o cliente mudar, resetar UF e unidade
   useEffect(() => {
     setSelectedUF(null);
     setSelectedUnit(null);
@@ -44,7 +56,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     }
   }, [selectedClient, onClientChange]);
 
-  // When unit changes, notify parent
+  // Quando a unidade mudar, notificar o componente pai
   useEffect(() => {
     if (selectedUnit && onUnitChange) {
       onUnitChange(selectedUnit);
@@ -56,7 +68,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       <CardContent className="p-2">
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="space-y-1">
-            {/* <Label htmlFor="client" className="text-xs font-medium">Cliente</Label> */}
             <Select
               disabled={isLoadingClients}
               onValueChange={(value) => setSelectedClient(Number(value))}
@@ -75,7 +86,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </div>
 
           <div className="space-y-1">
-            {/* <Label htmlFor="uf" className="text-xs font-medium">UF</Label> */}
             <Select
               disabled={!selectedClient || ufs.length === 0}
               onValueChange={(value) => setSelectedUF(value)}
@@ -94,7 +104,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </div>
 
           <div className="space-y-1">
-            {/* <Label htmlFor="unit" className="text-xs font-medium">Unidade</Label> */}
             <Select
               disabled={!selectedUF || units.length === 0}
               onValueChange={(value) => {
