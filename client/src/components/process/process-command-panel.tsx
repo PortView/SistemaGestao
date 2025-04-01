@@ -131,6 +131,15 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const showParamsDialog = () => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     
+    // Garantindo que os valores sejam recuperados corretamente
+    console.log('Verificando parâmetros para API:', {
+      token: token ? 'token presente' : 'sem token',
+      codCoor,
+      selectedClient,
+      selectedUF
+    });
+    
+    // Definindo os parâmetros para o diálogo
     setApiParams({
       token,
       codcoor: codCoor,
@@ -139,6 +148,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       page: 1
     });
     
+    // Mostrando o diálogo
     setIsVerifyDialogOpen(true);
   };
   

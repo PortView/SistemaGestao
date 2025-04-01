@@ -14,6 +14,10 @@ const API_CONFORMIDADE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_U
 const USE_CORS_PROXY = false; // import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY === 'true';
 const CORS_PROXY_URL = import.meta.env.VITE_NEXT_PUBLIC_CORS_PROXY_URL || 'https://corsproxy.io/?';
 
+// Configurações de timeout e retry
+const TIMEOUT = 60000; // 60 segundos - aumentando para requisições mais lentas
+const MAX_RETRIES = 2;
+
 // Cache expiration
 const CACHE_EXPIRATION = {
   SHORT: parseInt(import.meta.env.VITE_CACHE_SHORT || '300000'),
@@ -211,9 +215,7 @@ export class ApiService {
 
       // Fazer a requisição com retry e timeout
       let response;
-      const MAX_RETRIES = 2; // Aumentando para 2 tentativas mais a inicial (total de 3)
-      const RETRY_DELAY = 2000; // Aumentando para 2 segundos
-      const TIMEOUT = 30000; // Aumentando timeout para 30 segundos
+      const RETRY_DELAY = 2000; // Usando 2 segundos de delay entre tentativas
       
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
