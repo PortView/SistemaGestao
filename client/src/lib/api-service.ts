@@ -179,6 +179,9 @@ export class ApiService {
       const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log(`ApiService.request - Token adicionado ao header de autenticação (${token.substring(0, 15)}...)`);
+      } else {
+        console.warn(`ApiService.request - Token de autenticação não encontrado para requisição ${method} ${url}`);
       }
     }
 
@@ -422,9 +425,9 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
  */
 export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse> {
   // Validação dos parâmetros essenciais
-  if (!params.codcli || !params.uf) {
-    console.error('Erro: Parâmetros codcli e uf são obrigatórios para buscar unidades');
-    throw new Error('Parâmetros codcli e uf são obrigatórios para buscar unidades');
+  if (!params.codcoor || !params.codcli || !params.uf) {
+    console.error('Erro: Parâmetros codcoor, codcli e uf são obrigatórios para buscar unidades');
+    throw new Error('Parâmetros codcoor, codcli e uf são obrigatórios para buscar unidades');
   }
 
   console.log('fetchUnidades - Iniciando com params:', params);
@@ -439,7 +442,7 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
 
   const queryString = queryParams.toString();
   const url = `${API_UNIDADES_URL}?${queryString}`;
-  const cacheKey = `units_${params.codcli}_${params.uf}_${params.pagina || 1}`;
+  const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.pagina || 1}`;
 
   console.log('fetchUnidades - URL completa:', url);
 

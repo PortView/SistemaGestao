@@ -94,18 +94,19 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     error: unitsError,
     refetch: refetchUnits
   } = useQuery<SiscopUnidade[]>({
-    queryKey: ['siscop-unidades', selectedClient, selectedUF, authToken],
+    queryKey: ['siscop-unidades', codCoor, selectedClient, selectedUF, authToken],
     queryFn: async () => {
-      if (!selectedClient || !selectedUF || !authToken) {
-        console.warn('Cliente, UF ou token não disponíveis para buscar unidades');
+      if (!codCoor || !selectedClient || !selectedUF || !authToken) {
+        console.warn('Código de coordenador, cliente, UF ou token não disponíveis para buscar unidades');
         return [];
       }
       
-      console.log('Buscando unidades para cliente:', selectedClient, 'UF:', selectedUF);
+      console.log('Buscando unidades para codCoor:', codCoor, 'cliente:', selectedClient, 'UF:', selectedUF);
       const params = { 
+        codcoor: codCoor,
         codcli: selectedClient, 
         uf: selectedUF,
-        pagina: 1,
+        pagina: 1, // API espera pagina (não page)
         quantidade: 100
       };
       
@@ -123,7 +124,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         throw error;
       }
     },
-    enabled: !!selectedClient && !!selectedUF && !!authToken,
+    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken,
     retry: 1, // Tentar 1 vez além da tentativa inicial
     retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
   });
