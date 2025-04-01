@@ -245,6 +245,58 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           const firstUF = clientData.lc_ufs[0].uf;
           console.log('Selecionando automaticamente a primeira UF:', firstUF);
           setSelectedUF(firstUF);
+          
+          // Também buscar unidades automaticamente quando ocorrer a seleção automática de UF
+          if (firstUF && selectedClient && codCoor) {
+            setIsLoadingUnits(true);
+            
+            // Configurar os parâmetros para a API
+            const params = {
+              codcoor: codCoor,
+              codcli: selectedClient,
+              uf: firstUF,
+              page: 1
+            };
+            
+            console.log('Buscando unidades automaticamente após seleção automática de UF:', params);
+            
+            // Chamar a API para buscar unidades
+            fetchUnidades(params)
+              .then(response => {
+                console.log('Resposta da API de unidades (seleção automática):', response);
+                
+                if (response && response.folowups) {
+                  console.log(`${response.folowups.length} unidades encontradas`);
+                  setUnits(response.folowups);
+                  
+                  if (response.folowups.length === 0) {
+                    toast({
+                      title: 'Nenhuma unidade encontrada',
+                      description: `Não há unidades para o cliente ${selectedClient} na UF ${firstUF}.`,
+                      variant: 'default',
+                    });
+                  } else {
+                    toast({
+                      title: 'Unidades carregadas',
+                      description: `${response.folowups.length} unidades encontradas.`,
+                      variant: 'default',
+                    });
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('Erro ao buscar unidades (seleção automática):', error);
+                setUnitsError(error as Error);
+                toast({
+                  title: 'Erro ao buscar unidades',
+                  description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+                  variant: 'destructive',
+                });
+              })
+              .finally(() => {
+                setIsLoadingUnits(false);
+              });
+          }
         }
       } else {
         // Se não houver UFs disponíveis, limpar a seleção
@@ -349,6 +401,58 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               console.log('UF selecionada manualmente:', value);
               setSelectedUF(value);
               setManualUFSelection(true);
+              
+              // Buscar unidades automaticamente quando a UF for selecionada
+              if (value && selectedClient && codCoor) {
+                setIsLoadingUnits(true);
+                
+                // Configurar os parâmetros para a API
+                const params = {
+                  codcoor: codCoor,
+                  codcli: selectedClient,
+                  uf: value,
+                  page: 1
+                };
+                
+                console.log('Buscando unidades automaticamente após seleção de UF:', params);
+                
+                // Chamar a API para buscar unidades
+                fetchUnidades(params)
+                  .then(response => {
+                    console.log('Resposta da API de unidades:', response);
+                    
+                    if (response && response.folowups) {
+                      console.log(`${response.folowups.length} unidades encontradas`);
+                      setUnits(response.folowups);
+                      
+                      if (response.folowups.length === 0) {
+                        toast({
+                          title: 'Nenhuma unidade encontrada',
+                          description: `Não há unidades para o cliente ${selectedClient} na UF ${value}.`,
+                          variant: 'default',
+                        });
+                      } else {
+                        toast({
+                          title: 'Unidades carregadas',
+                          description: `${response.folowups.length} unidades encontradas.`,
+                          variant: 'default',
+                        });
+                      }
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Erro ao buscar unidades:', error);
+                    setUnitsError(error as Error);
+                    toast({
+                      title: 'Erro ao buscar unidades',
+                      description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+                      variant: 'destructive',
+                    });
+                  })
+                  .finally(() => {
+                    setIsLoadingUnits(false);
+                  });
+              }
             }}
           >
             <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
