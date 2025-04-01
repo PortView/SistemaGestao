@@ -289,7 +289,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     if (!unitSearchTerm.trim()) return units as SiscopUnidade[];
     
     return (units as SiscopUnidade[]).filter((unit: SiscopUnidade) => {
-      const unitStr = `${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`;
+      const unitStr = `${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.cadimov?.tipo || ''}`;
       return unitStr.toLowerCase().includes(unitSearchTerm.toLowerCase());
     });
   }, [units, unitSearchTerm]);
@@ -459,7 +459,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   {filteredUnits.length > 0 ? (
                     filteredUnits.map((unit) => (
                       <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
-                        {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
+                        {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.cadimov?.tipo || ''}`}
                       </SelectItem>
                     ))
                   ) : (
