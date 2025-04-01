@@ -220,12 +220,24 @@ export class ApiService {
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           // Usar Promise.race para implementar timeout
-          const fetchPromise = fetch(fullUrl, fetchOptions);
-          const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`)), TIMEOUT);
-          });
-
-          response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+          // Envolva a chamada para evitar erros de conexão
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
+            
+            fetchOptions.signal = controller.signal;
+            response = await fetch(fullUrl, fetchOptions);
+            
+            // Limpar o timeout se a requisição foi bem-sucedida
+            clearTimeout(timeoutId);
+          } catch (error) {
+            // Verificar se o erro é um timeout (AbortError)
+            if (error.name === 'AbortError') {
+              throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
+            }
+            // Outros erros de rede
+            throw error;
+          }
           break; // Se a requisição for bem-sucedida, sair do loop
         } catch (fetchError) {
           console.error(`ApiService.request - Tentativa ${attempt + 1} falhou:`, fetchError);

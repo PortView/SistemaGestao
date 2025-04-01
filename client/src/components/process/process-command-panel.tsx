@@ -110,7 +110,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       selectedUF
     });
     
-    // Definindo os parâmetros para o diálogo com valores fixos para debug
+    // Definindo os parâmetros para o diálogo
     const dialogParams = {
       token,
       codcoor: codCoor,
@@ -120,10 +120,16 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     };
     
     // Forçando log detalhado para entender o que está acontecendo
-    console.log('Parâmetros enviados para o diálogo:', JSON.stringify(dialogParams));
+    console.log('Parâmetros enviados para o diálogo:', JSON.stringify(dialogParams, null, 2));
     
-    // Definindo os parâmetros para o diálogo
-    setApiParams(dialogParams);
+    // Definindo os parâmetros para o diálogo - precisamos garantir que os valores não são undefined
+    setApiParams({
+      token: token || null,
+      codcoor: codCoor || null,
+      codcli: selectedClient || null,
+      uf: selectedUF || null,
+      page: 1
+    });
     
     // Mostrando o diálogo
     setIsVerifyDialogOpen(true);
@@ -179,18 +185,21 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     refetchUnits();
   };
 
-  // Quando o cliente mudar, resetar unidade
+  // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
   useEffect(() => {
     setSelectedUnit(null);
-    setSelectedUF(null);
 
     if (selectedClient && onClientChange) {
       onClientChange(selectedClient);
       
-      // Apenas log das UFs disponíveis sem selecionar automaticamente
+      // Selecionar automaticamente a primeira UF disponível
       const clientData = clients.find(c => c.codcli === selectedClient);
       if (clientData && clientData.lc_ufs && clientData.lc_ufs.length > 0) {
-        console.log('UFs disponíveis para o cliente:', clientData.lc_ufs.map(u => u.uf));
+        const firstUF = clientData.lc_ufs[0].uf;
+        console.log('Selecionando automaticamente a primeira UF:', firstUF);
+        setSelectedUF(firstUF);
+      } else {
+        setSelectedUF(null);
       }
     }
   }, [selectedClient, onClientChange, clients]);
@@ -276,37 +285,10 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             </SelectContent>
           </Select>
           
-          {/* UF */}
-          <Select
-            disabled={!selectedClient || ufs.length === 0}
-            onValueChange={(value) => setSelectedUF(value)}
-            value={selectedUF || undefined}
-          >
-            <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
-              <SelectValue placeholder="UF" />
-            </SelectTrigger>
-            <SelectContent className="z-50 fixed w-[100px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-              <div className="px-2 py-2">
-                <Input
-                  placeholder="Buscar UF..."
-                  value={ufSearchTerm}
-                  onChange={(e) => setUfSearchTerm(e.target.value)}
-                  className="h-8 mb-2"
-                />
-              </div>
-              {filteredUfs.length > 0 ? (
-                filteredUfs.map((uf) => (
-                  <SelectItem key={uf} value={uf}>
-                    {uf}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="px-2 py-1 text-xs text-muted-foreground">
-                  Nenhuma UF encontrada
-                </div>
-              )}
-            </SelectContent>
-          </Select>
+          {/* UF (Ações desativadas, somente visual) */}
+          <div className="h-8 text-xs w-[100px] border border-slate-200 rounded flex items-center px-3 bg-white">
+            <span className="truncate">{selectedUF || "UF"}</span>
+          </div>
           
           {/* Checkbox Todas UFs */}
           <div className="flex items-center bg-white h-8 px-2 rounded border border-slate-200">
