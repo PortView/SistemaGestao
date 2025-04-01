@@ -41,6 +41,10 @@ export class ApiService {
   static async get<T>(url: string, options: FetchOptions = {}, cacheTime?: number): Promise<T> {
     console.log(`ApiService.get - Iniciando requisição para: ${url}`);
     console.log(`ApiService.get - Opções recebidas:`, options);
+    
+    // Verificar token no início
+    const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+    console.log(`ApiService.get - Token encontrado:`, token ? `${token.substring(0, 15)}...` : 'null');
 
     // Desativando cache temporariamente para debug
     if (url.includes('codcoor')) {
@@ -445,9 +449,12 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
   const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.pagina || 1}`;
 
   console.log('fetchUnidades - URL completa:', url);
+  console.log('fetchUnidades - Cache key:', cacheKey);
 
   // Verificar token antes de fazer requisição
   const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+  console.log('fetchUnidades - Token encontrado:', token ? `${token.substring(0, 15)}...` : 'null');
+  
   if (!token) {
     console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
     throw new Error('Token de autenticação não encontrado. Faça login novamente.');

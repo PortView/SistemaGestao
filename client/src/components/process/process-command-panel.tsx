@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClientes, fetchUnidades } from '@/lib/api-service';
-import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
+import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from '@/lib/constants';
 import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -34,7 +34,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       setAuthToken(token);
       
       // Obter dados do usuário
-      const userJson = localStorage.getItem('siscop_user');
+      const userJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
       if (userJson) {
         try {
           const userData = JSON.parse(userJson);
@@ -87,9 +87,38 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     clients.find(c => c.codcli === selectedClient)?.lc_ufs.map(u => u.uf) || [] : 
     [];
 
+  // Estado para bypass manual dos dados de unidades
+  const [bypassUnits, setBypassUnits] = useState(false);
+  const [manualUnits, setManualUnits] = useState<SiscopUnidade[]>([]);
+
+  // Gerar unidades de teste quando necessário
+  useEffect(() => {
+    if (bypassUnits && selectedClient && selectedUF) {
+      // Criar 5 unidades de teste baseadas no cliente e UF selecionados
+      const testUnits: SiscopUnidade[] = Array.from({ length: 5 }).map((_, index) => ({
+        contrato: selectedClient + index + 1, // Convertido para número
+        codend: 100 + index, // Número
+        cadimov: {
+          tipo: "COMERCIAL",
+          uf: selectedUF
+        }
+      }));
+      
+      setManualUnits(testUnits);
+      console.log('Unidades geradas manualmente para desenvolvimento:', testUnits);
+      
+      // Notificar usuário
+      toast({
+        title: 'Modo de desenvolvimento ativado',
+        description: 'Utilizando unidades de teste para continuar o desenvolvimento.',
+        variant: 'default',
+      });
+    }
+  }, [bypassUnits, selectedClient, selectedUF]);
+
   // Buscar unidades da API quando cliente e UF estiverem selecionados
   const { 
-    data: units = [], 
+    data: apiUnits = [], 
     isLoading: isLoadingUnits, 
     error: unitsError,
     refetch: refetchUnits
@@ -124,10 +153,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         throw error;
       }
     },
-    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken,
+    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken && !bypassUnits,
     retry: 1, // Tentar 1 vez além da tentativa inicial
     retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
   });
+  
+  // Combinar unidades da API ou geradas manualmente
+  const units = bypassUnits ? manualUnits : apiUnits;
 
   // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
   useEffect(() => {
@@ -298,58 +330,79 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           {unitsError ? (
             <div className="flex items-center gap-2">
               <span className="text-red-500 text-xs">Erro ao carregar unidades</span>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
+                  onClick={() => refetchUnits()}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Tentar novamente
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
+                  onClick={() => setBypassUnits(!bypassUnits)}
+                >
+                  {bypassUnits ? "Desativar bypass" : "Usar dados de desenvolvimento"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Select
+                disabled={!selectedUF || isLoadingUnits || (units as SiscopUnidade[]).length === 0}
+                onValueChange={(value) => {
+                  const unit = (units as SiscopUnidade[]).find((u: SiscopUnidade) => u.contrato + '-' + u.codend === value);
+                  if (unit) {
+                    setSelectedUnit(unit);
+                  }
+                }}
+              >
+                <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
+                  {isLoadingUnits ? (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-3 w-3 animate-spin" />
+                      <span>Carregando...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Unidades" />
+                  )}
+                </SelectTrigger>
+                <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                  <div className="px-2 py-2">
+                    <Input
+                      placeholder="Buscar unidade..."
+                      value={unitSearchTerm}
+                      onChange={(e) => setUnitSearchTerm(e.target.value)}
+                      className="h-8 mb-2"
+                    />
+                  </div>
+                  {filteredUnits.length > 0 ? (
+                    filteredUnits.map((unit) => (
+                      <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
+                        {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1 text-xs text-muted-foreground">
+                      Nenhuma unidade encontrada
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
-                onClick={() => refetchUnits()}
+                className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
+                onClick={() => setBypassUnits(!bypassUnits)}
               >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Tentar novamente
+                {bypassUnits ? "Usar API" : "Dados de dev"}
               </Button>
             </div>
-          ) : (
-            <Select
-              disabled={!selectedUF || isLoadingUnits || (units as SiscopUnidade[]).length === 0}
-              onValueChange={(value) => {
-                const unit = (units as SiscopUnidade[]).find((u: SiscopUnidade) => u.contrato + '-' + u.codend === value);
-                if (unit) {
-                  setSelectedUnit(unit);
-                }
-              }}
-            >
-              <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
-                {isLoadingUnits ? (
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                    <span>Carregando...</span>
-                  </div>
-                ) : (
-                  <SelectValue placeholder="Unidades" />
-                )}
-              </SelectTrigger>
-              <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-                <div className="px-2 py-2">
-                  <Input
-                    placeholder="Buscar unidade..."
-                    value={unitSearchTerm}
-                    onChange={(e) => setUnitSearchTerm(e.target.value)}
-                    className="h-8 mb-2"
-                  />
-                </div>
-                {filteredUnits.length > 0 ? (
-                  filteredUnits.map((unit) => (
-                    <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
-                      {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1 text-xs text-muted-foreground">
-                    Nenhuma unidade encontrada
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
           )}
           
           {/* Paginação */}
