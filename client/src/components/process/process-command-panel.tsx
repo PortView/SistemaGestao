@@ -115,15 +115,24 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     enabled: !!selectedClient && !!selectedUF && !!authToken,
   });
 
-  // Quando o cliente mudar, resetar UF e unidade
+  // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
   useEffect(() => {
-    setSelectedUF(null);
     setSelectedUnit(null);
 
     if (selectedClient && onClientChange) {
       onClientChange(selectedClient);
+      
+      // Selecionar automaticamente a primeira UF disponível
+      const clientData = clients.find(c => c.codcli === selectedClient);
+      if (clientData && clientData.lc_ufs && clientData.lc_ufs.length > 0) {
+        const firstUF = clientData.lc_ufs[0].uf;
+        console.log('Selecionando automaticamente a primeira UF:', firstUF);
+        setSelectedUF(firstUF);
+      } else {
+        setSelectedUF(null);
+      }
     }
-  }, [selectedClient, onClientChange]);
+  }, [selectedClient, onClientChange, clients]);
 
   // Quando a unidade mudar, notificar o componente pai
   useEffect(() => {
@@ -210,6 +219,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           <Select
             disabled={!selectedClient || ufs.length === 0}
             onValueChange={(value) => setSelectedUF(value)}
+            value={selectedUF || undefined}
           >
             <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
               <SelectValue placeholder="UF" />
