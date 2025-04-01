@@ -141,22 +141,80 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     }, 50);
   };
   
-  // Desativamos a busca automática de unidades para evitar erros
-  const units: SiscopUnidade[] = [];
-  const isLoadingUnits = false;
-  const unitsError = null;
-  // Função de refetch será usada apenas quando explicitamente chamada pelo botão
-  const refetchUnits = () => {
-    console.log('Tentando buscar unidades manualmente com parâmetros:', {
-      codCoor,
-      selectedClient,
-      selectedUF
-    });
-    toast({
-      title: 'Função desativada',
-      description: 'A busca automática de unidades foi desativada temporariamente para evitar erros.',
-      variant: 'default',
-    });
+  // Estado para as unidades
+  const [units, setUnits] = useState<SiscopUnidade[]>([]);
+  const [isLoadingUnits, setIsLoadingUnits] = useState(false);
+  const [unitsError, setUnitsError] = useState<Error | null>(null);
+  
+  // Função para buscar unidades usando os parâmetros do diálogo
+  const refetchUnits = async () => {
+    if (!codCoor || !selectedClient || !selectedUF) {
+      console.error('Parâmetros incompletos para buscar unidades');
+      toast({
+        title: 'Parâmetros incompletos',
+        description: 'Código do coordenador, cliente e UF são necessários para buscar unidades.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setIsLoadingUnits(true);
+    setUnitsError(null);
+    
+    try {
+      // Configurar os parâmetros usando os valores que foram validados no diálogo
+      const params = {
+        codcoor: codCoor,
+        codcli: selectedClient,
+        uf: selectedUF,
+        pagina: 1, // API espera pagina (não page)
+        quantidade: 100
+      };
+      
+      console.log('Buscando unidades com parâmetros:', params);
+      
+      // Chamar a API usando a função fetchUnidades
+      const response = await fetchUnidades(params);
+      console.log('Resposta da API de unidades:', response);
+      
+      // Verificar se a resposta contém unidades
+      if (response && response.folowups) {
+        console.log(`${response.folowups.length} unidades encontradas`);
+        setUnits(response.folowups);
+        
+        if (response.folowups.length === 0) {
+          toast({
+            title: 'Nenhuma unidade encontrada',
+            description: `Não há unidades para o cliente ${selectedClient} na UF ${selectedUF}.`,
+            variant: 'default',
+          });
+        } else {
+          toast({
+            title: 'Unidades carregadas',
+            description: `${response.folowups.length} unidades encontradas.`,
+            variant: 'default',
+          });
+        }
+      } else {
+        console.warn('Resposta da API não contém unidades');
+        setUnits([]);
+        toast({
+          title: 'Dados incompletos',
+          description: 'A resposta da API não contém dados de unidades.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar unidades:', error);
+      setUnitsError(error as Error);
+      toast({
+        title: 'Erro ao buscar unidades',
+        description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingUnits(false);
+    }
   };
   
   // Função para executar a requisição após confirmação do diálogo
