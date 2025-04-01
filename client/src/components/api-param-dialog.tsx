@@ -45,15 +45,31 @@ export function ApiParamDialog({ isOpen, onClose, onConfirm, params }: ApiParamD
     return `${token.substring(0, 15)}...${token.substring(token.length - 5)}`;
   };
 
+  // Função para obter URL completa da API
+  const getApiUrl = () => {
+    if (!localParams.codcoor || !localParams.codcli || !localParams.uf) {
+      return 'Parâmetros incompletos';
+    }
+    
+    return `https://amenirealestate.com.br:5601/ger-clientes/unidades?codcoor=${localParams.codcoor}&codcli=${localParams.codcli}&uf=${localParams.uf}&page=${localParams.page || 1}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-slate-900 text-white border-slate-700">
+      <DialogContent className="sm:max-w-[600px] bg-slate-900 text-white border-slate-700">
         <DialogHeader>
           <DialogTitle className="text-xl text-white">Parâmetros da API de Unidades</DialogTitle>
           <DialogDescription className="text-slate-400">
             Verifique se os parâmetros estão corretos antes de prosseguir com a requisição.
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Exibir URL completa da requisição */}
+        <div className="mt-2 rounded-md bg-blue-900 p-3 font-mono text-xs text-blue-200 overflow-x-auto">
+          <span className="font-semibold">URL completa: </span>
+          <span className="whitespace-nowrap">{getApiUrl()}</span>
+        </div>
+        
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 items-center gap-4">
             <div className="font-semibold text-white">Token:</div>

@@ -447,7 +447,7 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
  * Função para buscar unidades com cache
  */
 export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse> {
-  // Validação dos parâmetros essenciais
+  // Validação dos parâmetros essenciais (usando exatamente os nomes dos parâmetros do exemplo)
   if (!params.codcoor || !params.codcli || !params.uf) {
     console.error('Erro: Parâmetros codcoor, codcli e uf são obrigatórios para buscar unidades');
     throw new Error('Parâmetros codcoor, codcli e uf são obrigatórios para buscar unidades');
@@ -455,17 +455,12 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
 
   console.log('fetchUnidades - Iniciando com params:', params);
 
-  // Construir queryString
-  const queryParams = new URLSearchParams();
-  for (const key in params) {
-    if (params[key] !== undefined && params[key] !== null) {
-      queryParams.append(key, params[key]);
-    }
-  }
-
-  const queryString = queryParams.toString();
-  const url = `${API_UNIDADES_URL}?${queryString}`;
-  const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.pagina || 1}`;
+  // Construir URL exatamente como no exemplo:
+  // https://amenirealestate.com.br:5601/ger-clientes/unidades?codcoor=110&codcli=1448&uf=SP&page=1
+  const url = `${API_UNIDADES_URL}?codcoor=${params.codcoor}&codcli=${params.codcli}&uf=${params.uf}&page=${params.page || 1}`;
+  
+  // Chave de cache usando os mesmos parâmetros
+  const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.page || 1}`;
 
   console.log('fetchUnidades - URL completa:', url);
   console.log('fetchUnidades - Cache key:', cacheKey);

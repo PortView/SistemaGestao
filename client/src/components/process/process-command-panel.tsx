@@ -162,13 +162,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setUnitsError(null);
     
     try {
-      // Configurar os parâmetros usando os valores que foram validados no diálogo
+      // Configurar os parâmetros exatamente como no exemplo fornecido
       const params = {
         codcoor: codCoor,
         codcli: selectedClient,
         uf: selectedUF,
-        pagina: 1, // API espera pagina (não page)
-        quantidade: 100
+        page: 1  // Conforme o exemplo, a API espera 'page' e não 'pagina'
       };
       
       console.log('Buscando unidades com parâmetros:', params);
