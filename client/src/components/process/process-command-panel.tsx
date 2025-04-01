@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,11 @@ interface ProcessCommandPanelProps {
 }
 
 export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCommandPanelProps) {
+  // Referências para controle de processamento
+  const isProcessingClientChange = useRef(false);
+  const isProcessingUfChange = useRef(false);
+  const lastFetchedParams = useRef<{ codcli?: number, uf?: string } | null>(null);
+  
   // Estados principais
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
@@ -27,7 +32,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   
   // Estados para dados e operações
   const [codCoor, setCodCoor] = useState<number>(0);
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const [units, setUnits] = useState<SiscopUnidade[]>([]);
   const [isLoadingUnits, setIsLoadingUnits] = useState(false);
   const [unitsError, setUnitsError] = useState<Error | null>(null);
@@ -46,63 +50,51 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [unitSearchTerm, setUnitSearchTerm] = useState<string>('');
   const [allUfs, setAllUfs] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 10; // Valor de exemplo, deve ser calculado com base no total de unidades
+  const totalPages = 10; // Exemplo, calculado com base no total de unidades
   
-  // Carregar dados do usuário (uma única vez na inicialização)
+  // Carregar dados do usuário uma única vez
   useEffect(() => {
-    const loadUserData = () => {
-      if (typeof window === 'undefined') return;
-      
+    if (typeof window === 'undefined') return;
+    
+    try {
       // Obter token
       const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-      setAuthToken(token);
       
       // Obter dados do usuário
       const userJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
       if (!userJson) return;
       
-      try {
-        const userData = JSON.parse(userJson);
-        if (userData?.cod) {
-          console.log('Dados do usuário carregados:', userData.cod);
-          setCodCoor(userData.cod);
-        }
-      } catch (e) {
-        console.error('Erro ao carregar dados do usuário:', e);
+      const userData = JSON.parse(userJson);
+      if (userData?.cod) {
+        setCodCoor(userData.cod);
       }
-    };
-    
-    loadUserData();
+    } catch (e) {
+      console.error('Erro ao carregar dados do usuário:', e);
+    }
   }, []);
   
-  // Query para carregar clientes
+  // Query para carregar clientes (com cache e retry)
   const { 
     data: clients = [], 
     isLoading: isLoadingClients 
   } = useQuery<SiscopCliente[]>({
     queryKey: ['siscop-clientes', codCoor],
     queryFn: async () => {
-      if (!codCoor) {
-        console.warn('codCoor não disponível, não é possível buscar clientes');
-        return [];
-      }
+      if (!codCoor) return [];
       
       const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-      if (!token) {
-        console.warn('Token de autenticação não disponível, não é possível buscar clientes');
-        return [];
-      }
+      if (!token) return [];
 
       try {
-        const clientData = await fetchClientes(codCoor);
-        return clientData || [];
+        return await fetchClientes(codCoor) || [];
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
         return [];
       }
     },
-    enabled: !!codCoor && !!authToken,
+    enabled: !!codCoor,
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
+    retry: 1,                 // Tentar novamente apenas uma vez em caso de falha
   });
 
   // UFs disponíveis para o cliente selecionado
@@ -135,15 +127,31 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     });
   }, [units, unitSearchTerm]);
 
-  // Buscar unidades com base nos parâmetros atuais
-  const fetchUnitsWithParams = useCallback(async (params: {
-    codcoor: number, 
+  // Função memoizada para carregar unidades com validação de parâmetros duplicados
+  const fetchUnitsIfNeeded = useCallback(async (
     codcli: number, 
-    uf: string, 
-    page: number
-  }) => {
-    if (!params.codcoor || !params.codcli || !params.uf) {
-      console.error('Parâmetros incompletos para buscar unidades');
+    uf: string,
+    processingRef: React.MutableRefObject<boolean>,
+    shouldForceRefresh = false
+  ) => {
+    // Evitar chamadas duplicadas ou desnecessárias
+    if (
+      processingRef.current || 
+      (!shouldForceRefresh && 
+       lastFetchedParams.current?.codcli === codcli && 
+       lastFetchedParams.current?.uf === uf)
+    ) {
+      return null;
+    }
+    
+    // Marcar como em processamento
+    processingRef.current = true;
+    
+    // Atualizar parâmetros da última busca
+    lastFetchedParams.current = { codcli, uf };
+    
+    if (!codCoor) {
+      processingRef.current = false;
       return null;
     }
     
@@ -151,27 +159,37 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setUnitsError(null);
     
     try {
-      console.log('Buscando unidades com parâmetros:', params);
+      const params = { codcoor: codCoor, codcli, uf, page: 1 };
       
       const response = await fetchUnidades(params);
       
-      // Verificar se a resposta contém unidades
       if (!response?.folowups) {
-        console.warn('Resposta da API não contém unidades');
         setUnits([]);
+        processingRef.current = false;
         return null;
       }
       
-      console.log(`${response.folowups.length} unidades encontradas`);
+      // Atualizar unidades
       setUnits(response.folowups);
       
+      // Verificar se há unidades
       if (response.folowups.length === 0) {
         toast({
           title: 'Nenhuma unidade encontrada',
-          description: `Não há unidades para o cliente ${params.codcli} na UF ${params.uf}.`,
+          description: `Não há unidades para este cliente na UF ${uf}.`,
           variant: 'default',
         });
+        processingRef.current = false;
         return null;
+      }
+      
+      // Selecionar primeira unidade com timeout para evitar renders excessivos
+      if (response.folowups.length > 0) {
+        const firstUnit = response.folowups[0];
+        setTimeout(() => {
+          setSelectedUnit(firstUnit);
+          processingRef.current = false;
+        }, 100);
       }
       
       return response;
@@ -183,149 +201,92 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
         variant: 'destructive',
       });
+      processingRef.current = false;
       return null;
     } finally {
       setIsLoadingUnits(false);
     }
-  }, []);
+  }, [codCoor]);
 
-  // Selecionar automaticamente a primeira unidade quando unidades são carregadas
-  const selectFirstUnit = useCallback((response: any) => {
-    if (!response?.folowups?.length) return;
-    
-    const firstUnit = response.folowups[0];
-    console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
-    
-    // Usar setTimeout para evitar múltiplos renders rápidos
-    setTimeout(() => {
-      setSelectedUnit(firstUnit);
-    }, 50);
-  }, []);
-
-  // Função para recarregar unidades usando os parâmetros atuais
-  const refetchUnits = useCallback(async () => {
-    if (!codCoor || !selectedClient || !selectedUF) {
+  // Handler para recarregar unidades manualmente (botão "Tentar novamente")
+  const refetchUnits = useCallback(() => {
+    if (!selectedClient || !selectedUF) {
       toast({
         title: 'Parâmetros incompletos',
-        description: 'Código do coordenador, cliente e UF são necessários para buscar unidades.',
+        description: 'Cliente e UF são necessários para buscar unidades.',
         variant: 'destructive',
       });
       return;
     }
     
-    const params = {
-      codcoor: codCoor,
-      codcli: selectedClient,
-      uf: selectedUF,
-      page: 1
-    };
-    
-    const response = await fetchUnitsWithParams(params);
-    if (response) {
-      selectFirstUnit(response);
-    }
-  }, [codCoor, selectedClient, selectedUF, fetchUnitsWithParams, selectFirstUnit]);
+    fetchUnitsIfNeeded(selectedClient, selectedUF, isProcessingUfChange, true);
+  }, [selectedClient, selectedUF, fetchUnitsIfNeeded]);
 
-  // Função para executar a requisição após confirmação do diálogo
-  const handleConfirmApiCall = useCallback(() => {
-    setIsVerifyDialogOpen(false);
-    refetchUnits();
-  }, [refetchUnits]);
-
-  // Preparar e mostrar o diálogo de verificação de API
+  // Handler para o diálogo de API
   const showParamsDialog = useCallback(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     
-    const apiParamsObj = {
+    setApiParams({
       token: token || 'não disponível',
       codcoor: Number(codCoor) || 0,
       codcli: Number(selectedClient) || 0, 
       uf: selectedUF || 'não disponível',
       page: 1
-    };
+    });
     
-    setApiParams(apiParamsObj);
-    
-    setTimeout(() => {
-      setIsVerifyDialogOpen(true);
-    }, 50);
+    setIsVerifyDialogOpen(true);
   }, [codCoor, selectedClient, selectedUF]);
 
-  // Efeito: quando o cliente muda, atualizar UF e carregar unidades
-  useEffect(() => {
-    if (!selectedClient) {
-      setSelectedUF(null);
-      setSelectedUnit(null);
-      setUnits([]);
-      return;
-    }
-    
-    // Notificar componente pai
-    if (onClientChange) {
-      onClientChange(selectedClient);
-    }
-    
-    // Reset de estados para evitar exibição de dados antigos
+  const handleConfirmApiCall = useCallback(() => {
+    setIsVerifyDialogOpen(false);
+    refetchUnits();
+  }, [refetchUnits]);
+
+  // Manipulador de alteração de cliente
+  const handleClientChange = useCallback((codcli: number) => {
+    setSelectedClient(codcli);
+    setManualUFSelection(false);
     setSelectedUnit(null);
     setUnits([]);
     
-    // Se ainda não houve seleção manual, selecionar a primeira UF
-    if (!manualUFSelection) {
-      const clientData = clients.find(c => c.codcli === selectedClient);
-      
-      if (clientData?.lc_ufs?.length) {
-        const firstUF = clientData.lc_ufs[0].uf;
-        console.log('Selecionando automaticamente a primeira UF:', firstUF);
-        setSelectedUF(firstUF);
-        
-        // Carregar unidades para a primeira UF
-        if (codCoor) {
-          const params = {
-            codcoor: codCoor,
-            codcli: selectedClient,
-            uf: firstUF,
-            page: 1
-          };
-          
-          (async () => {
-            const response = await fetchUnitsWithParams(params);
-            if (response) {
-              selectFirstUnit(response);
-            }
-          })();
-        }
-      }
+    // Notificar o componente pai
+    if (onClientChange) {
+      onClientChange(codcli);
     }
-  }, [selectedClient, clients, manualUFSelection, onClientChange, codCoor, fetchUnitsWithParams, selectFirstUnit]);
+  }, [onClientChange]);
 
-  // Efeito: quando a UF muda manualmente, buscar unidades
+  // Manipulador de alteração de UF
+  const handleUFChange = useCallback((uf: string) => {
+    setSelectedUF(uf);
+    setManualUFSelection(true);
+    setSelectedUnit(null);
+  }, []);
+
+  // Efeito: processar mudança de cliente para selecionar UF automaticamente
   useEffect(() => {
-    // Ignorar se for seleção automática da UF (já foi tratada no efeito do cliente)
-    // ou se os parâmetros necessários não estiverem disponíveis
-    if (!selectedUF || !selectedClient || !codCoor || !manualUFSelection) {
-      return;
-    }
+    if (!selectedClient || manualUFSelection || isProcessingClientChange.current) return;
     
-    const params = {
-      codcoor: codCoor,
-      codcli: selectedClient,
-      uf: selectedUF,
-      page: 1
-    };
+    const clientData = clients.find(c => c.codcli === selectedClient);
+    if (!clientData?.lc_ufs?.length) return;
     
-    (async () => {
-      const response = await fetchUnitsWithParams(params);
-      if (response) {
-        selectFirstUnit(response);
-      }
-    })();
-  }, [selectedUF, selectedClient, codCoor, manualUFSelection, fetchUnitsWithParams, selectFirstUnit]);
+    const firstUF = clientData.lc_ufs[0].uf;
+    setSelectedUF(firstUF);
+  }, [selectedClient, clients, manualUFSelection]);
+
+  // Efeito: carregar unidades quando UF e cliente estiverem definidos
+  useEffect(() => {
+    if (!selectedClient || !selectedUF) return;
+    
+    // Use a referência apropriada dependendo se foi mudança manual de UF ou automática
+    const processingRef = manualUFSelection ? isProcessingUfChange : isProcessingClientChange;
+    
+    fetchUnitsIfNeeded(selectedClient, selectedUF, processingRef);
+  }, [selectedClient, selectedUF, manualUFSelection, fetchUnitsIfNeeded]);
 
   // Efeito: quando a unidade muda, notificar o componente pai
   useEffect(() => {
     if (!selectedUnit || !onUnitChange) return;
     
-    // Usar debounce para evitar atualizações excessivas
     const timer = setTimeout(() => {
       onUnitChange(selectedUnit);
     }, 100);
