@@ -38,7 +38,7 @@
 
 1. **Dimensões Gerais**
    - Largura total do projeto: 1920px (monitores de alta resolução)
-   - Para resoluções menores, usar responsividade para adequar componentes
+   - Para resoluções menores que 1920px, usar responsividade que alinhe os paineis verticalmente e centralizados
    - Usar scroll vertical para conteúdo que ultrapasse a altura da tela
 
 2. **Blocos e Dimensões**
@@ -52,7 +52,33 @@
 
 4. **Componentes Específicos**
    - Largura do dropdown de Clientes: 380px
-   - Todos os dropdowns devem incluir funcionalidade de busca por conteúdo
+   - Todos os dropdowns devem incluir funcionalidade de busca por conteúdo com as seguintes características:
+     - Campo de busca no topo do dropdown
+     - Filtragem em tempo real à medida que o usuário digita
+     - Mensagens de feedback quando nenhum item corresponder à busca
+     - Suporte à busca case-insensitive (ignorando maiúsculas/minúsculas)
+     - Dropdown de UF com largura de 100px
+     - Dropdown de Unidades com largura de 380px
+   
+5. **Organização do Primeiro Bloco (Painel Superior)**
+   - **Primeira linha**:
+     - Dropdown Clientes
+     - Dropdown UFs
+     - Checkbox "Todas UFs"
+     - Botão "Planilhas" com ícone à esquerda
+     - Botão "Contrato" sem ícone
+   - **Segunda linha**:
+     - Dropdown Unidades (sem label)
+     - Régua para paginação de unidades
+   - **Terceira linha**:
+     - 7 botões com seus respectivos ícones e labels:
+       - Editar
+       - Ocorrências
+       - Custos
+       - Ord.Compra
+       - Edit.Tarefas
+       - Rescisão
+       - Pendenciar
 
 ## Fluxo de Autenticação e Acesso
 
