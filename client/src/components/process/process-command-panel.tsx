@@ -230,6 +230,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   useEffect(() => {
     // Resetar unidade selecionada quando cliente mudar
     setSelectedUnit(null);
+    setUnits([]); // Limpar as unidades para evitar flashes da lista anterior
     
     // Quando cliente for selecionado inicialmente, notificar o componente pai
     if (selectedClient && onClientChange) {
@@ -279,9 +280,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     });
                   } else {
                     // Selecionar automaticamente a primeira unidade
-                    const firstUnit = response.folowups[0];
-                    console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
-                    setSelectedUnit(firstUnit);
+                    // Usar setTimeout para evitar múltiplos renders rápidos
+                    setTimeout(() => {
+                      const firstUnit = response.folowups[0];
+                      console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
+                      setSelectedUnit(firstUnit);
+                    }, 10);
                   }
                   // Removida a notificação para o caso de sucesso para evitar piscadas
                 }
@@ -313,7 +317,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   // Quando a unidade mudar, notificar o componente pai
   useEffect(() => {
     if (selectedUnit && onUnitChange) {
-      onUnitChange(selectedUnit);
+      // Usar um pequeno debounce para evitar atualizações excessivas
+      const timer = setTimeout(() => {
+        onUnitChange(selectedUnit);
+      }, 50); 
+      
+      return () => clearTimeout(timer);
     }
   }, [selectedUnit, onUnitChange]);
 
@@ -436,9 +445,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                         });
                       } else {
                         // Selecionar automaticamente a primeira unidade
-                        const firstUnit = response.folowups[0];
-                        console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
-                        setSelectedUnit(firstUnit);
+                        // Usar setTimeout para evitar múltiplos renders rápidos
+                        setTimeout(() => {
+                          const firstUnit = response.folowups[0];
+                          console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
+                          setSelectedUnit(firstUnit);
+                        }, 10);
                       }
                       // Removida a notificação para o caso de sucesso para evitar piscadas
                     }
