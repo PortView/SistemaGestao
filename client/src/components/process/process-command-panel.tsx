@@ -537,6 +537,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             <div className="flex items-center gap-2">
               <Select
                 disabled={!selectedUF || isLoadingUnits || (units as SiscopUnidade[]).length === 0}
+                value={selectedUnit ? `${selectedUnit.contrato}-${selectedUnit.codend}` : undefined}
                 onValueChange={(value) => {
                   const unit = (units as SiscopUnidade[]).find((u: SiscopUnidade) => u.contrato + '-' + u.codend === value);
                   if (unit) {
