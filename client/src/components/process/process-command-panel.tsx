@@ -110,14 +110,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       selectedUF
     });
     
-    // Definindo os parâmetros para o diálogo
-    setApiParams({
+    // Definindo os parâmetros para o diálogo com valores fixos para debug
+    const dialogParams = {
       token,
       codcoor: codCoor,
       codcli: selectedClient,
       uf: selectedUF,
       page: 1
-    });
+    };
+    
+    // Forçando log detalhado para entender o que está acontecendo
+    console.log('Parâmetros enviados para o diálogo:', JSON.stringify(dialogParams));
+    
+    // Definindo os parâmetros para o diálogo
+    setApiParams(dialogParams);
     
     // Mostrando o diálogo
     setIsVerifyDialogOpen(true);
@@ -173,21 +179,18 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     refetchUnits();
   };
 
-  // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
+  // Quando o cliente mudar, resetar unidade
   useEffect(() => {
     setSelectedUnit(null);
+    setSelectedUF(null);
 
     if (selectedClient && onClientChange) {
       onClientChange(selectedClient);
       
-      // Selecionar automaticamente a primeira UF disponível
+      // Apenas log das UFs disponíveis sem selecionar automaticamente
       const clientData = clients.find(c => c.codcli === selectedClient);
       if (clientData && clientData.lc_ufs && clientData.lc_ufs.length > 0) {
-        const firstUF = clientData.lc_ufs[0].uf;
-        console.log('Selecionando automaticamente a primeira UF:', firstUF);
-        setSelectedUF(firstUF);
-      } else {
-        setSelectedUF(null);
+        console.log('UFs disponíveis para o cliente:', clientData.lc_ufs.map(u => u.uf));
       }
     }
   }, [selectedClient, onClientChange, clients]);
