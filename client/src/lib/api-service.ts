@@ -225,18 +225,23 @@ export class ApiService {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
             
-            fetchOptions.signal = controller.signal;
-            response = await fetch(fullUrl, fetchOptions);
+            // Clone dos fetchOptions para evitar modificar o objeto original
+            const fetchOptionsWithSignal = {
+              ...fetchOptions,
+              signal: controller.signal
+            };
+            
+            response = await fetch(fullUrl, fetchOptionsWithSignal);
             
             // Limpar o timeout se a requisição foi bem-sucedida
             clearTimeout(timeoutId);
-          } catch (error) {
+          } catch (err: any) {
             // Verificar se o erro é um timeout (AbortError)
-            if (error.name === 'AbortError') {
+            if (err.name === 'AbortError') {
               throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
             }
             // Outros erros de rede
-            throw error;
+            throw err;
           }
           break; // Se a requisição for bem-sucedida, sair do loop
         } catch (fetchError) {

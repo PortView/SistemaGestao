@@ -135,49 +135,23 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setIsVerifyDialogOpen(true);
   };
   
-  // Buscar unidades da API quando cliente e UF estiverem selecionados
-  const { 
-    data: units = [], 
-    isLoading: isLoadingUnits, 
-    error: unitsError,
-    refetch: refetchUnits
-  } = useQuery<SiscopUnidade[]>({
-    queryKey: ['siscop-unidades', codCoor, selectedClient, selectedUF, authToken],
-    queryFn: async () => {
-      if (!codCoor || !selectedClient || !selectedUF || !authToken) {
-        console.warn('Código de coordenador, cliente, UF ou token não disponíveis para buscar unidades');
-        return [];
-      }
-      
-      // Não usamos mais esse método para mostrar parâmetros, agora está no botão de verificação
-      
-      console.log('Buscando unidades para codCoor:', codCoor, 'cliente:', selectedClient, 'UF:', selectedUF);
-      const params = { 
-        codcoor: codCoor,
-        codcli: selectedClient, 
-        uf: selectedUF,
-        pagina: 1, // API espera pagina (não page)
-        quantidade: 100
-      };
-      
-      try {
-        const response = await fetchUnidades(params);
-        console.log('Dados de unidades recebidos:', response);
-        return response.folowups || [];
-      } catch (error) {
-        console.error('Erro ao buscar unidades:', error);
-        toast({
-          title: 'Erro ao carregar unidades',
-          description: 'Não foi possível carregar as unidades. Tente novamente mais tarde.',
-          variant: 'destructive',
-        });
-        throw error;
-      }
-    },
-    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken,
-    retry: 1, // Tentar 1 vez além da tentativa inicial
-    retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
-  });
+  // Desativamos a busca automática de unidades para evitar erros
+  const units: SiscopUnidade[] = [];
+  const isLoadingUnits = false;
+  const unitsError = null;
+  // Função de refetch será usada apenas quando explicitamente chamada pelo botão
+  const refetchUnits = () => {
+    console.log('Tentando buscar unidades manualmente com parâmetros:', {
+      codCoor,
+      selectedClient,
+      selectedUF
+    });
+    toast({
+      title: 'Função desativada',
+      description: 'A busca automática de unidades foi desativada temporariamente para evitar erros.',
+      variant: 'default',
+    });
+  };
   
   // Função para executar a requisição após confirmação do diálogo
   const handleConfirmApiCall = () => {
