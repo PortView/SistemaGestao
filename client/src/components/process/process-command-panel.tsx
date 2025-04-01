@@ -9,7 +9,8 @@ import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClientes, fetchUnidades } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
-import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle } from 'lucide-react';
+import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface ProcessCommandPanelProps {
   onClientChange?: (clientId: number) => void;
@@ -87,7 +88,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     [];
 
   // Buscar unidades da API quando cliente e UF estiverem selecionados
-  const { data: units = [], isLoading: isLoadingUnits, error: unitsError } = useQuery<SiscopUnidade[]>({
+  const { 
+    data: units = [], 
+    isLoading: isLoadingUnits, 
+    error: unitsError,
+    refetch: refetchUnits
+  } = useQuery<SiscopUnidade[]>({
     queryKey: ['siscop-unidades', selectedClient, selectedUF, authToken],
     queryFn: async () => {
       if (!selectedClient || !selectedUF || !authToken) {
@@ -109,10 +115,17 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         return response.folowups || [];
       } catch (error) {
         console.error('Erro ao buscar unidades:', error);
+        toast({
+          title: 'Erro ao carregar unidades',
+          description: 'Não foi possível carregar as unidades. Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
         throw error;
       }
     },
     enabled: !!selectedClient && !!selectedUF && !!authToken,
+    retry: 1, // Tentar 1 vez além da tentativa inicial
+    retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
   });
 
   // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
@@ -164,9 +177,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
 
   // Lista de unidades filtrada com base na pesquisa
   const filteredUnits = useMemo(() => {
-    if (!unitSearchTerm.trim()) return units;
+    if (!unitSearchTerm.trim()) return units as SiscopUnidade[];
     
-    return units.filter(unit => {
+    return (units as SiscopUnidade[]).filter((unit: SiscopUnidade) => {
       const unitStr = `${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`;
       return unitStr.toLowerCase().includes(unitSearchTerm.toLowerCase());
     });
@@ -281,40 +294,62 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-2">
           <Label htmlFor="unidades" className="text-slate-800 text-xs font-semibold">Unidades</Label>
-          <Select
-            disabled={!selectedUF || isLoadingUnits || units.length === 0}
-            onValueChange={(value) => {
-              const unit = units.find(u => u.contrato + '-' + u.codend === value);
-              if (unit) {
-                setSelectedUnit(unit);
-              }
-            }}
-          >
-            <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
-              <SelectValue placeholder="Unidades" />
-            </SelectTrigger>
-            <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-              <div className="px-2 py-2">
-                <Input
-                  placeholder="Buscar unidade..."
-                  value={unitSearchTerm}
-                  onChange={(e) => setUnitSearchTerm(e.target.value)}
-                  className="h-8 mb-2"
-                />
-              </div>
-              {filteredUnits.length > 0 ? (
-                filteredUnits.map((unit) => (
-                  <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
-                    {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="px-2 py-1 text-xs text-muted-foreground">
-                  Nenhuma unidade encontrada
+          {unitsError ? (
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 text-xs">Erro ao carregar unidades</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
+                onClick={() => refetchUnits()}
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Tentar novamente
+              </Button>
+            </div>
+          ) : (
+            <Select
+              disabled={!selectedUF || isLoadingUnits || (units as SiscopUnidade[]).length === 0}
+              onValueChange={(value) => {
+                const unit = (units as SiscopUnidade[]).find((u: SiscopUnidade) => u.contrato + '-' + u.codend === value);
+                if (unit) {
+                  setSelectedUnit(unit);
+                }
+              }}
+            >
+              <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
+                {isLoadingUnits ? (
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    <span>Carregando...</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Unidades" />
+                )}
+              </SelectTrigger>
+              <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                <div className="px-2 py-2">
+                  <Input
+                    placeholder="Buscar unidade..."
+                    value={unitSearchTerm}
+                    onChange={(e) => setUnitSearchTerm(e.target.value)}
+                    className="h-8 mb-2"
+                  />
                 </div>
-              )}
-            </SelectContent>
-          </Select>
+                {filteredUnits.length > 0 ? (
+                  filteredUnits.map((unit) => (
+                    <SelectItem key={`${unit.contrato}-${unit.codend}`} value={`${unit.contrato}-${unit.codend}`}>
+                      {`${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.codend}`}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1 text-xs text-muted-foreground">
+                    Nenhuma unidade encontrada
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          )}
           
           {/* Paginação */}
           <div className="flex items-center gap-1">

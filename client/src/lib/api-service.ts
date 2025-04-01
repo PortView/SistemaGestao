@@ -204,15 +204,16 @@ export class ApiService {
 
       // Fazer a requisição com retry e timeout
       let response;
-      const MAX_RETRIES = 1;
-      const RETRY_DELAY = 1000;
+      const MAX_RETRIES = 2; // Aumentando para 2 tentativas mais a inicial (total de 3)
+      const RETRY_DELAY = 2000; // Aumentando para 2 segundos
+      const TIMEOUT = 30000; // Aumentando timeout para 30 segundos
       
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           // Usar Promise.race para implementar timeout
           const fetchPromise = fetch(fullUrl, fetchOptions);
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout na requisição')), 15000);
+            setTimeout(() => reject(new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`)), TIMEOUT);
           });
 
           response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
@@ -221,10 +222,12 @@ export class ApiService {
           console.error(`ApiService.request - Tentativa ${attempt + 1} falhou:`, fetchError);
           
           if (attempt === MAX_RETRIES) {
+            console.warn(`ApiService.request - Todas as ${MAX_RETRIES + 1} tentativas falharam`);
             throw fetchError; // Propagar o erro após todas as tentativas
           }
           
           // Aguardar antes da próxima tentativa
+          console.log(`ApiService.request - Aguardando ${RETRY_DELAY/1000} segundos antes da próxima tentativa`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         }
       }
@@ -448,13 +451,68 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
   }
 
   try {
+    // Buscar do cache primeiro
+    if (typeof window !== 'undefined') {
+      const cachedUnidades = localStorage.getItem(cacheKey);
+      if (cachedUnidades) {
+        try {
+          const { data, expiration } = JSON.parse(cachedUnidades);
+          // Verificar se o cache ainda é válido
+          if (Date.now() < expiration) {
+            console.log('fetchUnidades - Usando dados em cache');
+            return data;
+          }
+          // Remover cache expirado
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('fetchUnidades - Erro ao ler cache:', e);
+        }
+      }
+    }
+
     // Buscar dados da API - o ApiService já vai incluir o token nas headers
     const unidadesData = await ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
     console.log('fetchUnidades - Dados recebidos da API:', unidadesData);
+    
+    // Salvar no cache
+    if (typeof window !== 'undefined' && unidadesData) {
+      const cacheData = {
+        data: unidadesData,
+        expiration: Date.now() + CACHE_EXPIRATION.SHORT
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      console.log('fetchUnidades - Dados salvos no cache');
+    }
+    
     return unidadesData;
   } catch (error) {
     console.error('Erro ao buscar unidades:', error);
-    throw error;
+    
+    // Em caso de falha, verificar se temos dados em cache mesmo que expirados
+    if (typeof window !== 'undefined') {
+      const cachedUnidades = localStorage.getItem(cacheKey);
+      if (cachedUnidades) {
+        try {
+          const { data } = JSON.parse(cachedUnidades);
+          console.log('fetchUnidades - Usando dados em cache como fallback após erro');
+          return data;
+        } catch (e) {
+          console.error('Erro ao ler cache para fallback:', e);
+        }
+      }
+    }
+    
+    // Se não há dados em cache, retornar uma resposta vazia para evitar quebra da interface
+    console.log('fetchUnidades - Retornando estrutura vazia após erro');
+    return {
+      folowups: [],
+      pagination: {
+        totalItems: 0,
+        currentPage: 1,
+        itemsPerPage: 10,
+        lastPage: 1
+      }
+    };
   }
 }
 
@@ -472,8 +530,59 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
 
   const queryString = queryParams.toString();
   const url = `${API_SERVICOS_URL}?${queryString}`;
+  const cacheKey = `services_${JSON.stringify(params)}`;
 
-  return ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+  try {
+    // Verificar cache primeiro
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const { data, expiration } = JSON.parse(cachedData);
+          if (Date.now() < expiration) {
+            console.log('fetchServicos - Usando dados em cache');
+            return data;
+          }
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('fetchServicos - Erro ao ler cache:', e);
+        }
+      }
+    }
+    
+    // Buscar da API
+    const servicosData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+    
+    // Salvar no cache
+    if (typeof window !== 'undefined' && servicosData) {
+      const cacheData = {
+        data: servicosData,
+        expiration: Date.now() + CACHE_EXPIRATION.SHORT
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    }
+    
+    return servicosData;
+  } catch (error) {
+    console.error('Erro ao buscar serviços:', error);
+    
+    // Verificar se há dados em cache como fallback
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const { data } = JSON.parse(cachedData);
+          console.log('fetchServicos - Usando dados em cache como fallback após erro');
+          return data;
+        } catch (e) {
+          console.error('Erro ao ler cache para fallback:', e);
+        }
+      }
+    }
+    
+    // Se não houver cache, retornar array vazio para não quebrar a interface
+    return [];
+  }
 }
 
 /**
@@ -490,6 +599,57 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
 
   const queryString = queryParams.toString();
   const url = `${API_CONFORMIDADE_URL}?${queryString}`;
+  const cacheKey = `conformidades_${JSON.stringify(params)}`;
 
-  return ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+  try {
+    // Verificar cache primeiro
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const { data, expiration } = JSON.parse(cachedData);
+          if (Date.now() < expiration) {
+            console.log('fetchConformidades - Usando dados em cache');
+            return data;
+          }
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('fetchConformidades - Erro ao ler cache:', e);
+        }
+      }
+    }
+    
+    // Buscar da API
+    const conformidadesData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+    
+    // Salvar no cache
+    if (typeof window !== 'undefined' && conformidadesData) {
+      const cacheData = {
+        data: conformidadesData,
+        expiration: Date.now() + CACHE_EXPIRATION.SHORT
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    }
+    
+    return conformidadesData;
+  } catch (error) {
+    console.error('Erro ao buscar conformidades:', error);
+    
+    // Verificar se há dados em cache como fallback
+    if (typeof window !== 'undefined') {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const { data } = JSON.parse(cachedData);
+          console.log('fetchConformidades - Usando dados em cache como fallback após erro');
+          return data;
+        } catch (e) {
+          console.error('Erro ao ler cache para fallback:', e);
+        }
+      }
+    }
+    
+    // Se não houver cache, retornar array vazio para não quebrar a interface
+    return [];
+  }
 }
