@@ -171,7 +171,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const totalPages = 10; // Valor de exemplo, deve ser calculado com base no total de unidades
   
   return (
-    <Card className="bg-[#ffc107] border-none shadow-md w-[940px] h-[150px]">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-[940px] h-[150px]">
       <CardContent className="p-1 flex flex-col gap-1">
         {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos */}
         <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             disabled={isLoadingClients}
             onValueChange={(value) => setSelectedClient(Number(value))}
           >
-            <SelectTrigger className="h-8 text-xs w-[380px] bg-white border-none">
+            <SelectTrigger className="h-8 text-xs w-[380px] border-slate-200">
               <SelectValue placeholder="Cliente" />
             </SelectTrigger>
             <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
@@ -211,7 +211,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             disabled={!selectedClient || ufs.length === 0}
             onValueChange={(value) => setSelectedUF(value)}
           >
-            <SelectTrigger className="h-8 text-xs w-[100px] bg-white border-none">
+            <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
               <SelectValue placeholder="UF" />
             </SelectTrigger>
             <SelectContent className="z-50 fixed w-[100px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
@@ -238,7 +238,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Select>
           
           {/* Checkbox Todas UFs */}
-          <div className="flex items-center bg-white h-8 px-2 rounded">
+          <div className="flex items-center bg-white h-8 px-2 rounded border border-slate-200">
             <Checkbox 
               id="todas-ufs" 
               checked={allUfs}
@@ -250,9 +250,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Botão Planilhas */}
           <Button 
-            variant="default" 
+            variant="outline" 
             size="sm" 
-            className="h-8 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
           >
             <FileText className="h-4 w-4 mr-1" />
             Planilhas
@@ -260,9 +260,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Botão Contrato */}
           <Button 
-            variant="default" 
+            variant="outline" 
             size="sm" 
-            className="h-8 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
           >
             Contr: 03119
           </Button>
@@ -270,7 +270,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-2">
-          <Label htmlFor="unidades" className="text-white text-xs font-semibold">Unidades</Label>
+          <Label htmlFor="unidades" className="text-slate-800 text-xs font-semibold">Unidades</Label>
           <Select
             disabled={!selectedUF || isLoadingUnits || units.length === 0}
             onValueChange={(value) => {
@@ -280,7 +280,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               }
             }}
           >
-            <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] bg-white border-none">
+            <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
               <SelectValue placeholder="Unidades" />
             </SelectTrigger>
             <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
@@ -308,21 +308,21 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Paginação */}
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-200 p-0">
+            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-100 border-gray-300 p-0">
               <span className="text-xs">≪</span>
             </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-200 p-0">
+            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-100 border-gray-300 p-0">
               <span className="text-xs">＜</span>
             </Button>
-            <div className="bg-white rounded h-7 px-2 flex items-center text-xs">
+            <div className="bg-white rounded h-7 px-2 flex items-center text-xs border border-slate-200">
               <span>{currentPage}</span>
               <span className="mx-1">/</span>
               <span>{totalPages}</span>
             </div>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-600 text-white p-0">
+            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0">
               <span className="text-xs">＞</span>
             </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-600 text-white p-0">
+            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0">
               <span className="text-xs">≫</span>
             </Button>
           </div>
@@ -330,31 +330,31 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         
         {/* Terceira linha: 7 botões com ícones */}
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <Edit className="h-4 w-4 mr-1" />
             Editar
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <AlertCircle className="h-4 w-4 mr-1" />
             Ocorrências
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <DollarSign className="h-4 w-4 mr-1" />
             Custos
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <ShoppingCart className="h-4 w-4 mr-1" />
             Ord.Compra
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <ClipboardList className="h-4 w-4 mr-1" />
             Edit.Tarefas
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <Trash2 className="h-4 w-4 mr-1" />
             Rescisão
           </Button>
-          <Button variant="outline" size="sm" className="h-8 bg-blue-500 hover:bg-blue-600 text-white">
+          <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
             <AlertTriangle className="h-4 w-4 mr-1" />
             Pendenciar
           </Button>
