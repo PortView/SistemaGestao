@@ -188,6 +188,11 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             description: `Não há unidades para o cliente ${selectedClient} na UF ${selectedUF}.`,
             variant: 'default',
           });
+        } else {
+          // Selecionar automaticamente a primeira unidade
+          const firstUnit = response.folowups[0];
+          console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
+          setSelectedUnit(firstUnit);
         }
         // Removida a notificação para o caso de sucesso para evitar piscadas
       } else {
@@ -272,6 +277,11 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       description: `Não há unidades para o cliente ${selectedClient} na UF ${firstUF}.`,
                       variant: 'default',
                     });
+                  } else {
+                    // Selecionar automaticamente a primeira unidade
+                    const firstUnit = response.folowups[0];
+                    console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
+                    setSelectedUnit(firstUnit);
                   }
                   // Removida a notificação para o caso de sucesso para evitar piscadas
                 }
@@ -424,6 +434,11 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                           description: `Não há unidades para o cliente ${selectedClient} na UF ${value}.`,
                           variant: 'default',
                         });
+                      } else {
+                        // Selecionar automaticamente a primeira unidade
+                        const firstUnit = response.folowups[0];
+                        console.log('Selecionando automaticamente a primeira unidade:', firstUnit);
+                        setSelectedUnit(firstUnit);
                       }
                       // Removida a notificação para o caso de sucesso para evitar piscadas
                     }
