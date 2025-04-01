@@ -182,18 +182,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         setUnits(response.folowups);
         
         if (response.folowups.length === 0) {
+          // Apenas notificar quando não houver unidades (situação excepcional)
           toast({
             title: 'Nenhuma unidade encontrada',
             description: `Não há unidades para o cliente ${selectedClient} na UF ${selectedUF}.`,
             variant: 'default',
           });
-        } else {
-          toast({
-            title: 'Unidades carregadas',
-            description: `${response.folowups.length} unidades encontradas.`,
-            variant: 'default',
-          });
         }
+        // Removida a notificação para o caso de sucesso para evitar piscadas
       } else {
         console.warn('Resposta da API não contém unidades');
         setUnits([]);
@@ -270,18 +266,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   setUnits(response.folowups);
                   
                   if (response.folowups.length === 0) {
+                    // Apenas notificar quando não houver unidades (situação excepcional)
                     toast({
                       title: 'Nenhuma unidade encontrada',
                       description: `Não há unidades para o cliente ${selectedClient} na UF ${firstUF}.`,
                       variant: 'default',
                     });
-                  } else {
-                    toast({
-                      title: 'Unidades carregadas',
-                      description: `${response.folowups.length} unidades encontradas.`,
-                      variant: 'default',
-                    });
                   }
+                  // Removida a notificação para o caso de sucesso para evitar piscadas
                 }
               })
               .catch(error => {
@@ -426,18 +418,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       setUnits(response.folowups);
                       
                       if (response.folowups.length === 0) {
+                        // Apenas notificar quando não houver unidades (situação excepcional)
                         toast({
                           title: 'Nenhuma unidade encontrada',
                           description: `Não há unidades para o cliente ${selectedClient} na UF ${value}.`,
                           variant: 'default',
                         });
-                      } else {
-                        toast({
-                          title: 'Unidades carregadas',
-                          description: `${response.folowups.length} unidades encontradas.`,
-                          variant: 'default',
-                        });
                       }
+                      // Removida a notificação para o caso de sucesso para evitar piscadas
                     }
                   })
                   .catch(error => {
