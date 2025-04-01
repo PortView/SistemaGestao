@@ -11,6 +11,7 @@ import { fetchClientes, fetchUnidades } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from '@/lib/constants';
 import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { ApiParamDialog } from '@/components/api-param-dialog';
 
 interface ProcessCommandPanelProps {
   onClientChange?: (clientId: number) => void;
@@ -116,6 +117,31 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     }
   }, [bypassUnits, selectedClient, selectedUF]);
 
+  // Estado para controle do diálogo de verificação de parâmetros API
+  const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false);
+  const [apiParams, setApiParams] = useState({
+    token: null as string | null,
+    codcoor: null as number | null,
+    codcli: null as number | null,
+    uf: null as string | null,
+    page: 1
+  });
+  
+  // Função para preparar chamada da API com diálogo de verificação
+  const showParamsDialog = () => {
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+    
+    setApiParams({
+      token,
+      codcoor: codCoor,
+      codcli: selectedClient,
+      uf: selectedUF,
+      page: 1
+    });
+    
+    setIsVerifyDialogOpen(true);
+  };
+  
   // Buscar unidades da API quando cliente e UF estiverem selecionados
   const { 
     data: apiUnits = [], 
@@ -129,6 +155,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         console.warn('Código de coordenador, cliente, UF ou token não disponíveis para buscar unidades');
         return [];
       }
+      
+      // Não usamos mais esse método para mostrar parâmetros, agora está no botão de verificação
       
       console.log('Buscando unidades para codCoor:', codCoor, 'cliente:', selectedClient, 'UF:', selectedUF);
       const params = { 
@@ -157,6 +185,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     retry: 1, // Tentar 1 vez além da tentativa inicial
     retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
   });
+  
+  // Função para executar a requisição após confirmação do diálogo
+  const handleConfirmApiCall = () => {
+    setIsVerifyDialogOpen(false);
+    refetchUnits();
+  };
   
   // Combinar unidades da API ou geradas manualmente
   const units = bypassUnits ? manualUnits : apiUnits;
@@ -394,14 +428,25 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 </SelectContent>
               </Select>
               
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
-                onClick={() => setBypassUnits(!bypassUnits)}
-              >
-                {bypassUnits ? "Usar API" : "Dados de dev"}
-              </Button>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
+                  onClick={() => setBypassUnits(!bypassUnits)}
+                >
+                  {bypassUnits ? "Usar API" : "Dados de dev"}
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 bg-green-100 border-green-300 text-green-800 hover:bg-green-200"
+                  onClick={showParamsDialog}
+                >
+                  Verificar parâmetros
+                </Button>
+              </div>
             </div>
           )}
           
@@ -459,6 +504,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Button>
         </div>
       </CardContent>
+      
+      {/* Diálogo de verificação de parâmetros da API */}
+      <ApiParamDialog 
+        isOpen={isVerifyDialogOpen}
+        onClose={() => setIsVerifyDialogOpen(false)}
+        onConfirm={handleConfirmApiCall}
+        params={apiParams}
+      />
     </Card>
   );
 }
