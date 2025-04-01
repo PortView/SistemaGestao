@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,55 +23,76 @@ interface ApiParamDialogProps {
 }
 
 export function ApiParamDialog({ isOpen, onClose, onConfirm, params }: ApiParamDialogProps) {
+  // Use estado local para garantir que os parâmetros sejam exibidos corretamente
+  const [localParams, setLocalParams] = useState(params);
+  
+  // Atualizar o estado local quando os parâmetros mudarem ou o diálogo abrir
+  useEffect(() => {
+    if (isOpen) {
+      console.log('Diálogo aberto com parâmetros:', params);
+      setLocalParams(params);
+    }
+  }, [isOpen, params]);
+  
+  // Função para formatar o token
   const formatToken = (token: string | null) => {
     if (!token) return 'Não disponível';
+    if (token === 'não disponível') return 'Não disponível';
+    
+    // Verificar se o token é longo o suficiente para truncar
+    if (token.length < 25) return token;
+    
     return `${token.substring(0, 15)}...${token.substring(token.length - 5)}`;
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-slate-900 text-white border-slate-700">
         <DialogHeader>
-          <DialogTitle>Parâmetros da API de Unidades</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl text-white">Parâmetros da API de Unidades</DialogTitle>
+          <DialogDescription className="text-slate-400">
             Verifique se os parâmetros estão corretos antes de prosseguir com a requisição.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 items-center gap-4">
-            <div className="font-semibold">Token:</div>
-            <div className="font-mono text-xs truncate bg-slate-50 p-2 rounded">
-              {formatToken(params.token)}
+            <div className="font-semibold text-white">Token:</div>
+            <div className="font-mono text-xs truncate bg-slate-800 p-2 rounded border border-slate-700 text-slate-300">
+              {formatToken(localParams.token)}
             </div>
           </div>
           <div className="grid grid-cols-2 items-center gap-4">
-            <div className="font-semibold">Código Coordenador:</div>
-            <div className="font-mono text-xs bg-slate-50 p-2 rounded">
-              {params.codcoor || 'Não disponível'}
+            <div className="font-semibold text-white">Código Coordenador:</div>
+            <div className="font-mono text-xs bg-slate-800 p-2 rounded border border-slate-700 text-slate-300">
+              {localParams.codcoor || 'Não disponível'}
             </div>
           </div>
           <div className="grid grid-cols-2 items-center gap-4">
-            <div className="font-semibold">Código Cliente:</div>
-            <div className="font-mono text-xs bg-slate-50 p-2 rounded">
-              {params.codcli || 'Não disponível'}
+            <div className="font-semibold text-white">Código Cliente:</div>
+            <div className="font-mono text-xs bg-slate-800 p-2 rounded border border-slate-700 text-slate-300">
+              {localParams.codcli || 'Não disponível'}
             </div>
           </div>
           <div className="grid grid-cols-2 items-center gap-4">
-            <div className="font-semibold">UF:</div>
-            <div className="font-mono text-xs bg-slate-50 p-2 rounded">
-              {params.uf || 'Não disponível'}
+            <div className="font-semibold text-white">UF:</div>
+            <div className="font-mono text-xs bg-slate-800 p-2 rounded border border-slate-700 text-slate-300">
+              {localParams.uf || 'Não disponível'}
             </div>
           </div>
           <div className="grid grid-cols-2 items-center gap-4">
-            <div className="font-semibold">Página:</div>
-            <div className="font-mono text-xs bg-slate-50 p-2 rounded">
-              {params.page}
+            <div className="font-semibold text-white">Página:</div>
+            <div className="font-mono text-xs bg-slate-800 p-2 rounded border border-slate-700 text-slate-300">
+              {localParams.page}
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={onConfirm}>Prosseguir com a requisição</Button>
+          <Button variant="outline" onClick={onClose} className="bg-slate-800 text-white hover:bg-slate-700 border-slate-600">
+            Cancelar
+          </Button>
+          <Button onClick={onConfirm} className="bg-blue-600 hover:bg-blue-700 text-white">
+            Prosseguir com a requisição
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

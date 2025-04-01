@@ -100,39 +100,45 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   
   // Função para preparar chamada da API com diálogo de verificação
   const showParamsDialog = () => {
+    // Busca o token diretamente do localStorage para garantir valor atualizado
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     
-    // Garantindo que os valores sejam recuperados corretamente
-    console.log('Verificando parâmetros para API:', {
-      token: token ? 'token presente' : 'sem token',
-      codCoor,
-      selectedClient,
-      selectedUF
+    // Debug do estado atual de UFs
+    console.log('Lista de UFs disponíveis:', ufs);
+    console.log('Cliente selecionado:', selectedClient);
+    console.log('Cliente encontrado:', clients.find(c => c.codcli === selectedClient));
+    
+    // Log detalhado dos parâmetros
+    console.log('VERIFICANDO PARÂMETROS PARA API (valores brutos):', {
+      token: token ? `${token.substring(0, 15)}...` : 'sem token',
+      codCoor: typeof codCoor === 'number' ? codCoor : 'inválido',
+      selectedClient: typeof selectedClient === 'number' ? selectedClient : 'inválido',
+      selectedUF: typeof selectedUF === 'string' ? selectedUF : 'inválido'
     });
     
-    // Definindo os parâmetros para o diálogo
-    const dialogParams = {
-      token,
-      codcoor: codCoor,
-      codcli: selectedClient,
-      uf: selectedUF,
+    // Forçar valores numéricos para os campos que precisam ser números
+    const codCoorNum = Number(codCoor) || 0;
+    const selectedClientNum = Number(selectedClient) || 0;
+    
+    // Criando objeto de parâmetros com conversões explícitas
+    const apiParamsObj = {
+      token: token || 'não disponível',
+      codcoor: codCoorNum,
+      codcli: selectedClientNum, 
+      uf: selectedUF || 'não disponível',
       page: 1
     };
     
-    // Forçando log detalhado para entender o que está acontecendo
-    console.log('Parâmetros enviados para o diálogo:', JSON.stringify(dialogParams, null, 2));
+    // Log do objeto final que será enviado
+    console.log('PARÂMETROS FINAIS (após conversão):', JSON.stringify(apiParamsObj, null, 2));
     
-    // Definindo os parâmetros para o diálogo - precisamos garantir que os valores não são undefined
-    setApiParams({
-      token: token || null,
-      codcoor: codCoor || null,
-      codcli: selectedClient || null,
-      uf: selectedUF || null,
-      page: 1
-    });
+    // Atualiza o estado com os novos parâmetros
+    setApiParams(apiParamsObj);
     
-    // Mostrando o diálogo
-    setIsVerifyDialogOpen(true);
+    // Garante que o diálogo será aberto após o estado ser atualizado
+    setTimeout(() => {
+      setIsVerifyDialogOpen(true);
+    }, 50);
   };
   
   // Desativamos a busca automática de unidades para evitar erros
@@ -259,10 +265,37 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             </SelectContent>
           </Select>
           
-          {/* UF (Ações desativadas, somente visual) */}
-          <div className="h-8 text-xs w-[100px] border border-slate-200 rounded flex items-center px-3 bg-white">
-            <span className="truncate">{selectedUF || "UF"}</span>
-          </div>
+          {/* UF - Dropdown com seleção real */}
+          <Select
+            disabled={!selectedClient || ufs.length === 0}
+            value={selectedUF || undefined}
+            onValueChange={(value) => setSelectedUF(value)}
+          >
+            <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
+              <SelectValue placeholder="UF" />
+            </SelectTrigger>
+            <SelectContent className="z-50">
+              <div className="px-2 py-2">
+                <Input
+                  placeholder="Buscar UF..."
+                  value={ufSearchTerm}
+                  onChange={(e) => setUfSearchTerm(e.target.value)}
+                  className="h-8 mb-2"
+                />
+              </div>
+              {filteredUfs.length > 0 ? (
+                filteredUfs.map((uf) => (
+                  <SelectItem key={uf} value={uf}>
+                    {uf}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-2 py-1 text-xs text-muted-foreground">
+                  Nenhuma UF encontrada
+                </div>
+              )}
+            </SelectContent>
+          </Select>
           
           {/* Checkbox Todas UFs */}
           <div className="flex items-center bg-white h-8 px-2 rounded border border-slate-200">
