@@ -88,35 +88,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     clients.find(c => c.codcli === selectedClient)?.lc_ufs.map(u => u.uf) || [] : 
     [];
 
-  // Estado para bypass manual dos dados de unidades
-  const [bypassUnits, setBypassUnits] = useState(false);
-  const [manualUnits, setManualUnits] = useState<SiscopUnidade[]>([]);
-
-  // Gerar unidades de teste quando necessário
-  useEffect(() => {
-    if (bypassUnits && selectedClient && selectedUF) {
-      // Criar 5 unidades de teste baseadas no cliente e UF selecionados
-      const testUnits: SiscopUnidade[] = Array.from({ length: 5 }).map((_, index) => ({
-        contrato: selectedClient + index + 1, // Convertido para número
-        codend: 100 + index, // Número
-        cadimov: {
-          tipo: "COMERCIAL",
-          uf: selectedUF
-        }
-      }));
-      
-      setManualUnits(testUnits);
-      console.log('Unidades geradas manualmente para desenvolvimento:', testUnits);
-      
-      // Notificar usuário
-      toast({
-        title: 'Modo de desenvolvimento ativado',
-        description: 'Utilizando unidades de teste para continuar o desenvolvimento.',
-        variant: 'default',
-      });
-    }
-  }, [bypassUnits, selectedClient, selectedUF]);
-
   // Estado para controle do diálogo de verificação de parâmetros API
   const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false);
   const [apiParams, setApiParams] = useState({
@@ -154,7 +125,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   
   // Buscar unidades da API quando cliente e UF estiverem selecionados
   const { 
-    data: apiUnits = [], 
+    data: units = [], 
     isLoading: isLoadingUnits, 
     error: unitsError,
     refetch: refetchUnits
@@ -191,7 +162,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         throw error;
       }
     },
-    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken && !bypassUnits,
+    enabled: !!codCoor && !!selectedClient && !!selectedUF && !!authToken,
     retry: 1, // Tentar 1 vez além da tentativa inicial
     retryDelay: 2000, // Aguardar 2 segundos antes de tentar novamente
   });
@@ -201,9 +172,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setIsVerifyDialogOpen(false);
     refetchUnits();
   };
-  
-  // Combinar unidades da API ou geradas manualmente
-  const units = bypassUnits ? manualUnits : apiUnits;
 
   // Quando o cliente mudar, selecionar a primeira UF disponível e resetar unidade
   useEffect(() => {
@@ -384,14 +352,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   <RefreshCw className="h-4 w-4 mr-1" />
                   Tentar novamente
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
-                  onClick={() => setBypassUnits(!bypassUnits)}
-                >
-                  {bypassUnits ? "Desativar bypass" : "Usar dados de desenvolvimento"}
-                </Button>
               </div>
             </div>
           ) : (
@@ -439,15 +399,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               </Select>
               
               <div className="flex gap-1">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
-                  onClick={() => setBypassUnits(!bypassUnits)}
-                >
-                  {bypassUnits ? "Usar API" : "Dados de dev"}
-                </Button>
-                
                 <Button 
                   variant="outline" 
                   size="sm" 

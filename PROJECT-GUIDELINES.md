@@ -128,3 +128,10 @@
 - Sempre mostrar mensagens de erro ao usuário usando toast ou notificações
 - Capturar e logar detalhes de erros para debug
 - Em caso de falha na API, tentar usar dados em cache mesmo que expirados como fallback
+
+## Regras de Uso de Dados
+- NUNCA usar dados fictícios, simulados ou "mock data" para popular componentes ou interfaces
+- Sempre usar dados autênticos vindos das APIs oficiais
+- Não criar ou simular respostas de API inexistentes
+- Não implementar funcionalidades que dependam de dados fictícios
+- Em casos excepcionais onde dados para desenvolvimento ou testes são necessários, isto deve ser explicitamente solicitado e aprovado
