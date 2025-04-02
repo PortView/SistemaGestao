@@ -50,7 +50,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [unitSearchTerm, setUnitSearchTerm] = useState<string>('');
   const [allUfs, setAllUfs] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 10; // Exemplo, calculado com base no total de unidades
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [shouldShowPagination, setShouldShowPagination] = useState(false);
   
   // Carregar dados do usuário uma única vez e inicializar estados
   useEffect(() => {
@@ -210,6 +212,22 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       // Atualizar unidades
       setUnits(response.folowups);
       
+      // Atualizar informações de paginação
+      if (response.pagination) {
+        setCurrentPage(response.pagination.currentPage);
+        setTotalPages(response.pagination.lastPage);
+        setTotalItems(response.pagination.totalItems);
+        
+        // Mostrar paginação apenas se houver mais de 100 itens
+        setShouldShowPagination(response.pagination.totalItems > 100);
+      } else {
+        // Reset paginação se não houver dados de paginação
+        setCurrentPage(1);
+        setTotalPages(1);
+        setTotalItems(0);
+        setShouldShowPagination(false);
+      }
+      
       // Verificar se há unidades
       if (response.folowups.length === 0) {
         toast({
@@ -261,6 +279,64 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     
     fetchUnitsIfNeeded(selectedClient, selectedUF, isProcessingUfChange, true);
   }, [selectedClient, selectedUF, fetchUnitsIfNeeded]);
+  
+  // Função para carregar unidades com paginação
+  const loadPagedUnits = useCallback((pageNumber: number) => {
+    if (!selectedClient || !codCoor) return;
+    
+    // Se não houver UF selecionada e o checkbox Todas UFs estiver desmarcado, não fazer nada
+    if (!selectedUF && !allUfs) return;
+    
+    // Determinar a UF a ser usada
+    const ufParam = allUfs ? "ZZ" : selectedUF;
+    
+    if (!ufParam) return;
+    
+    setIsLoadingUnits(true);
+    
+    const params = {
+      codcoor: codCoor,
+      codcli: selectedClient,
+      uf: ufParam,
+      page: pageNumber
+    };
+    
+    // Força o refresh do cache
+    fetchUnidades(params, { skipCache: true })
+      .then(response => {
+        if (response?.folowups) {
+          setUnits(response.folowups);
+          
+          // Atualizar informações de paginação
+          if (response.pagination) {
+            setCurrentPage(response.pagination.currentPage);
+            setTotalPages(response.pagination.lastPage);
+            setTotalItems(response.pagination.totalItems);
+            
+            // Mostrar paginação apenas se houver mais de 100 itens
+            setShouldShowPagination(response.pagination.totalItems > 100);
+          }
+          
+          if (response.folowups.length > 0) {
+            // Selecionar primeira unidade
+            setTimeout(() => {
+              setSelectedUnit(response.folowups[0]);
+            }, 100);
+          }
+        }
+      })
+      .catch(error => {
+        setUnitsError(error as Error);
+        toast({
+          title: 'Erro ao buscar unidades',
+          description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        setIsLoadingUnits(false);
+      });
+  }, [selectedClient, selectedUF, allUfs, codCoor]);
 
   // Handler para o diálogo de API
   const showParamsDialog = useCallback(() => {
@@ -465,6 +541,22 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       .then(response => {
                         if (response?.folowups) {
                           setUnits(response.folowups);
+                          
+                          // Atualizar informações de paginação
+                          if (response.pagination) {
+                            setCurrentPage(response.pagination.currentPage);
+                            setTotalPages(response.pagination.lastPage);
+                            setTotalItems(response.pagination.totalItems);
+                            
+                            // Mostrar paginação apenas se houver mais de 100 itens
+                            setShouldShowPagination(response.pagination.totalItems > 100);
+                          } else {
+                            setCurrentPage(1);
+                            setTotalPages(1);
+                            setTotalItems(0);
+                            setShouldShowPagination(false);
+                          }
+                          
                           if (response.folowups.length > 0) {
                             // Selecionar primeira unidade
                             setTimeout(() => {
@@ -500,6 +592,22 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     .then(response => {
                       if (response?.folowups) {
                         setUnits(response.folowups);
+                        
+                        // Atualizar informações de paginação
+                        if (response.pagination) {
+                          setCurrentPage(response.pagination.currentPage);
+                          setTotalPages(response.pagination.lastPage);
+                          setTotalItems(response.pagination.totalItems);
+                          
+                          // Mostrar paginação apenas se houver mais de 100 itens
+                          setShouldShowPagination(response.pagination.totalItems > 100);
+                        } else {
+                          setCurrentPage(1);
+                          setTotalPages(1);
+                          setTotalItems(0);
+                          setShouldShowPagination(false);
+                        }
+                        
                         if (response.folowups.length > 0) {
                           // Selecionar primeira unidade
                           setTimeout(() => {
@@ -622,26 +730,86 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             </div>
           )}
           
-          {/* Paginação */}
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-100 border-gray-300 p-0">
-              <span className="text-xs">≪</span>
-            </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-gray-100 border-gray-300 p-0">
-              <span className="text-xs">＜</span>
-            </Button>
-            <div className="bg-white rounded h-7 px-2 flex items-center text-xs border border-slate-200">
-              <span>{currentPage}</span>
-              <span className="mx-1">/</span>
-              <span>{totalPages}</span>
+          {/* Paginação - Visível apenas quando há mais de 100 itens */}
+          {shouldShowPagination && (
+            <div className="flex items-center gap-1">
+              {/* Primeira página */}
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-7 w-7 bg-gray-100 border-gray-300 p-0"
+                disabled={currentPage === 1 || isLoadingUnits}
+                onClick={() => loadPagedUnits(1)}
+              >
+                <span className="text-xs">≪</span>
+              </Button>
+              
+              {/* Página anterior */}
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-7 w-7 bg-gray-100 border-gray-300 p-0"
+                disabled={currentPage === 1 || isLoadingUnits}
+                onClick={() => loadPagedUnits(currentPage - 1)}
+              >
+                <span className="text-xs">＜</span>
+              </Button>
+              
+              {/* Exibição da página atual e total */}
+              <div className="bg-white rounded h-7 px-2 flex items-center text-xs border border-slate-200">
+                <span>{currentPage}</span>
+                <span className="mx-1">/</span>
+                <span>{totalPages}</span>
+              </div>
+              
+              {/* Próxima página */}
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0"
+                disabled={currentPage === totalPages || isLoadingUnits}
+                onClick={() => loadPagedUnits(currentPage + 1)}
+              >
+                <span className="text-xs">＞</span>
+              </Button>
+              
+              {/* Última página */}
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0"
+                disabled={currentPage === totalPages || isLoadingUnits}
+                onClick={() => loadPagedUnits(totalPages)}
+              >
+                <span className="text-xs">≫</span>
+              </Button>
+              
+              {/* Input para ir para uma página específica */}
+              <Input
+                type="number"
+                min={1}
+                max={totalPages}
+                className="h-7 w-12 text-xs text-center"
+                placeholder="Pg"
+                disabled={isLoadingUnits}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const input = e.currentTarget;
+                    const page = parseInt(input.value);
+                    if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                      loadPagedUnits(page);
+                    } else {
+                      toast({
+                        title: 'Página inválida',
+                        description: `Informe um número entre 1 e ${totalPages}`,
+                        variant: 'destructive',
+                      });
+                    }
+                  }
+                }}
+              />
             </div>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0">
-              <span className="text-xs">＞</span>
-            </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0">
-              <span className="text-xs">≫</span>
-            </Button>
-          </div>
+          )}
         </div>
         
         {/* Terceira linha: 7 botões com ícones */}
