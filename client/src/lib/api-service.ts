@@ -33,6 +33,7 @@ const LOCAL_STORAGE_CLIENTES_KEY = 'siscop_clientes';
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
+  skipCache?: boolean;
 }
 
 /**
@@ -446,7 +447,7 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
 /**
  * Função para buscar unidades com cache
  */
-export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse> {
+export async function fetchUnidades(params: any, options: { skipCache?: boolean } = {}): Promise<SiscopUnidadesResponse> {
   // Validação dos parâmetros essenciais (usando exatamente os nomes dos parâmetros do exemplo)
   if (!params.codcoor || !params.codcli || !params.uf) {
     console.error('Erro: Parâmetros codcoor, codcli e uf são obrigatórios para buscar unidades');
@@ -457,7 +458,13 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
 
   // Construir URL exatamente como no exemplo:
   // https://amenirealestate.com.br:5601/ger-clientes/unidades?codcoor=110&codcli=1448&uf=SP&page=1
-  const url = `${API_UNIDADES_URL}?codcoor=${params.codcoor}&codcli=${params.codcli}&uf=${params.uf}&page=${params.page || 1}`;
+  // Se skipCache for true, adicionar timestamp para forçar requisição nova
+  let url = `${API_UNIDADES_URL}?codcoor=${params.codcoor}&codcli=${params.codcli}&uf=${params.uf}&page=${params.page || 1}`;
+  
+  if (options.skipCache) {
+    url += `&_timestamp=${Date.now()}`;
+    console.log('fetchUnidades - Forçando requisição nova com timestamp');
+  }
   
   // Chave de cache usando os mesmos parâmetros
   const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.page || 1}`;
@@ -475,8 +482,8 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
   }
 
   try {
-    // Buscar do cache primeiro
-    if (typeof window !== 'undefined') {
+    // Buscar do cache primeiro, se não estiver pulando o cache
+    if (typeof window !== 'undefined' && !options.skipCache) {
       const cachedUnidades = localStorage.getItem(cacheKey);
       if (cachedUnidades) {
         try {

@@ -143,10 +143,11 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     processingRef: React.MutableRefObject<boolean>,
     shouldForceRefresh = false
   ) => {
-    // Evitar chamadas duplicadas ou desnecessárias
+    // Evitar chamadas duplicadas ou desnecessárias (somente quando não for alteração recente)
     if (
       processingRef.current || 
       (!shouldForceRefresh && 
+       !manualUFSelection && // Se for seleção manual de UF, sempre recarregar
        lastFetchedParams.current?.codcli === codcli && 
        lastFetchedParams.current?.uf === uf)
     ) {
@@ -155,6 +156,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     
     // Marcar como em processamento
     processingRef.current = true;
+    
+    // Limpar unidades enquanto carrega novos dados
+    setUnits([]);
     
     // Atualizar parâmetros da última busca
     lastFetchedParams.current = { codcli, uf };
@@ -170,11 +174,16 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     try {
       const params = { codcoor: codCoor, codcli, uf, page: 1 };
       
-      const response = await fetchUnidades(params);
+      console.log(`Buscando unidades para cliente ${codcli} e UF ${uf}`);
+      
+      // Forçar recarga de dados (sem usar cache) quando for troca de cliente ou UF
+      const options = shouldForceRefresh ? { skipCache: true } : undefined;
+      const response = await fetchUnidades(params, options);
       
       if (!response?.folowups) {
         setUnits([]);
         processingRef.current = false;
+        setSelectedUnit(null); // Garantir que nenhuma unidade esteja selecionada se não houver dados
         return null;
       }
       
@@ -189,6 +198,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           variant: 'default',
         });
         processingRef.current = false;
+        setSelectedUnit(null); // Garantir que nenhuma unidade esteja selecionada
         return null;
       }
       
@@ -211,11 +221,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         variant: 'destructive',
       });
       processingRef.current = false;
+      setSelectedUnit(null); // Garantir que nenhuma unidade esteja selecionada em caso de erro
       return null;
     } finally {
       setIsLoadingUnits(false);
     }
-  }, [codCoor]);
+  }, [codCoor, manualUFSelection]);
 
   // Handler para recarregar unidades manualmente (botão "Tentar novamente")
   const refetchUnits = useCallback(() => {
@@ -269,6 +280,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setSelectedUF(uf);
     setManualUFSelection(true);
     setSelectedUnit(null);
+    setUnits([]); // Limpar unidades ao mudar a UF
+    setIsLoadingUnits(true); // Mostrar estado de carregamento
   }, []);
 
   // Efeito: processar mudança de cliente para selecionar UF automaticamente
@@ -349,9 +362,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             value={selectedUF || undefined}
             onValueChange={(value) => {
               console.log('UF selecionada manualmente:', value);
-              setSelectedUF(value);
-              setManualUFSelection(true);
-              // A busca de unidades é processada pelo efeito quando selectedUF muda
+              handleUFChange(value);
             }}
           >
             <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
@@ -403,7 +414,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     };
                     
                     setIsLoadingUnits(true);
-                    fetchUnidades(params)
+                    // Forçar requisição nova ao mudar o filtro para todas UFs
+                    fetchUnidades(params, { skipCache: true })
                       .then(response => {
                         if (response?.folowups) {
                           setUnits(response.folowups);
@@ -437,7 +449,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   };
                   
                   setIsLoadingUnits(true);
-                  fetchUnidades(params)
+                  // Forçar requisição nova ao desmarcar "Todas UFs"
+                  fetchUnidades(params, { skipCache: true })
                     .then(response => {
                       if (response?.folowups) {
                         setUnits(response.folowups);

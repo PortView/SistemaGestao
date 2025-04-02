@@ -21,6 +21,7 @@ import {
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
+  skipCache?: boolean;
 }
 
 /**
@@ -31,8 +32,8 @@ export class ApiService {
    * Faz uma requisição GET à API com suporte a cache
    */
   static async get<T>(url: string, options: FetchOptions = {}, cacheTime?: number): Promise<T> {
-    // Tentar obter dados do cache para requisições GET
-    if (typeof window !== 'undefined' && cacheTime) {
+    // Tentar obter dados do cache para requisições GET, se não estiver pulando o cache
+    if (typeof window !== 'undefined' && cacheTime && !options.skipCache) {
       const cachedData = this.getFromCache<T>(url);
       if (cachedData) {
         console.log(`Usando dados em cache para: ${url}`);
@@ -291,7 +292,7 @@ export async function fetchClientes(codCoor: number): Promise<SiscopCliente[]> {
 /**
  * Função para buscar unidades com cache
  */
-export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse> {
+export async function fetchUnidades(params: any, options: { skipCache?: boolean } = {}): Promise<SiscopUnidadesResponse> {
   const queryParams = new URLSearchParams();
   
   for (const key in params) {
@@ -300,12 +301,20 @@ export async function fetchUnidades(params: any): Promise<SiscopUnidadesResponse
     }
   }
   
+  // Se skipCache for true, adicionar um timestamp como parâmetro na URL para forçar requisição nova
+  if (options.skipCache) {
+    queryParams.append('_timestamp', Date.now().toString());
+    console.log('fetchUnidades - Forçando requisição nova com timestamp');
+  }
+  
   const queryString = queryParams.toString();
   const url = API_UNIDADES_URL ? 
     `${API_UNIDADES_URL}?${queryString}` : 
     `/ger-clientes/unidades?${queryString}`;
   
-  return ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
+  // Passar a opção skipCache para o ApiService
+  const apiOptions = options.skipCache ? { skipCache: true } : {};
+  return ApiService.get<SiscopUnidadesResponse>(url, apiOptions, CACHE_EXPIRATION.SHORT);
 }
 
 /**
