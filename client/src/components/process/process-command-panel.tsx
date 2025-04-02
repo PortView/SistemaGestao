@@ -141,17 +141,21 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     codcli: number, 
     uf: string,
     processingRef: React.MutableRefObject<boolean>,
-    shouldForceRefresh = false
+    shouldForceRefresh = true // Agora por padrão sempre forçamos refresh
   ) => {
-    // Evitar chamadas duplicadas ou desnecessárias (somente quando não for alteração recente)
-    if (
-      processingRef.current || 
-      (!shouldForceRefresh && 
-       !manualUFSelection && // Se for seleção manual de UF, sempre recarregar
-       lastFetchedParams.current?.codcli === codcli && 
-       lastFetchedParams.current?.uf === uf)
-    ) {
+    // Se já estiver processando, evitamos requisições duplicadas
+    if (processingRef.current) {
       return null;
+    }
+    
+    // Verificar se é uma mudança real de cliente/UF ou se é apenas um recarregamento
+    const isParameterChange = 
+      lastFetchedParams.current?.codcli !== codcli || 
+      lastFetchedParams.current?.uf !== uf;
+    
+    // Sempre limpar cache quando mudar cliente ou UF
+    if (isParameterChange) {
+      clearUnitsCache(codcli, uf);
     }
     
     // Marcar como em processamento
@@ -176,8 +180,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       
       console.log(`Buscando unidades para cliente ${codcli} e UF ${uf}`);
       
-      // Forçar recarga de dados (sem usar cache) quando for troca de cliente ou UF
-      const options = shouldForceRefresh ? { skipCache: true } : undefined;
+      // Sempre forçar recarga de dados (sem usar cache) para garantir dados atualizados
+      // Independente se é troca de cliente, UF ou não
+      const options = { skipCache: true };
       const response = await fetchUnidades(params, options);
       
       if (!response?.folowups) {
@@ -226,7 +231,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     } finally {
       setIsLoadingUnits(false);
     }
-  }, [codCoor, manualUFSelection]);
+  }, [codCoor, clearUnitsCache]);
 
   // Handler para recarregar unidades manualmente (botão "Tentar novamente")
   const refetchUnits = useCallback(() => {
@@ -262,8 +267,23 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     refetchUnits();
   }, [refetchUnits]);
 
+  // Função para limpar o cache de unidades
+  const clearUnitsCache = useCallback((client: number, uf: string) => {
+    if (!client || !uf || !codCoor) return;
+    
+    // Limpar chave específica do localStorage
+    const cacheKey = `units_${codCoor}_${client}_${uf}_1`;
+    console.log(`Limpando cache para ${cacheKey}`);
+    localStorage.removeItem(cacheKey);
+  }, [codCoor]);
+
   // Manipulador de alteração de cliente
   const handleClientChange = useCallback((codcli: number) => {
+    // Limpar cache do cliente/UF anterior se existir
+    if (selectedClient && selectedUF) {
+      clearUnitsCache(selectedClient, selectedUF);
+    }
+    
     setSelectedClient(codcli);
     setManualUFSelection(false);
     setSelectedUnit(null);
@@ -273,16 +293,26 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     if (onClientChange) {
       onClientChange(codcli);
     }
-  }, [onClientChange]);
+  }, [onClientChange, selectedClient, selectedUF, clearUnitsCache]);
 
   // Manipulador de alteração de UF
   const handleUFChange = useCallback((uf: string) => {
+    // Limpar cache do cliente/UF anterior se existir
+    if (selectedClient && selectedUF) {
+      clearUnitsCache(selectedClient, selectedUF);
+    }
+    
+    // Limpar possível cache para a nova combinação cliente/UF
+    if (selectedClient && uf) {
+      clearUnitsCache(selectedClient, uf);
+    }
+    
     setSelectedUF(uf);
     setManualUFSelection(true);
     setSelectedUnit(null);
     setUnits([]); // Limpar unidades ao mudar a UF
     setIsLoadingUnits(true); // Mostrar estado de carregamento
-  }, []);
+  }, [selectedClient, selectedUF, clearUnitsCache]);
 
   // Efeito: processar mudança de cliente para selecionar UF automaticamente
   useEffect(() => {
@@ -299,11 +329,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   useEffect(() => {
     if (!selectedClient || !selectedUF) return;
     
+    // Limpar cache atual antes de buscar novas unidades
+    clearUnitsCache(selectedClient, selectedUF);
+    
     // Use a referência apropriada dependendo se foi mudança manual de UF ou automática
     const processingRef = manualUFSelection ? isProcessingUfChange : isProcessingClientChange;
     
     fetchUnitsIfNeeded(selectedClient, selectedUF, processingRef);
-  }, [selectedClient, selectedUF, manualUFSelection, fetchUnitsIfNeeded]);
+  }, [selectedClient, selectedUF, manualUFSelection, fetchUnitsIfNeeded, clearUnitsCache]);
 
   // Efeito: quando a unidade muda, notificar o componente pai
   useEffect(() => {
