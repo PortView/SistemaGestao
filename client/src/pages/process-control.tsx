@@ -7,15 +7,19 @@ import { ProcessTabs } from "@/components/process/process-tabs";
 import { SiscopUnidade, SiscopServico, SiscopCliente } from "@/lib/types";
 
 export default function ProcessControlPage() {
-  const [selectedClient, setSelectedClient] = useState<SiscopCliente | null>(null);
+  const [selectedClient, setSelectedClient] = useState<SiscopCliente | null>(
+    null,
+  );
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
-  const [selectedService, setSelectedService] = useState<SiscopServico | null>(null);
+  const [selectedService, setSelectedService] = useState<SiscopServico | null>(
+    null,
+  );
   const [codCoor, setCodCoor] = useState<number>(0);
 
   // Efeito para obter o código de coordenação (codcoor) do localStorage
   useEffect(() => {
     // Obter o usuário do localStorage
-    const userJson = localStorage.getItem('siscop_user');
+    const userJson = localStorage.getItem("siscop_user");
     if (userJson) {
       try {
         const userData = JSON.parse(userJson);
@@ -23,7 +27,7 @@ export default function ProcessControlPage() {
           setCodCoor(userData.cod);
         }
       } catch (e) {
-        console.error('Erro ao carregar dados do usuário:', e);
+        console.error("Erro ao carregar dados do usuário:", e);
       }
     }
   }, []);
@@ -36,11 +40,11 @@ export default function ProcessControlPage() {
       fantasia: `Cliente ${clientId}`,
       lc_ufs: [],
     });
-    
+
     // Quando o cliente muda, limpar a unidade selecionada
     setSelectedUnit(null);
   };
-  
+
   // Handler para processar uma unidade selecionada
   const handleUnitChange = (unit: SiscopUnidade) => {
     setSelectedUnit(unit);
@@ -91,7 +95,10 @@ export default function ProcessControlPage() {
 
             {/* Área inferior: abas (largura total) */}
             <div className="w-full">
-              <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
+              <ProcessTabs
+                selectedClient={selectedClient}
+                selectedUnit={selectedUnit}
+              />
             </div>
           </div>
         </div>
@@ -130,8 +137,11 @@ export default function ProcessControlPage() {
           </div>
 
           {/* Área inferior: abas (largura total) */}
-          <div className="w-full">
-            <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
+          <div className=" w-full">
+            <ProcessTabs
+              selectedClient={selectedClient}
+              selectedUnit={selectedUnit}
+            />
           </div>
         </div>
       </div>
