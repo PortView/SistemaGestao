@@ -1,19 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProcessCommandPanel } from "@/components/process/process-command-panel";
 import { ProcessFilterPanel } from "@/components/process/process-filter-panel";
-import { ServicesGrid } from "@/components/process/services-grid";
+import { TableServicos } from "@/components/process/table-servicos";
 import { TasksGrid } from "@/components/process/tasks-grid";
 import { ProcessTabs } from "@/components/process/process-tabs";
 import { SiscopUnidade, SiscopServico, SiscopCliente } from "@/lib/types";
 
 export default function ProcessControlPage() {
-  const [selectedClient, setSelectedClient] = useState<SiscopCliente | null>(
-    null,
-  );
+  const [selectedClient, setSelectedClient] = useState<SiscopCliente | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
-  const [selectedService, setSelectedService] = useState<SiscopServico | null>(
-    null,
-  );
+  const [selectedService, setSelectedService] = useState<SiscopServico | null>(null);
+  const [codCoor, setCodCoor] = useState<number>(0);
+
+  // Efeito para obter o código de coordenação (codcoor) do localStorage
+  useEffect(() => {
+    // Obter o usuário do localStorage
+    const userJson = localStorage.getItem('siscop_user');
+    if (userJson) {
+      try {
+        const userData = JSON.parse(userJson);
+        if (userData?.cod) {
+          setCodCoor(userData.cod);
+        }
+      } catch (e) {
+        console.error('Erro ao carregar dados do usuário:', e);
+      }
+    }
+  }, []);
 
   // Handler para mudança de cliente
   const handleClientChange = (clientId: number) => {
@@ -23,6 +36,16 @@ export default function ProcessControlPage() {
       fantasia: `Cliente ${clientId}`,
       lc_ufs: [],
     });
+    
+    // Quando o cliente muda, limpar a unidade selecionada
+    setSelectedUnit(null);
+  };
+  
+  // Handler para processar uma unidade selecionada
+  const handleUnitChange = (unit: SiscopUnidade) => {
+    setSelectedUnit(unit);
+    // Quando a unidade muda, limpar o serviço selecionado
+    setSelectedService(null);
   };
 
   return (
@@ -40,7 +63,7 @@ export default function ProcessControlPage() {
               <div className="w-[940px] h-[150px]">
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
-                  onUnitChange={setSelectedUnit}
+                  onUnitChange={handleUnitChange}
                 />
               </div>
               <div className="w-[940px] h-[150px]">
@@ -51,9 +74,14 @@ export default function ProcessControlPage() {
             {/* Área do meio: serviços + tarefas (lado a lado) */}
             <div className="flex justify-center gap-2 mb-2">
               <div className="w-[940px] h-[460px] overflow-auto">
-                <ServicesGrid
-                  selectedUnit={selectedUnit}
-                  onServiceSelect={setSelectedService}
+                <TableServicos
+                  qcodCoor={codCoor}
+                  qcontrato={selectedUnit?.contrato || null}
+                  qUnidade={selectedUnit?.codend || null}
+                  qConcluido={true}
+                  qCodServ={-1}
+                  qStatus="ALL"
+                  qDtlimite="2001-01-01"
                 />
               </div>
               <div className="w-[940px] h-[460px] overflow-auto">
@@ -75,7 +103,7 @@ export default function ProcessControlPage() {
             <div className="w-full max-w-[940px] h-[150px]">
               <ProcessCommandPanel
                 onClientChange={handleClientChange}
-                onUnitChange={setSelectedUnit}
+                onUnitChange={handleUnitChange}
               />
             </div>
             <div className="w-full max-w-[940px] h-[150px]">
@@ -86,9 +114,14 @@ export default function ProcessControlPage() {
           {/* Área do meio: serviços + tarefas (empilhados) */}
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="w-full max-w-[940px] h-[460px] overflow-auto">
-              <ServicesGrid
-                selectedUnit={selectedUnit}
-                onServiceSelect={setSelectedService}
+              <TableServicos
+                qcodCoor={codCoor}
+                qcontrato={selectedUnit?.contrato || null}
+                qUnidade={selectedUnit?.codend || null}
+                qConcluido={true}
+                qCodServ={-1}
+                qStatus="ALL"
+                qDtlimite="2001-01-01"
               />
             </div>
             <div className="w-full max-w-[940px] h-[460px] overflow-auto">
