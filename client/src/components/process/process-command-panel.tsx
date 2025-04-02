@@ -336,7 +336,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* UF - Dropdown com seleção real */}
           <Select
-            disabled={!selectedClient || ufs.length === 0}
+            disabled={!selectedClient || ufs.length === 0 || allUfs}
             value={selectedUF || undefined}
             onValueChange={(value) => {
               console.log('UF selecionada manualmente:', value);
@@ -372,11 +372,86 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Select>
           
           {/* Checkbox Todas UFs */}
-          <div className="flex items-center bg-white h-8 px-2 rounded border border-slate-200">
+          <div className="flex items-center h-8 px-2 rounded border border-slate-200">
             <Checkbox 
               id="todas-ufs" 
               checked={allUfs}
-              onCheckedChange={(checked) => setAllUfs(!!checked)}
+              onCheckedChange={(checked) => {
+                const isChecked = !!checked;
+                setAllUfs(isChecked);
+                
+                // Se marcado, buscar unidades com UF="ZZ", senão usar o UF selecionado
+                if (isChecked) {
+                  // Buscar todas as UFs com parâmetro especial "ZZ"
+                  if (selectedClient && codCoor) {
+                    // Use a referência apropriada para controle de processamento
+                    const params = {
+                      codcoor: codCoor,
+                      codcli: selectedClient,
+                      uf: "ZZ", // Código especial para todas as UFs
+                      page: 1
+                    };
+                    
+                    setIsLoadingUnits(true);
+                    fetchUnidades(params)
+                      .then(response => {
+                        if (response?.folowups) {
+                          setUnits(response.folowups);
+                          if (response.folowups.length > 0) {
+                            // Selecionar primeira unidade
+                            setTimeout(() => {
+                              setSelectedUnit(response.folowups[0]);
+                            }, 100);
+                          }
+                        }
+                      })
+                      .catch(error => {
+                        setUnitsError(error as Error);
+                        toast({
+                          title: 'Erro ao buscar unidades',
+                          description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+                          variant: 'destructive',
+                        });
+                      })
+                      .finally(() => {
+                        setIsLoadingUnits(false);
+                      });
+                  }
+                } else if (selectedClient && selectedUF && codCoor) {
+                  // Ao desmarcar, voltar a usar o UF selecionado e buscar unidades normalmente
+                  const params = {
+                    codcoor: codCoor,
+                    codcli: selectedClient,
+                    uf: selectedUF,
+                    page: 1
+                  };
+                  
+                  setIsLoadingUnits(true);
+                  fetchUnidades(params)
+                    .then(response => {
+                      if (response?.folowups) {
+                        setUnits(response.folowups);
+                        if (response.folowups.length > 0) {
+                          // Selecionar primeira unidade
+                          setTimeout(() => {
+                            setSelectedUnit(response.folowups[0]);
+                          }, 100);
+                        }
+                      }
+                    })
+                    .catch(error => {
+                      setUnitsError(error as Error);
+                      toast({
+                        title: 'Erro ao buscar unidades',
+                        description: `${(error as Error).message || 'Erro desconhecido ao buscar unidades.'}`,
+                        variant: 'destructive',
+                      });
+                    })
+                    .finally(() => {
+                      setIsLoadingUnits(false);
+                    });
+                }
+              }}
               className="mr-1"
             />
             <Label htmlFor="todas-ufs" className="text-xs">Todas UFs</Label>
@@ -423,7 +498,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           ) : (
             <div className="flex items-center gap-2">
               <Select
-                disabled={!selectedUF || isLoadingUnits || (units as SiscopUnidade[]).length === 0}
+                disabled={((!selectedUF && !allUfs) || isLoadingUnits || (units as SiscopUnidade[]).length === 0)}
                 value={selectedUnit ? `${selectedUnit.contrato}-${selectedUnit.codend}` : undefined}
                 onValueChange={(value) => {
                   const unit = (units as SiscopUnidade[]).find((u: SiscopUnidade) => u.contrato + '-' + u.codend === value);
