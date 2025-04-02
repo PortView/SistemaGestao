@@ -587,7 +587,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   )}
                 </SelectTrigger>
                 <SelectContent className="z-50 fixed w-[450px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
-                  <style jsx>{`
+                  <style>{`
                     .custom-dropdown {
                       font-family: inherit;
                       font-size: inherit;
