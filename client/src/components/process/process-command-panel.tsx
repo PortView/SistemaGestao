@@ -576,7 +576,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   }
                 }}
               >
-                <SelectTrigger id="unidades" className="h-8 text-xs w-[380px] border-slate-200">
+                <SelectTrigger id="unidades" className="h-8 text-xs w-[450px] border-slate-200">
                   {isLoadingUnits ? (
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-3 w-3 animate-spin" />
@@ -586,7 +586,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     <SelectValue placeholder="Unidades" />
                   )}
                 </SelectTrigger>
-                <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+                <SelectContent className="z-50 fixed w-[450px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
+                  <style jsx>{`
+                    .custom-dropdown {
+                      font-family: inherit;
+                      font-size: inherit;
+                      color: inherit;
+                    }
+                  `}</style>
                   <div className="px-2 py-2">
                     <Input
                       placeholder="Buscar unidade..."
@@ -609,7 +616,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 </SelectContent>
               </Select>
               
-              <div className="flex gap-1">
+              {/* <div className="flex gap-1">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -618,7 +625,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 >
                   Verificar parâmetros
                 </Button>
-              </div>
+              </div> */}
             </div>
           )}
           
