@@ -136,6 +136,21 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     });
   }, [units, unitSearchTerm]);
 
+  // Função interna para limpar o cache de unidades
+  const clearUnitsCacheInternal = (client: number, uf: string, coorCode: number) => {
+    if (!client || !uf || !coorCode) return;
+    
+    // Limpar chave específica do localStorage
+    const cacheKey = `units_${coorCode}_${client}_${uf}_1`;
+    console.log(`Limpando cache para ${cacheKey}`);
+    localStorage.removeItem(cacheKey);
+  };
+  
+  // Função para limpar o cache de unidades (versão com hook)
+  const clearUnitsCache = useCallback((client: number, uf: string) => {
+    clearUnitsCacheInternal(client, uf, codCoor);
+  }, [codCoor]);
+
   // Função memoizada para carregar unidades com validação de parâmetros duplicados
   const fetchUnitsIfNeeded = useCallback(async (
     codcli: number, 
@@ -154,8 +169,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       lastFetchedParams.current?.uf !== uf;
     
     // Sempre limpar cache quando mudar cliente ou UF
-    if (isParameterChange) {
-      clearUnitsCache(codcli, uf);
+    if (isParameterChange && codCoor) {
+      clearUnitsCacheInternal(codcli, uf, codCoor);
     }
     
     // Marcar como em processamento
@@ -231,7 +246,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     } finally {
       setIsLoadingUnits(false);
     }
-  }, [codCoor, clearUnitsCache]);
+  }, [codCoor]);
 
   // Handler para recarregar unidades manualmente (botão "Tentar novamente")
   const refetchUnits = useCallback(() => {
@@ -266,16 +281,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setIsVerifyDialogOpen(false);
     refetchUnits();
   }, [refetchUnits]);
-
-  // Função para limpar o cache de unidades
-  const clearUnitsCache = useCallback((client: number, uf: string) => {
-    if (!client || !uf || !codCoor) return;
-    
-    // Limpar chave específica do localStorage
-    const cacheKey = `units_${codCoor}_${client}_${uf}_1`;
-    console.log(`Limpando cache para ${cacheKey}`);
-    localStorage.removeItem(cacheKey);
-  }, [codCoor]);
 
   // Manipulador de alteração de cliente
   const handleClientChange = useCallback((codcli: number) => {
