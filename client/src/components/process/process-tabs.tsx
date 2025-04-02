@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComplianceSection } from './compliance-section';
-import { SiscopCliente } from '@/lib/types';
+import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 
 interface ProcessTabsProps {
   selectedClient: SiscopCliente | null;
+  selectedUnit?: SiscopUnidade | null;
 }
 
-export function ProcessTabs({ selectedClient }: ProcessTabsProps) {
+export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) {
   return (
     <Tabs defaultValue="conformidade" className="w-full h-[460px]">
       <TabsList className="bg-blue-600 text-white">
@@ -38,7 +39,7 @@ export function ProcessTabs({ selectedClient }: ProcessTabsProps) {
       </TabsList>
       
       <TabsContent value="conformidade" className="mt-2 h-[425px] overflow-auto">
-        <ComplianceSection selectedClient={selectedClient} />
+        <ComplianceSection selectedClient={selectedClient} selectedUnit={selectedUnit} />
       </TabsContent>
       
       <TabsContent value="servicos" className="mt-2 h-[425px] overflow-auto">

@@ -91,7 +91,7 @@ export default function ProcessControlPage() {
 
             {/* Área inferior: abas (largura total) */}
             <div className="w-full h-[460px] overflow-auto">
-              <ProcessTabs selectedClient={selectedClient} />
+              <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
             </div>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function ProcessControlPage() {
 
           {/* Área inferior: abas (largura total) */}
           <div className="w-full h-[460px] overflow-auto">
-            <ProcessTabs selectedClient={selectedClient} />
+            <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
           </div>
         </div>
       </div>

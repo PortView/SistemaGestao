@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
-import { SiscopConformidade, SiscopCliente } from '@/lib/types';
+import { SiscopConformidade, SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { formatDate } from '@/lib/types';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import TableConform from './table-conform';
 
 interface ComplianceSectionProps {
   selectedClient: SiscopCliente | null;
+  selectedUnit?: SiscopUnidade | null;
 }
 
-export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
+export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSectionProps) {
   const [cnpj, setCnpj] = useState<string | null>(null);
   const [onlyForReport, setOnlyForReport] = useState(false);
   
@@ -81,98 +83,20 @@ export function ComplianceSection({ selectedClient }: ComplianceSectionProps) {
           </div>
         </div>
         
-        <div className="rounded-md border overflow-hidden h-[400px] overflow-y-auto">
-          <Table>
-            <TableHeader className="bg-blue-600 sticky top-0">
-              <TableRow>
-                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Verif</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Rel</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">G.Cli</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Cód</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Descrição</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Documento</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Área</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Emissão</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Vencim.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Renov.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Period.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1 w-8">Peso</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Ativ.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Obs.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Dt.Prev</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Grupo</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Comp.</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Doc.Ori</TableHead>
-                <TableHead className="text-white font-semibold text-[10px] py-1">Doc</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {!selectedClient && (
-                <TableRow>
-                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
-                    Selecione um cliente para visualizar os documentos de conformidade.
-                  </TableCell>
-                </TableRow>
-              )}
-              
-              {selectedClient && !cnpj && (
-                <TableRow>
-                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
-                    Selecione um CNPJ para visualizar os documentos de conformidade.
-                  </TableCell>
-                </TableRow>
-              )}
-              
-              {selectedClient && cnpj && complianceDocuments.length === 0 && !isLoading && (
-                <TableRow>
-                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
-                    Nenhum documento de conformidade encontrado.
-                  </TableCell>
-                </TableRow>
-              )}
-              
-              {selectedClient && cnpj && isLoading && (
-                <TableRow>
-                  <TableCell colSpan={19} className="text-center py-2 text-gray-500 text-xs">
-                    Carregando documentos de conformidade...
-                  </TableCell>
-                </TableRow>
-              )}
-              
-              {complianceDocuments.map((doc) => (
-                <TableRow 
-                  key={doc.cod}
-                  className={`${doc.statusconform ? 'bg-green-50' : 'bg-red-50'} hover:bg-blue-50 text-[10px]`}
-                >
-                  <TableCell className="text-center py-0.5">
-                    <Checkbox checked={doc.statusconform} className="h-3 w-3" />
-                  </TableCell>
-                  <TableCell className="text-center py-0.5">
-                    <Checkbox checked={doc.frelatorio} className="h-3 w-3" />
-                  </TableCell>
-                  <TableCell className="text-center py-0.5">
-                    <Checkbox checked={false} className="h-3 w-3" />
-                  </TableCell>
-                  <TableCell className="py-0.5">{doc.cod}</TableCell>
-                  <TableCell className="py-0.5">{doc.descr}</TableCell>
-                  <TableCell className="py-0.5">{doc.doc}</TableCell>
-                  <TableCell className="py-0.5">Área</TableCell>
-                  <TableCell className="py-0.5">{formatDate(new Date(doc.dt))}</TableCell>
-                  <TableCell className="py-0.5">{doc.dtvenc ? formatDate(new Date(doc.dtvenc)) : ''}</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">{doc.periodocidade}</TableCell>
-                  <TableCell className="py-0.5">{doc.graurisco}</TableCell>
-                  <TableCell className="py-0.5">{doc.providencia}</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                  <TableCell className="py-0.5">-</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="rounded-md border overflow-hidden h-[400px]">
+          {!selectedUnit ? (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-gray-500 text-sm">Selecione uma unidade para visualizar os documentos de conformidade.</p>
+            </div>
+          ) : (
+            <TableConform 
+              codimov={selectedUnit?.codend || 0}
+              web={false}
+              relatorio={true}
+              cnpj=""
+              temcnpj={false}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
