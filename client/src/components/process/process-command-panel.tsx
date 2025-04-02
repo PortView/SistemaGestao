@@ -732,31 +732,31 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Paginação - Visível apenas quando há mais de 100 itens */}
           {shouldShowPagination && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 ml-auto">
               {/* Primeira página */}
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-7 w-7 bg-gray-100 border-gray-300 p-0"
+                className="h-8 w-8 bg-blue-700 border-blue-600 text-white p-0 hover:bg-blue-800"
                 disabled={currentPage === 1 || isLoadingUnits}
                 onClick={() => loadPagedUnits(1)}
               >
-                <span className="text-xs">≪</span>
+                <span className="text-xs font-bold">≪</span>
               </Button>
               
               {/* Página anterior */}
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-7 w-7 bg-gray-100 border-gray-300 p-0"
+                className="h-8 w-8 bg-blue-700 border-blue-600 text-white p-0 hover:bg-blue-800"
                 disabled={currentPage === 1 || isLoadingUnits}
                 onClick={() => loadPagedUnits(currentPage - 1)}
               >
-                <span className="text-xs">＜</span>
+                <span className="text-xs font-bold">＜</span>
               </Button>
               
               {/* Exibição da página atual e total */}
-              <div className="bg-white rounded h-7 px-2 flex items-center text-xs border border-slate-200">
+              <div className="bg-blue-900 rounded h-8 px-3 flex items-center text-sm font-medium text-white border border-blue-600">
                 <span>{currentPage}</span>
                 <span className="mx-1">/</span>
                 <span>{totalPages}</span>
@@ -766,22 +766,22 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0"
+                className="h-8 w-8 bg-blue-700 border-blue-600 text-white p-0 hover:bg-blue-800"
                 disabled={currentPage === totalPages || isLoadingUnits}
                 onClick={() => loadPagedUnits(currentPage + 1)}
               >
-                <span className="text-xs">＞</span>
+                <span className="text-xs font-bold">＞</span>
               </Button>
               
               {/* Última página */}
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-7 w-7 bg-blue-100 border-blue-300 text-blue-800 p-0"
+                className="h-8 w-8 bg-blue-700 border-blue-600 text-white p-0 hover:bg-blue-800"
                 disabled={currentPage === totalPages || isLoadingUnits}
                 onClick={() => loadPagedUnits(totalPages)}
               >
-                <span className="text-xs">≫</span>
+                <span className="text-xs font-bold">≫</span>
               </Button>
               
               {/* Input para ir para uma página específica */}
@@ -789,7 +789,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 type="number"
                 min={1}
                 max={totalPages}
-                className="h-7 w-12 text-xs text-center"
+                className="h-8 w-14 text-sm text-center bg-blue-900 border-blue-600 text-white placeholder-blue-300"
                 placeholder="Pg"
                 disabled={isLoadingUnits}
                 onKeyDown={(e) => {
@@ -798,6 +798,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     const page = parseInt(input.value);
                     if (!isNaN(page) && page >= 1 && page <= totalPages) {
                       loadPagedUnits(page);
+                      // Limpar o input após navegar
+                      input.value = '';
                     } else {
                       toast({
                         title: 'Página inválida',
