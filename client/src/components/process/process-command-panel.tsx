@@ -9,7 +9,7 @@ import { SiscopCliente, SiscopUnidade } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClientes, fetchUnidades } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from '@/lib/constants';
-import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { FileText, Edit, AlertCircle, DollarSign, ShoppingCart, ClipboardList, Trash2, AlertTriangle, RefreshCw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ApiParamDialog } from '@/components/api-param-dialog';
 
@@ -774,7 +774,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Paginação - Visível apenas quando há mais de 100 itens */}
           {shouldShowPagination && (
-            <div className="flex items-center gap-3 ml-4">
+            <div className="flex items-center gap-[2px] ml-2">
               {/* Primeira página */}
               <Button 
                 variant="outline" 
@@ -783,7 +783,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 disabled={currentPage === 1 || isLoadingUnits}
                 onClick={() => loadPagedUnits(1)}
               >
-                <span className="text-xs font-bold">≪</span>
+                <ChevronsLeft className="h-4 w-4" />
               </Button>
               
               {/* Página anterior */}
@@ -794,7 +794,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 disabled={currentPage === 1 || isLoadingUnits}
                 onClick={() => loadPagedUnits(currentPage - 1)}
               >
-                <span className="text-xs font-bold">＜</span>
+                <ChevronLeft className="h-4 w-4" />
               </Button>
               
               {/* Exibição da página atual e total */}
@@ -812,7 +812,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 disabled={currentPage === totalPages || isLoadingUnits}
                 onClick={() => loadPagedUnits(currentPage + 1)}
               >
-                <span className="text-xs font-bold">＞</span>
+                <ChevronRight className="h-4 w-4" />
               </Button>
               
               {/* Última página */}
@@ -823,7 +823,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 disabled={currentPage === totalPages || isLoadingUnits}
                 onClick={() => loadPagedUnits(totalPages)}
               >
-                <span className="text-xs font-bold">≫</span>
+                <ChevronsRight className="h-4 w-4" />
               </Button>
               
               {/* Input para ir para uma página específica */}
