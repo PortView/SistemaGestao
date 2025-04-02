@@ -33,7 +33,7 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
   });
   
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full">
       <CardContent className="p-2">
         <div className="flex justify-between items-end mb-2">
           <div className="flex items-end gap-2">
@@ -83,9 +83,9 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
           </div>
         </div>
         
-        <div className="rounded-md border overflow-hidden h-[400px]">
+        <div className="rounded-md border overflow-hidden">
           {!selectedUnit ? (
-            <div className="h-full flex items-center justify-center">
+            <div className="flex items-center justify-center p-10">
               <p className="text-gray-500 text-sm">Selecione uma unidade para visualizar os documentos de conformidade.</p>
             </div>
           ) : (

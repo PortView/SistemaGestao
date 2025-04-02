@@ -38,24 +38,24 @@ export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) 
         </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="conformidade" className="mt-2 h-[425px] overflow-auto">
+      <TabsContent value="conformidade" className="mt-2">
         <ComplianceSection selectedClient={selectedClient} selectedUnit={selectedUnit} />
       </TabsContent>
       
-      <TabsContent value="servicos" className="mt-2 h-[425px] overflow-auto">
-        <div className="bg-[#d0e0f0] p-4 rounded-md h-full">
+      <TabsContent value="servicos" className="mt-2">
+        <div className="bg-[#d0e0f0] p-4 rounded-md">
           <p className="text-center text-gray-500 text-xs">Conteúdo da aba Serviços em desenvolvimento</p>
         </div>
       </TabsContent>
       
-      <TabsContent value="outros" className="mt-2 h-[425px] overflow-auto">
-        <div className="bg-[#d0e0f0] p-4 rounded-md h-full">
+      <TabsContent value="outros" className="mt-2">
+        <div className="bg-[#d0e0f0] p-4 rounded-md">
           <p className="text-center text-gray-500 text-xs">Conteúdo da aba Outros em desenvolvimento</p>
         </div>
       </TabsContent>
       
-      <TabsContent value="prazos" className="mt-2 h-[425px] overflow-auto">
-        <div className="bg-[#d0e0f0] p-4 rounded-md h-full">
+      <TabsContent value="prazos" className="mt-2">
+        <div className="bg-[#d0e0f0] p-4 rounded-md">
           <p className="text-center text-gray-500 text-xs">Conteúdo da aba Prazos em desenvolvimento</p>
         </div>
       </TabsContent>

@@ -50,8 +50,8 @@ export default function ProcessControlPage() {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      {/* Conteúdo principal que ocupa a largura total na resolução 1920px */}
-      <div className="w-full mx-auto px-2 pb-2 overflow-y-auto">
+      {/* Conteúdo principal que ocupa a largura total */}
+      <div className="w-full mx-auto px-2 pb-2">
         <div className="text-xs font-light mb-1">Controle de Processos</div>
 
         {/* Layout responsivo condicional - usando classes para targetar exatamente 1920px */}
@@ -60,20 +60,20 @@ export default function ProcessControlPage() {
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) */}
             <div className="flex justify-center gap-2 mb-2">
-              <div className="w-[940px] h-[150px]">
+              <div className="w-[940px]">
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px] h-[150px]">
+              <div className="w-[940px]">
                 <ProcessFilterPanel />
               </div>
             </div>
 
             {/* Área do meio: serviços + tarefas (lado a lado) */}
             <div className="flex justify-center gap-2 mb-2">
-              <div className="w-[940px] h-[460px] overflow-auto">
+              <div className="w-[940px]">
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}
@@ -84,13 +84,13 @@ export default function ProcessControlPage() {
                   qDtlimite="2001-01-01"
                 />
               </div>
-              <div className="w-[940px] h-[460px] overflow-auto">
+              <div className="w-[940px]">
                 <TasksGrid selectedService={selectedService} />
               </div>
             </div>
 
             {/* Área inferior: abas (largura total) */}
-            <div className="w-full h-[460px] overflow-auto">
+            <div className="w-full">
               <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
             </div>
           </div>
@@ -100,20 +100,20 @@ export default function ProcessControlPage() {
         <div className="block 2xl:hidden">
           {/* Área superior: command panel + filter panel (empilhados) */}
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="w-full max-w-[940px] h-[150px]">
+            <div className="w-full max-w-[940px]">
               <ProcessCommandPanel
                 onClientChange={handleClientChange}
                 onUnitChange={handleUnitChange}
               />
             </div>
-            <div className="w-full max-w-[940px] h-[150px]">
+            <div className="w-full max-w-[940px]">
               <ProcessFilterPanel />
             </div>
           </div>
 
           {/* Área do meio: serviços + tarefas (empilhados) */}
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="w-full max-w-[940px] h-[460px] overflow-auto">
+            <div className="w-full max-w-[940px]">
               <TableServicos
                 qcodCoor={codCoor}
                 qcontrato={selectedUnit?.contrato || null}
@@ -124,13 +124,13 @@ export default function ProcessControlPage() {
                 qDtlimite="2001-01-01"
               />
             </div>
-            <div className="w-full max-w-[940px] h-[460px] overflow-auto">
+            <div className="w-full max-w-[940px]">
               <TasksGrid selectedService={selectedService} />
             </div>
           </div>
 
           {/* Área inferior: abas (largura total) */}
-          <div className="w-full h-[460px] overflow-auto">
+          <div className="w-full">
             <ProcessTabs selectedClient={selectedClient} selectedUnit={selectedUnit} />
           </div>
         </div>
