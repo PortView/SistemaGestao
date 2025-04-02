@@ -115,26 +115,35 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     return clientData?.lc_ufs?.map(u => u.uf) || [];
   }, [selectedClient, clients]);
 
-  // Listas filtradas para os dropdowns
+  // Listas filtradas para os dropdowns (filtragem ocorre apenas após 3 caracteres)
   const filteredClients = useMemo(() => {
-    if (!clientSearchTerm.trim()) return clients;
+    const trimmedTerm = clientSearchTerm.trim();
+    // Retornar todos os clientes se o termo de busca for vazio ou tiver menos de 3 caracteres
+    if (!trimmedTerm || trimmedTerm.length < 3) return clients;
+    // Aplicar filtro apenas se tiver 3 ou mais caracteres
     return clients.filter(client => 
-      client.fantasia.toLowerCase().includes(clientSearchTerm.toLowerCase())
+      client.fantasia.toLowerCase().includes(trimmedTerm.toLowerCase())
     );
   }, [clients, clientSearchTerm]);
 
   const filteredUfs = useMemo(() => {
-    if (!ufSearchTerm.trim()) return ufs;
+    const trimmedTerm = ufSearchTerm.trim();
+    // Retornar todas as UFs se o termo de busca for vazio ou tiver menos de 3 caracteres
+    if (!trimmedTerm || trimmedTerm.length < 3) return ufs;
+    // Aplicar filtro apenas se tiver 3 ou mais caracteres
     return ufs.filter(uf => 
-      uf.toLowerCase().includes(ufSearchTerm.toLowerCase())
+      uf.toLowerCase().includes(trimmedTerm.toLowerCase())
     );
   }, [ufs, ufSearchTerm]);
 
   const filteredUnits = useMemo(() => {
-    if (!unitSearchTerm.trim()) return units;
+    const trimmedTerm = unitSearchTerm.trim();
+    // Retornar todas as unidades se o termo de busca for vazio ou tiver menos de 3 caracteres
+    if (!trimmedTerm || trimmedTerm.length < 3) return units;
+    // Aplicar filtro apenas se tiver 3 ou mais caracteres
     return units.filter(unit => {
       const unitStr = `${unit.contrato} - ${unit.cadimov?.uf || ''} - ${unit.cadimov?.tipo || ''}`;
-      return unitStr.toLowerCase().includes(unitSearchTerm.toLowerCase());
+      return unitStr.toLowerCase().includes(trimmedTerm.toLowerCase());
     });
   }, [units, unitSearchTerm]);
 
@@ -458,9 +467,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
               <div className="px-2 py-2">
                 <Input
-                  placeholder="Buscar cliente..."
+                  placeholder="Buscar cliente... (min. 3 letras)"
                   value={clientSearchTerm}
-                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    // Manter a referência ao input atual
+                    const inputElement = e.target;
+                    setClientSearchTerm(e.target.value);
+                    
+                    // Manter o foco no input após atualizar o valor
+                    setTimeout(() => {
+                      if (inputElement) {
+                        inputElement.focus();
+                      }
+                    }, 0);
+                  }}
                   className="h-8 mb-2"
                 />
               </div>
@@ -493,9 +513,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             <SelectContent className="z-50">
               <div className="px-2 py-2">
                 <Input
-                  placeholder="Buscar UF..."
+                  placeholder="Buscar UF... (min. 3 letras)"
                   value={ufSearchTerm}
-                  onChange={(e) => setUfSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    // Manter a referência ao input atual
+                    const inputElement = e.target;
+                    setUfSearchTerm(e.target.value);
+                    
+                    // Manter o foco no input após atualizar o valor
+                    setTimeout(() => {
+                      if (inputElement) {
+                        inputElement.focus();
+                      }
+                    }, 0);
+                  }}
                   className="h-8 mb-2"
                 />
               </div>
@@ -655,7 +686,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         </div>
         
         {/* Segunda linha: Unidades e Paginação */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Label htmlFor="unidades" className="text-slate-800 text-xs font-semibold">Unidades</Label>
           {unitsError ? (
             <div className="flex items-center gap-2">
@@ -697,9 +728,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 <SelectContent className="z-50 fixed w-[480px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
                   <div className="px-2 py-2">
                     <Input
-                      placeholder="Buscar unidade..."
+                      placeholder="Buscar unidade... (min. 3 letras)"
                       value={unitSearchTerm}
-                      onChange={(e) => setUnitSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        // Manter a referência ao input atual
+                        const inputElement = e.target;
+                        setUnitSearchTerm(e.target.value);
+                        
+                        // Manter o foco no input após atualizar o valor
+                        setTimeout(() => {
+                          if (inputElement) {
+                            inputElement.focus();
+                          }
+                        }, 0);
+                      }}
                       className="h-8 mb-2"
                     />
                   </div>
@@ -732,7 +774,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           
           {/* Paginação - Visível apenas quando há mais de 100 itens */}
           {shouldShowPagination && (
-            <div className="flex items-center gap-1 ml-auto">
+            <div className="flex items-center gap-3 ml-4">
               {/* Primeira página */}
               <Button 
                 variant="outline" 
@@ -789,7 +831,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                 type="number"
                 min={1}
                 max={totalPages}
-                className="h-8 w-14 text-sm text-center bg-blue-900 border-blue-600 text-white placeholder-blue-300"
+                className="h-8 w-26 text-sm text-center bg-blue-900 border-blue-600 text-white placeholder-blue-300"
                 placeholder="Pg"
                 disabled={isLoadingUnits}
                 onKeyDown={(e) => {
