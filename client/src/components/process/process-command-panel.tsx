@@ -52,9 +52,18 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 10; // Exemplo, calculado com base no total de unidades
   
-  // Carregar dados do usuário uma única vez
+  // Carregar dados do usuário uma única vez e inicializar estados
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    
+    // Ao carregar a página, o checkbox deve estar unchecked e desabilitado
+    setAllUfs(false);
+    
+    // Limpar todos os estados iniciais
+    setSelectedClient(null);
+    setSelectedUF(null);
+    setSelectedUnit(null);
+    setUnits([]);
     
     try {
       // Obter token
@@ -376,6 +385,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             <Checkbox 
               id="todas-ufs" 
               checked={allUfs}
+              disabled={!selectedClient} 
               onCheckedChange={(checked) => {
                 const isChecked = !!checked;
                 setAllUfs(isChecked);
@@ -454,7 +464,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               }}
               className="mr-1"
             />
-            <Label htmlFor="todas-ufs" className="text-xs">Todas UFs</Label>
+            <Label htmlFor="todas-ufs" className="text-xs text-blue-800">Todas UFs</Label>
           </div>
           
           {/* Botão Planilhas */}

@@ -111,9 +111,11 @@
 ### Endpoint de Unidades
 - URL: `https://amenirealestate.com.br:5601/ger-clientes/unidades`
 - Método: GET
-- Parâmetros: `codcli` (código do cliente), `uf` (estado)
-- Paginação: `pagina` e `quantidade`
-- Exemplo: `https://amenirealestate.com.br:5601/ger-clientes/unidades?codcli=123&uf=SP&pagina=1&quantidade=100`
+- Parâmetros obrigatórios: `codcoor` (código do usuário logado), `codcli` (código do cliente), `uf` (estado)
+- Parâmetro de paginação: `page=1` (não usar `pagina` nem `quantidade`)
+- Todos os parâmetros devem ser em minúsculo
+- Valor especial do parâmetro uf="ZZ" para buscar unidades de todas as UFs
+- Exemplo: `https://amenirealestate.com.br:5601/ger-clientes/unidades?codcoor=110&codcli=1448&uf=SP&page=1`
 
 ## Implementação Específica de Clientes
 - O dropdown de clientes deve ser populado com dados da API via endpoint `VITE_NEXT_PUBLIC_API_CLIENTES_URL`
@@ -121,6 +123,29 @@
 - Implementar cache para reduzir o número de requisições frequentes
 - Implementar fallback para usar dados em cache caso a API falhe temporariamente
 - O dropdown de clientes deve ter largura fixa de 380px e incluir funcionalidade de busca
+
+## Fluxo do Checkbox "Todas UFs"
+- Requisitos iniciais: Inicialmente desabilitado até que um cliente seja selecionado
+- Quando marcado: 
+  - Desabilita o dropdown de UF
+  - Usa o parâmetro especial uf="ZZ" na requisição para a API de unidades
+  - Busca todas as unidades independente de UF
+- Quando desmarcado:
+  - Habilita o dropdown de UF
+  - Usa a UF selecionada na requisição para a API de unidades
+- Sequência de comportamento esperada:
+  1. Ao carregar a página: checkbox unchecked e desabilitado, nenhum dropdown carregado, nenhuma chamada à API
+  2. Ao selecionar um cliente: popular dropdown de UFs, selecionar primeira UF, chamar API de unidades, habilitar checkbox
+  3. Ao selecionar uma UF: chamar API de unidades com nova UF
+  4. Ao marcar/desmarcar checkbox: atualizar parâmetros da API conforme necessário
+
+## Formato de Unidades no Dropdown
+- Ao exibir unidades no dropdown, usar o formato: `contrato - uf - cadimov.tipo`
+- Exemplo: `6832 - SP - SHOPPING`
+- Importante: Não usar codend no formato exibido, apenas contrato
+- O valor interno do dropdown deve ser no formato `contrato-codend` para identificação única da unidade
+- Quando uma unidade é selecionada no dropdown (seja manualmente ou automaticamente ao carregar dados), a primeira unidade deve ser selecionada automaticamente
+- Ao selecionar uma unidade, notificar o componente pai através do callback `onUnitChange` passando o objeto completo da unidade
 
 ## Padrões de Tratamento de Erros
 - Implementar timeout para requisições para evitar esperas infinitas (máximo 15 segundos)
