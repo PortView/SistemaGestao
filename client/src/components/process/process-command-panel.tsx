@@ -289,16 +289,32 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       clearUnitsCache(selectedClient, selectedUF);
     }
     
+    // Definir o novo cliente
     setSelectedClient(codcli);
+    
+    // Forçar remoção da seleção manual de UF para permitir seleção automática
     setManualUFSelection(false);
+    
+    // Limpar seleções atuais
     setSelectedUnit(null);
     setUnits([]);
+    
+    // Encontrar a primeira UF do novo cliente selecionado e defini-la imediatamente
+    const clientData = clients.find(c => c.codcli === codcli);
+    if (clientData?.lc_ufs?.length) {
+      const firstClientUF = clientData.lc_ufs[0].uf;
+      console.log(`Cliente alterado para ${codcli}, definindo primeira UF: ${firstClientUF}`);
+      setSelectedUF(firstClientUF);
+    } else {
+      // Se o cliente não tiver UFs, limpar a UF selecionada
+      setSelectedUF(null);
+    }
     
     // Notificar o componente pai
     if (onClientChange) {
       onClientChange(codcli);
     }
-  }, [onClientChange, selectedClient, selectedUF, clearUnitsCache]);
+  }, [onClientChange, selectedClient, selectedUF, clearUnitsCache, clients]);
 
   // Manipulador de alteração de UF
   const handleUFChange = useCallback((uf: string) => {
@@ -319,16 +335,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     setIsLoadingUnits(true); // Mostrar estado de carregamento
   }, [selectedClient, selectedUF, clearUnitsCache]);
 
-  // Efeito: processar mudança de cliente para selecionar UF automaticamente
-  useEffect(() => {
-    if (!selectedClient || manualUFSelection || isProcessingClientChange.current) return;
-    
-    const clientData = clients.find(c => c.codcli === selectedClient);
-    if (!clientData?.lc_ufs?.length) return;
-    
-    const firstUF = clientData.lc_ufs[0].uf;
-    setSelectedUF(firstUF);
-  }, [selectedClient, clients, manualUFSelection]);
+  // Removemos o efeito de selecionar UF automaticamente,
+  // pois isso agora é feito diretamente no handleClientChange
+  // para evitar condições de corrida e garantir a ordem correta das operações
 
   // Efeito: carregar unidades quando UF e cliente estiverem definidos
   useEffect(() => {
@@ -363,9 +372,8 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           <Select
             disabled={isLoadingClients}
             onValueChange={(value) => {
-              setSelectedClient(Number(value));
-              // Reset manual UF selection flag ao mudar de cliente
-              setManualUFSelection(false);
+              // Usar a função handleClientChange para garantir consistência
+              handleClientChange(Number(value));
             }}
           >
             <SelectTrigger className="h-8 text-xs w-[380px] border-slate-200">
