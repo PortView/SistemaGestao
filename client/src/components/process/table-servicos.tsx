@@ -57,13 +57,17 @@ export function TableServicos({
     const fetchData = async () => {
       // Se não tivermos contrato ou unidade selecionados, não fazemos a requisição
       if (!qcontrato || !qUnidade) {
+        console.log('TableServicos: Contrato ou unidade não selecionados, cancelando busca');
         setLoading(false);
+        setData([]);
+        setSelectedRow(null); // Limpar a seleção quando a unidade muda
         return;
       }
 
       try {
         setLoading(true);
         setError(null);
+        setSelectedRow(null); // Limpar a seleção quando a unidade muda
         
         // Obter o token do localStorage
         const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
@@ -74,7 +78,7 @@ export function TableServicos({
           return;
         }
 
-        console.log('Buscando serviços com parâmetros:', {
+        console.log('TableServicos: Buscando serviços com parâmetros:', {
           qcodCoor, qcontrato, qUnidade, qConcluido, qCodServ, qStatus, qDtlimite
         });
 
@@ -162,6 +166,7 @@ export function TableServicos({
   
   // Função para lidar com o clique na linha
   const handleRowClick = (codServ: number) => {
+    console.log('TableServicos: Linha clicada, serviço ID:', codServ);
     setSelectedRow(codServ);
     if (onSelectServico) {
       onSelectServico(codServ);

@@ -22,9 +22,24 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Log quando a prop codserv mudar
+  useEffect(() => {
+    console.log('TableFollowup: codserv prop mudou para:', codserv);
+  }, [codserv]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Se não temos um codserv válido, não fazemos requisição
+        if (!codserv || codserv <= 0) {
+          console.log('TableFollowup: Código de serviço inválido, ignorando requisição:', codserv);
+          setData([]);
+          setLoading(false);
+          return;
+        }
+
+        console.log('TableFollowup: Iniciando busca de dados para serviço ID:', codserv);
+        
         // Usar o token armazenado no localStorage
         const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
@@ -35,8 +50,10 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         }
 
         // Usar a URL da API de followup
-        const apiUrl = process.env.NEXT_PUBLIC_API_FOLLOWUP_URL || 
-                      import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
+        const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
+        
+        console.log('URL API Followup:', apiUrl);
+        console.log('Buscando tarefas para o serviço ID:', codserv);
         
         if (!apiUrl) {
           setError('URL da API de tarefas não configurada');
@@ -50,7 +67,8 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           {
             headers: {
               Authorization: `Bearer ${token}`
-            }
+            },
+            skipCache: true // Garantir dados frescos
           }
         );
         
@@ -88,10 +106,18 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     );
   }
 
-  if (!codserv || data.length === 0) {
+  if (!codserv) {
     return (
       <div className="flex justify-center items-center h-[200px]">
         <div className="text-gray-500 text-sm">Selecione um serviço para visualizar as tarefas.</div>
+      </div>
+    );
+  }
+  
+  if (data.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <div className="text-gray-500 text-sm">Não foram encontradas tarefas para o serviço #{codserv}.</div>
       </div>
     );
   }

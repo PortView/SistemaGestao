@@ -48,6 +48,7 @@ export default function ProcessControlPage() {
 
   // Handler para processar uma unidade selecionada
   const handleUnitChange = (unit: SiscopUnidade) => {
+    console.log('ProcessControl: Unidade selecionada:', unit);
     setSelectedUnit(unit);
     // Quando a unidade muda, limpar o serviço selecionado
     setSelectedService(null);
@@ -56,6 +57,7 @@ export default function ProcessControlPage() {
   
   // Handler para processar a seleção de serviço
   const handleServicoSelect = (codServ: number) => {
+    console.log('Serviço selecionado:', codServ);
     setSelectedServicoCod(codServ);
   };
 
