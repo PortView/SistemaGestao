@@ -98,47 +98,42 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (loading) {
     return (
-      <Card className="border border-slate-200 h-[200px]">
-        <CardContent className="p-4 flex flex-col justify-center items-center h-full">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-5 w-5 animate-pulse text-blue-500" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </div>
-          </div>
-        </CardContent>
+      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-[320px] w-full" />
+        </div>
       </Card>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive" className="h-[200px] flex items-center">
-        <AlertCircle className="h-4 w-4 mr-2" />
-        <AlertDescription>
-          {error}
-        </AlertDescription>
-      </Alert>
+      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </Card>
     );
   }
 
   if (!codserv) {
     return (
-      <Card className="border border-slate-200 h-[200px]">
-        <CardContent className="p-4 flex justify-center items-center h-full">
-          <p className="text-gray-500 text-sm">Selecione um serviço para visualizar as tarefas.</p>
-        </CardContent>
+      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">
+          Selecione um serviço para visualizar as tarefas
+        </p>
       </Card>
     );
   }
   
   if (data.length === 0) {
     return (
-      <Card className="border border-slate-200 h-[200px]">
-        <CardContent className="p-4 flex justify-center items-center h-full">
-          <p className="text-gray-500 text-sm">Não foram encontradas tarefas para o serviço #{codserv}.</p>
-        </CardContent>
+      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">
+          Não foram encontradas tarefas para o serviço #{codserv}
+        </p>
       </Card>
     );
   }
@@ -149,46 +144,93 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     return date.toLocaleDateString('pt-BR');
   };
 
+  // Definição das larguras das colunas
+  const columnWidths = [
+    150, // Analista
+    100, // Dt.Tarefa
+    30,  // Ok
+    30,  // Med
+    500, // Desc.Tarefa
+    30,  // Evento
+    60,  // H.Tram
+    60,  // H.Ass
+  ];
+
   return (
-    <Card className="border border-slate-200">
-      <div className="w-full overflow-x-auto p-1">
-        <Table>
-          <TableHeader className="bg-[#c0c0c0]">
-            <TableRow className="hover:bg-[#b0b0b0] text-xs font-medium text-gray-700">
-              <TableHead className="text-left sticky top-0 z-10 w-[150px] p-1">Analista</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[100px] p-1">Dt.Tarefa</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Ok</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Med</TableHead>
-              <TableHead className="text-left sticky top-0 z-10 w-[500px] p-1">Desc.Tarefa</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Evento</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[60px] p-1">H.Tram.</TableHead>
-              <TableHead className="text-center sticky top-0 z-10 w-[60px] p-1">H.Ass.</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((item, index) => (
-              <TableRow 
-                key={index} 
-                className="text-xs border-b hover:bg-slate-50"
-              >
-                <TableCell className="p-1 text-left">{item.analista}</TableCell>
-                <TableCell className="p-1 text-center">{formatDate(item.dttarefa)}</TableCell>
-                <TableCell className="p-1 text-center">
-                  <Checkbox checked={item.conclusao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                </TableCell>
-                <TableCell className="p-1 text-center">
-                  <Checkbox checked={item.medicao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                </TableCell>
-                <TableCell className="p-1 text-left">{item.desctarefa}</TableCell>
-                <TableCell className="p-1 text-center">
-                  <Checkbox checked={item.evento} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                </TableCell>
-                <TableCell className="p-1 text-center">{Number(item.tetramitacao)}</TableCell>
-                <TableCell className="p-1 text-center">{Number(item.teassessoria)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+    <Card className="p-0 bg-background shadow-md w-full overflow-hidden">
+      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '360px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
+        <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
+          <div style={{ overflow: 'visible' }}>
+            <div style={{ position: 'relative' }}>
+              <table style={{ minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', width: 'max-content' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#c0c0c0', opacity: 1, color: '#333', fontSize: '12px', fontWeight: 'bold' }}>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Analista</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Dt.Tarefa</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Med</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[4]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Tarefa</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[5]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Evento</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[6]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Tram.</th>
+                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[7]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Ass.</th>
+                  </tr>
+                </thead>
+                <tbody style={{ backgroundColor: '#fff', opacity: 1, color: '#333' }}>
+                  {data.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '20px 0', color: '#666' }}>
+                        Não foram encontradas tarefas para este serviço
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((item, index) => (
+                      <tr 
+                        key={index} 
+                        style={{ 
+                          fontSize: '12px', 
+                          cursor: 'pointer', 
+                          borderBottom: '1px solid #eee'
+                        }} 
+                        className="hover:bg-slate-100"
+                      >
+                        <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff' }}>
+                          <div style={{ width: '100%', textAlign: 'left', padding: '0 4px' }}>{item.analista}</div>
+                        </td>
+                        <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ width: '100%', textAlign: 'center' }}>{formatDate(item.dttarefa)}</div>
+                        </td>
+                        <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Checkbox checked={item.conclusao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                          </div>
+                        </td>
+                        <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Checkbox checked={item.medicao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                          </div>
+                        </td>
+                        <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          <div style={{ width: '100%', textAlign: 'left', padding: '0 4px' }}>{item.desctarefa}</div>
+                        </td>
+                        <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Checkbox checked={item.evento} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                          </div>
+                        </td>
+                        <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.tetramitacao)}</div>
+                        </td>
+                        <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.teassessoria)}</div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </Card>
   );
