@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ApiService } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
+import { Card, CardContent } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Clock } from 'lucide-react';
 
 interface TarefasData {
   analista: string;
@@ -92,33 +98,48 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-      </div>
+      <Card className="border border-slate-200 h-[200px]">
+        <CardContent className="p-4 flex flex-col justify-center items-center h-full">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 animate-pulse text-blue-500" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-[200px]">
-        <div className="text-red-500">{error}</div>
-      </div>
+      <Alert variant="destructive" className="h-[200px] flex items-center">
+        <AlertCircle className="h-4 w-4 mr-2" />
+        <AlertDescription>
+          {error}
+        </AlertDescription>
+      </Alert>
     );
   }
 
   if (!codserv) {
     return (
-      <div className="flex justify-center items-center h-[200px]">
-        <div className="text-gray-500 text-sm">Selecione um serviço para visualizar as tarefas.</div>
-      </div>
+      <Card className="border border-slate-200 h-[200px]">
+        <CardContent className="p-4 flex justify-center items-center h-full">
+          <p className="text-gray-500 text-sm">Selecione um serviço para visualizar as tarefas.</p>
+        </CardContent>
+      </Card>
     );
   }
   
   if (data.length === 0) {
     return (
-      <div className="flex justify-center items-center h-[200px]">
-        <div className="text-gray-500 text-sm">Não foram encontradas tarefas para o serviço #{codserv}.</div>
-      </div>
+      <Card className="border border-slate-200 h-[200px]">
+        <CardContent className="p-4 flex justify-center items-center h-full">
+          <p className="text-gray-500 text-sm">Não foram encontradas tarefas para o serviço #{codserv}.</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -129,44 +150,46 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   };
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="min-w-full border-collapse bg-white text-black">
-        <thead>
-          <tr className="bg-[#c0c0c0] text-xs font-medium text-gray-700">
-            <th className="px-2 py-1 text-left sticky top-0 z-10 w-[150px]">Analista</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[100px]">Dt.Tarefa</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[30px]">Ok</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[30px]">Med</th>
-            <th className="px-2 py-1 text-left sticky top-0 z-10 w-[500px]">Desc.Tarefa</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[30px]">Evento</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[60px]">H.Tram.</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10 w-[60px]">H.Ass.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item, index) => (
-            <tr 
-              key={index} 
-              className="text-xs border-b border-gray-200 hover:bg-gray-50"
-            >
-              <td className="px-2 py-1 text-left">{item.analista}</td>
-              <td className="px-2 py-1 text-center">{formatDate(item.dttarefa)}</td>
-              <td className="px-2 py-1 text-center">
-                <input type="checkbox" checked={item.conclusao} readOnly className="h-3 w-3" />
-              </td>
-              <td className="px-2 py-1 text-center">
-                <input type="checkbox" checked={item.medicao} readOnly className="h-3 w-3" />
-              </td>
-              <td className="px-2 py-1 text-left">{item.desctarefa}</td>
-              <td className="px-2 py-1 text-center">
-                <input type="checkbox" checked={item.evento} readOnly className="h-3 w-3" />
-              </td>
-              <td className="px-2 py-1 text-center">{Number(item.tetramitacao)}</td>
-              <td className="px-2 py-1 text-center">{Number(item.teassessoria)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Card className="border border-slate-200">
+      <div className="w-full overflow-x-auto p-1">
+        <Table>
+          <TableHeader className="bg-[#c0c0c0]">
+            <TableRow className="hover:bg-[#b0b0b0] text-xs font-medium text-gray-700">
+              <TableHead className="text-left sticky top-0 z-10 w-[150px] p-1">Analista</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[100px] p-1">Dt.Tarefa</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Ok</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Med</TableHead>
+              <TableHead className="text-left sticky top-0 z-10 w-[500px] p-1">Desc.Tarefa</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[30px] p-1">Evento</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[60px] p-1">H.Tram.</TableHead>
+              <TableHead className="text-center sticky top-0 z-10 w-[60px] p-1">H.Ass.</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item, index) => (
+              <TableRow 
+                key={index} 
+                className="text-xs border-b hover:bg-slate-50"
+              >
+                <TableCell className="p-1 text-left">{item.analista}</TableCell>
+                <TableCell className="p-1 text-center">{formatDate(item.dttarefa)}</TableCell>
+                <TableCell className="p-1 text-center">
+                  <Checkbox checked={item.conclusao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                </TableCell>
+                <TableCell className="p-1 text-center">
+                  <Checkbox checked={item.medicao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                </TableCell>
+                <TableCell className="p-1 text-left">{item.desctarefa}</TableCell>
+                <TableCell className="p-1 text-center">
+                  <Checkbox checked={item.evento} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                </TableCell>
+                <TableCell className="p-1 text-center">{Number(item.tetramitacao)}</TableCell>
+                <TableCell className="p-1 text-center">{Number(item.teassessoria)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Card>
   );
 }

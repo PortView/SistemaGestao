@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ApiService } from '@/lib/api-service';
+import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertCircle, Clock } from 'lucide-react';
 
 interface ConformidadeData {
   cod: number;
@@ -43,8 +48,8 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obter token do localStorage
-        const token = localStorage.getItem('siscop_token');
+        // Obter token do localStorage usando a constante apropriada
+        const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
         if (!token) {
           setError('Não autorizado: Token não encontrado');
@@ -88,17 +93,38 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-        <div style={{ width: '48px', height: '48px', border: '4px solid #3498db', borderRadius: '50%', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
-      </div>
+      <Card className="border border-slate-200 h-[400px]">
+        <CardContent className="p-4 flex flex-col justify-center items-center h-full">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 animate-pulse text-blue-500" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-        <div style={{ color: '#e74c3c' }}>{error}</div>
-      </div>
+      <Alert variant="destructive" className="h-[400px] flex items-center">
+        <AlertCircle className="h-4 w-4 mr-2" />
+        <AlertDescription>
+          {error}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  if (!codimov) {
+    return (
+      <Card className="border border-slate-200 h-[400px]">
+        <CardContent className="p-4 flex justify-center items-center h-full">
+          <p className="text-gray-500 text-sm">Selecione uma unidade para visualizar os documentos de conformidade.</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -182,12 +208,28 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
                     ) : (
                       data.map((item, index) => (
                         <tr key={index} style={{ fontSize: '12px', cursor: 'pointer' }}>
-                          <td style={{ position: 'sticky', left: 0, width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}><input style={{ width: '100%' }} type="checkbox" checked={item.finternet} readOnly /></td>
-                          <td style={{ position: 'sticky', left: `${getLeftPosition(1)}px`, width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}><input style={{ width: '100%' }} type="checkbox" checked={item.frelatorio} readOnly /></td>
-                          <td style={{ position: 'sticky', left: `${getLeftPosition(2)}px`, width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}><input style={{ width: '100%' }} type="checkbox" checked={item.gestaocli} readOnly /></td>
+                          <td style={{ position: 'sticky', left: 0, width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <Checkbox checked={item.finternet} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                            </div>
+                          </td>
+                          <td style={{ position: 'sticky', left: `${getLeftPosition(1)}px`, width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <Checkbox checked={item.frelatorio} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                            </div>
+                          </td>
+                          <td style={{ position: 'sticky', left: `${getLeftPosition(2)}px`, width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <Checkbox checked={item.gestaocli} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                            </div>
+                          </td>
                           <td style={{ position: 'sticky', left: `${getLeftPosition(3)}px`, width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}><div style={{ width: '100%', textAlign: 'center' }}>{item.codcfor}</div></td>
                           <td style={{ position: 'sticky', left: `${getLeftPosition(4)}px`, width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}><div style={{ width: '100%', textAlign: 'left' }}>{item.descr}</div></td>
-                          <td style={{ position: 'sticky', left: `${getLeftPosition(5)}px`, width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', backgroundColor: '#fff' }}><input style={{ width: '100%' }} type="checkbox" checked={item.flagtipopdf} readOnly /></td>
+                          <td style={{ position: 'sticky', left: `${getLeftPosition(5)}px`, width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', backgroundColor: '#fff' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <Checkbox checked={item.flagtipopdf} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
+                            </div>
+                          </td>
                           <td style={{ position: 'sticky', left: `${getLeftPosition(6)}px`, width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}><div style={{ width: '100%', textAlign: 'left' }}>{item.doc}</div></td>
                           <td style={{ position: 'sticky', left: `${getLeftPosition(7)}px`, width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: '#fff' }}><div style={{ width: '100%', textAlign: 'right' }}>{Number(item.area).toFixed(2)}</div></td>
                           <td style={{ position: 'sticky', left: `${getLeftPosition(8)}px`, width: `${columnWidths[8]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}><div style={{ width: '100%', textAlign: 'center' }}>{formatDate(item.dt)}</div></td>
