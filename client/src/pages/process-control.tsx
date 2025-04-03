@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ProcessCommandPanel } from "@/components/process/process-command-panel";
 import { ProcessFilterPanel } from "@/components/process/process-filter-panel";
 import { TableServicos } from "@/components/process/table-servicos";
-import { TasksGrid } from "@/components/process/tasks-grid";
+import { TableFollowup } from "@/components/process/table-followup";
 import { ProcessTabs } from "@/components/process/process-tabs";
 import { SiscopUnidade, SiscopServico, SiscopCliente } from "@/lib/types";
 
@@ -14,6 +14,7 @@ export default function ProcessControlPage() {
   const [selectedService, setSelectedService] = useState<SiscopServico | null>(
     null,
   );
+  const [selectedServicoCod, setSelectedServicoCod] = useState<number>(-1);
   const [codCoor, setCodCoor] = useState<number>(0);
 
   // Efeito para obter o código de coordenação (codcoor) do localStorage
@@ -50,6 +51,12 @@ export default function ProcessControlPage() {
     setSelectedUnit(unit);
     // Quando a unidade muda, limpar o serviço selecionado
     setSelectedService(null);
+    setSelectedServicoCod(-1);
+  };
+  
+  // Handler para processar a seleção de serviço
+  const handleServicoSelect = (codServ: number) => {
+    setSelectedServicoCod(codServ);
   };
 
   return (
@@ -86,10 +93,11 @@ export default function ProcessControlPage() {
                   qCodServ={-1}
                   qStatus="ALL"
                   qDtlimite="2001-01-01"
+                  onSelectServico={handleServicoSelect}
                 />
               </div>
               <div className="w-[940px]">
-                <TasksGrid selectedService={selectedService} />
+                <TableFollowup codserv={selectedServicoCod} />
               </div>
             </div>
 
@@ -129,10 +137,11 @@ export default function ProcessControlPage() {
                 qCodServ={-1}
                 qStatus="ALL"
                 qDtlimite="2001-01-01"
+                onSelectServico={handleServicoSelect}
               />
             </div>
             <div className="w-full max-w-[940px]">
-              <TasksGrid selectedService={selectedService} />
+              <TableFollowup codserv={selectedServicoCod} />
             </div>
           </div>
 

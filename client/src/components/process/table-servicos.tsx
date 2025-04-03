@@ -34,6 +34,7 @@ interface TableServicosProps {
   qCodServ: number;
   qStatus: string;
   qDtlimite: string;
+  onSelectServico?: (codServ: number) => void;
 }
 
 export function TableServicos({ 
@@ -43,11 +44,13 @@ export function TableServicos({
   qConcluido, 
   qCodServ, 
   qStatus, 
-  qDtlimite 
+  qDtlimite,
+  onSelectServico
 }: TableServicosProps) {
   const [data, setData] = useState<ServicosData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   // Efeito para carregar dados sempre que as props mudarem
   useEffect(() => {
@@ -89,6 +92,13 @@ export function TableServicos({
 
         if (Array.isArray(response)) {
           setData(response);
+          
+          // Se temos dados e uma função de callback, selecionamos o primeiro item
+          if (response.length > 0 && onSelectServico) {
+            const firstItem = response[0];
+            setSelectedRow(firstItem.codServ);
+            onSelectServico(firstItem.codServ);
+          }
         } else {
           console.error('Resposta da API não é um array:', response);
           setData([]);
@@ -147,6 +157,14 @@ export function TableServicos({
       return date.toLocaleDateString('pt-BR');
     } catch (e) {
       return dateStr;
+    }
+  };
+  
+  // Função para lidar com o clique na linha
+  const handleRowClick = (codServ: number) => {
+    setSelectedRow(codServ);
+    if (onSelectServico) {
+      onSelectServico(codServ);
     }
   };
 
@@ -216,54 +234,64 @@ export function TableServicos({
                       </tr>
                     ) : (
                       data.map((item, index) => (
-                        <tr key={index} style={{ fontSize: '12px', cursor: 'pointer', borderBottom: '1px solid #eee' }} className="hover:bg-slate-100">
-                          <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                        <tr 
+                          key={index} 
+                          style={{ 
+                            fontSize: '12px', 
+                            cursor: 'pointer', 
+                            borderBottom: '1px solid #eee',
+                            backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff'
+                          }} 
+                          className="hover:bg-slate-100"
+                          onClick={() => handleRowClick(item.codServ)}
+                        >
+                          <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{item.codServ}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'left' }}>{item.descserv}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.concluido} readOnly />
+                          <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.concluido} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.filtroOs} readOnly />
+                          <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.filtroOs} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.rescisao} readOnly />
+                          <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.rescisao} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.qtdPende)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.suspenso} readOnly />
+                          <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.suspenso} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.estadoOk} readOnly />
+                          <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.estadoOk} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[8]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.novo} readOnly />
+                          <td style={{ width: `${columnWidths[8]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.novo} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[9]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                            <input style={{ width: '100%' }} type="checkbox" checked={item.teventserv} readOnly />
+                          <td style={{ width: `${columnWidths[9]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                            <input style={{ width: '100%' }} type="checkbox" checked={item.teventserv} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[10]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[10]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'left' }}>{item.mStatus}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[11]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[11]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{formatDate(item.dtLimite)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[12]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[12]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.valserv).toFixed(2)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[13]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[13]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.horastramitacao)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[14]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: '#fff' }}>
+                          <td style={{ width: `${columnWidths[14]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.horasassessoria)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[15]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: '#fff' }}>{item.obsServ}</td>
-                          <td style={{ width: `${columnWidths[16]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: '#fff' }}>{item.obsResc}</td>
+                          <td style={{ width: `${columnWidths[15]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>{item.obsServ}</td>
+                          <td style={{ width: `${columnWidths[16]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>{item.obsResc}</td>
                         </tr>
                       ))
                     )}
