@@ -71,22 +71,22 @@ export default function ProcessControlPage() {
         <div className="hidden 2xl:block">
           {/* Layout para tela grande (1920px) - cards lado a lado */}
           <div>
-            {/* Área superior: command panel + filter panel (lado a lado) */}
+            {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
             <div className="flex justify-center gap-2 mb-2">
-              <div className="w-[940px]">
+              <div className="w-[940px] h-[150px]">
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px]">
+              <div className="w-[940px] h-[150px]">
                 <ProcessFilterPanel />
               </div>
             </div>
 
-            {/* Área do meio: serviços + tarefas (lado a lado) */}
+            {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
             <div className="flex justify-center gap-2 mb-2">
-              <div className="w-[940px]">
+              <div className="w-[940px] h-[460px]">
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}
@@ -98,13 +98,13 @@ export default function ProcessControlPage() {
                   onSelectServico={handleServicoSelect}
                 />
               </div>
-              <div className="w-[940px]">
+              <div className="w-[940px] h-[460px]">
                 <TableFollowup codserv={selectedServicoCod} />
               </div>
             </div>
 
-            {/* Área inferior: abas (largura total) */}
-            <div className="w-full">
+            {/* Área inferior: abas (largura total) com altura fixa de 400px */}
+            <div className="w-full h-[400px]">
               <ProcessTabs
                 selectedClient={selectedClient}
                 selectedUnit={selectedUnit}
@@ -115,22 +115,22 @@ export default function ProcessControlPage() {
 
         {/* Layout para telas menores que 1920px - cards empilhados */}
         <div className="block 2xl:hidden">
-          {/* Área superior: command panel + filter panel (empilhados) */}
+          {/* Área superior: command panel + filter panel (empilhados) com altura fixa de 150px */}
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="w-full max-w-[940px]">
+            <div className="w-full max-w-[940px] h-[150px]">
               <ProcessCommandPanel
                 onClientChange={handleClientChange}
                 onUnitChange={handleUnitChange}
               />
             </div>
-            <div className="w-full max-w-[940px]">
+            <div className="w-full max-w-[940px] h-[150px]">
               <ProcessFilterPanel />
             </div>
           </div>
 
-          {/* Área do meio: serviços + tarefas (empilhados) */}
+          {/* Área do meio: serviços + tarefas (empilhados) com altura fixa de 460px */}
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="w-full max-w-[940px]">
+            <div className="w-full max-w-[940px] h-[460px]">
               <TableServicos
                 qcodCoor={codCoor}
                 qcontrato={selectedUnit?.contrato || null}
@@ -142,13 +142,13 @@ export default function ProcessControlPage() {
                 onSelectServico={handleServicoSelect}
               />
             </div>
-            <div className="w-full max-w-[940px]">
+            <div className="w-full max-w-[940px] h-[460px]">
               <TableFollowup codserv={selectedServicoCod} />
             </div>
           </div>
 
-          {/* Área inferior: abas (largura total) */}
-          <div className=" w-full">
+          {/* Área inferior: abas (largura total) com altura fixa de 400px */}
+          <div className="w-full h-[400px]">
             <ProcessTabs
               selectedClient={selectedClient}
               selectedUnit={selectedUnit}

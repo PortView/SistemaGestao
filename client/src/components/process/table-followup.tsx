@@ -98,7 +98,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (loading) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
         <div className="space-y-2">
           <Skeleton className="h-6 w-full" />
           <Skeleton className="h-[320px] w-full" />
@@ -109,7 +109,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (error) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
@@ -120,7 +120,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (!codserv) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden flex items-center justify-center">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
         <p className="text-muted-foreground text-sm">
           Selecione um serviço para visualizar as tarefas
         </p>
@@ -130,7 +130,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   
   if (data.length === 0) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[360px] overflow-hidden flex items-center justify-center">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
         <p className="text-muted-foreground text-sm">
           Não foram encontradas tarefas para o serviço #{codserv}
         </p>
@@ -158,7 +158,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   return (
     <Card className="p-0 bg-background shadow-md w-full overflow-hidden">
-      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '360px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
+      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '460px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
         <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
           <div style={{ overflow: 'visible' }}>
             <div style={{ position: 'relative' }}>

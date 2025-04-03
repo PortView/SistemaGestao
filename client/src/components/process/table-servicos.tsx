@@ -122,7 +122,7 @@ export function TableServicos({
   // Renderiza um estado de carregamento
   if (loading) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[454px] overflow-hidden">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
         <div className="space-y-2">
           <Skeleton className="h-6 w-full" />
           <Skeleton className="h-[400px] w-full" />
@@ -134,7 +134,7 @@ export function TableServicos({
   // Renderiza um estado de erro
   if (error) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[454px] overflow-hidden">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
@@ -146,7 +146,7 @@ export function TableServicos({
   // Quando não temos unidade ou contrato selecionados
   if (!qcontrato || !qUnidade) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[454px] overflow-hidden flex items-center justify-center">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
         <p className="text-muted-foreground text-sm">
           Selecione um cliente e uma unidade para visualizar os serviços
         </p>
@@ -197,12 +197,12 @@ export function TableServicos({
   ];
 
   return (
-    <Card className="bg-background shadow-md w-full h-[454px] overflow-hidden">
+    <Card className="bg-background shadow-md w-full h-[460px] overflow-hidden">
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
         <div style={{ 
           overflowX: 'auto', 
           overflowY: 'auto', 
-          maxHeight: '454px', 
+          maxHeight: '460px', 
           position: 'relative', 
           WebkitOverflowScrolling: 'touch', 
           willChange: 'transform'

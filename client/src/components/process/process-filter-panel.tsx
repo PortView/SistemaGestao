@@ -32,7 +32,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
   };
 
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-full">
+    <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-[150px]">
       <CardContent className="p-2">
         <div className="grid grid-cols-3 gap-2">
           <div className="space-y-1">

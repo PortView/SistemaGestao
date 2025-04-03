@@ -10,10 +10,10 @@ interface ProcessTabsProps {
 
 export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) {
   return (
-    <div className="w-full flex max-w-[1920px] mx-auto">
+    <div className="w-full flex max-w-[1920px] mx-auto h-full">
       {/* Tabs na vertical seguindo o exemplo da imagem */}
-      <Tabs defaultValue="conformidade" orientation="vertical" className="flex w-full">
-        <TabsList className="bg-[#d0e0f0] text-gray-600 h-auto flex flex-col shrink-0 rounded-r-none">
+      <Tabs defaultValue="conformidade" orientation="vertical" className="flex w-full h-full">
+        <TabsList className="bg-[#d0e0f0] text-gray-600 h-[400px] flex flex-col shrink-0 rounded-r-none">
           <TabsTrigger 
             value="conformidade" 
             className="data-[state=active]:bg-white data-[state=active]:text-blue-800 px-2 py-6 h-24 w-10 rounded-r-none"
@@ -40,27 +40,27 @@ export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) 
           </TabsTrigger>
         </TabsList>
         
-        <div className="flex-1 overflow-x-auto">
-          <TabsContent value="conformidade" className="mt-0">
-            <div className="bg-white rounded-l-none rounded-r-md overflow-x-auto">
+        <div className="flex-1 overflow-x-auto h-[400px]">
+          <TabsContent value="conformidade" className="mt-0 h-full">
+            <div className="bg-white rounded-l-none rounded-r-md overflow-x-auto h-full">
               <ComplianceSection selectedClient={selectedClient} selectedUnit={selectedUnit} />
             </div>
           </TabsContent>
           
-          <TabsContent value="desenhos" className="mt-0">
-            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md">
+          <TabsContent value="desenhos" className="mt-0 h-full">
+            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md h-full">
               <p className="text-center text-gray-500 text-xs">Desenhos em desenvolvimento</p>
             </div>
           </TabsContent>
           
-          <TabsContent value="detalhe" className="mt-0">
-            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md">
+          <TabsContent value="detalhe" className="mt-0 h-full">
+            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md h-full">
               <p className="text-center text-gray-500 text-xs">Detalhes em desenvolvimento</p>
             </div>
           </TabsContent>
           
-          <TabsContent value="caract" className="mt-0">
-            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md">
+          <TabsContent value="caract" className="mt-0 h-full">
+            <div className="bg-[#d0e0f0] p-4 rounded-l-none rounded-r-md h-full">
               <p className="text-center text-gray-500 text-xs">Características em desenvolvimento</p>
             </div>
           </TabsContent>
