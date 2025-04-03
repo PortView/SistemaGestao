@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 interface ServicosData {
+  codccontra: number;
   codServ: number;
   descserv: string;
   concluido: boolean;
@@ -100,8 +101,8 @@ export function TableServicos({
           // Se temos dados e uma função de callback, selecionamos o primeiro item
           if (response.length > 0 && onSelectServico) {
             const firstItem = response[0];
-            setSelectedRow(firstItem.codServ);
-            onSelectServico(firstItem.codServ);
+            setSelectedRow(firstItem.codccontra);
+            onSelectServico(firstItem.codccontra);
           }
         } else {
           console.error('Resposta da API não é um array:', response);
@@ -175,6 +176,7 @@ export function TableServicos({
 
   // Definição das larguras das colunas
   const columnWidths = [
+    60, // Codcconta
     60,  // Cod. Serv.
     350, // Desc. Serv.
     26,  // Ok
@@ -210,22 +212,26 @@ export function TableServicos({
               <div style={{ position: 'relative' }}>
                 <table style={{ minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', width: 'max-content' }}>
                   <thead>
+                    
                     <tr style={{ backgroundColor: '#c0c0c0', color: '#333', fontSize: '12px', fontWeight: 'bold' }}>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Cod.Serv.</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Serv.</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Os</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[4]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Res</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[5]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Pdc</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[6]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Sus</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[7]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Doc.I</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[8]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Novo</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[9]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ocorr.</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[10]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Status</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[11]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Dt.Limite</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[12]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>Val.Serv.</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[13]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>H.Tram.</th>
-                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[14]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>H.Ass.</th>
+                      
+                      <th  className='hidden' style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Código.</th>
+                    
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Cod.Serv.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Serv.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[4]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Os</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[5]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Res</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[6]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Pdc</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[7]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Sus</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[8]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Doc.I</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[9]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Novo</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[10]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ocorr.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[11]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Status</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[12]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Dt.Limite</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[13]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>Val.Serv.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[14]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>H.Tram.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[15]}px`, zIndex: 10, padding: '8px 0', textAlign: 'right', backgroundColor: '#c0c0c0' }}>H.Ass.</th>
                       <th style={{ position: 'sticky', top: 0, width: `${columnWidths[15]}px`, zIndex: 10, padding: '8px 10px', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Obs.Serviço</th>
                       <th style={{ position: 'sticky', top: 0, width: `${columnWidths[16]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Obs.Rescisão</th>
                     </tr>
@@ -245,58 +251,61 @@ export function TableServicos({
                             fontSize: '12px', 
                             cursor: 'pointer', 
                             borderBottom: '1px solid #eee',
-                            backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff'
+                            backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff'
                           }} 
                           className="hover:bg-slate-100"
-                          onClick={() => handleRowClick(item.codServ)}
+                          onClick={() => handleRowClick(item.codccontra)}
                         >
-                          <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td  className='hidden' style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
+                            <div style={{ width: '100%', textAlign: 'center' }}>{item.codccontra}</div></td>
+                            
+                            <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{item.codServ}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'left' }}>{item.descserv}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.concluido} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.filtroOs} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.rescisao} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.qtdPende)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.suspenso} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.estadoOk} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[8]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[8]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.novo} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[9]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[9]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <input style={{ width: '100%' }} type="checkbox" checked={item.teventserv} readOnly onClick={(e) => e.stopPropagation()} />
                           </td>
-                          <td style={{ width: `${columnWidths[10]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[10]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'left' }}>{item.mStatus}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[11]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[11]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{formatDate(item.dtLimite)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[12]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[12]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.valserv).toFixed(2)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[13]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[13]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.horastramitacao)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[14]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>
+                          <td style={{ width: `${columnWidths[14]}px`, zIndex: 150, padding: '4px 0', textAlign: 'right', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'right' }}>{Number(item.horasassessoria)}</div>
                           </td>
-                          <td style={{ width: `${columnWidths[15]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>{item.obsServ}</td>
-                          <td style={{ width: `${columnWidths[16]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codServ ? '#e6f7ff' : '#fff' }}>{item.obsResc}</td>
+                          <td style={{ width: `${columnWidths[15]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>{item.obsServ}</td>
+                          <td style={{ width: `${columnWidths[16]}px`, zIndex: 150, padding: '4px 10px', textAlign: 'left', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>{item.obsResc}</td>
                         </tr>
                       ))
                     )}

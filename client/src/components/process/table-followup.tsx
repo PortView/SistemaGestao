@@ -130,17 +130,17 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="min-w-full border-collapse bg-white">
+      <table className="min-w-full border-collapse bg-white text-black">
         <thead>
           <tr className="bg-[#c0c0c0] text-xs font-medium text-gray-700">
-            <th className="px-2 py-1 text-left sticky top-0 z-10">Analista</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">Dt.Tarefa</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">Ok</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">Med</th>
-            <th className="px-2 py-1 text-left sticky top-0 z-10">Desc.Tarefa</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">Evento</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">H.Tram.</th>
-            <th className="px-2 py-1 text-center sticky top-0 z-10">H.Ass.</th>
+            <th className="px-2 py-1 text-left sticky top-0 z-10  width:150">Analista</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:100">Dt.Tarefa</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:30">Ok</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:30">Med</th>
+            <th className="px-2 py-1 text-left sticky top-0 z-10 width:500">Desc.Tarefa</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:30">Evento</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:60">H.Tram.</th>
+            <th className="px-2 py-1 text-center sticky top-0 z-10 width:60">H.Ass.</th>
           </tr>
         </thead>
         <tbody>
