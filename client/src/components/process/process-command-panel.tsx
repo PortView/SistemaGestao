@@ -725,7 +725,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     <SelectValue placeholder="Unidades" />
                   )}
                 </SelectTrigger>
-                <SelectContent className="z-50 fixed w-[480px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
+                <SelectContent className="z-50 fixed w-[510px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
                   <div className="px-2 py-2">
                     <Input
                       placeholder="Buscar unidade... (min. 3 letras)"
