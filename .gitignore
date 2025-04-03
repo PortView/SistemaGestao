@@ -10,3 +10,5 @@ vite.config.ts.*
 # Exclude these sensitive environment files
 .env.local
 .env*
+next.config.mjs
+PROJECT-GUIDELINES.md
