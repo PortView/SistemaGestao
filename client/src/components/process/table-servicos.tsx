@@ -146,7 +146,7 @@ export function TableServicos({
   // Quando não temos unidade ou contrato selecionados
   if (!qcontrato || !qUnidade) {
     return (
-      <Card className="p-4 bg-card/20 backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
         <p className="text-muted-foreground text-sm">
           Selecione um cliente e uma unidade para visualizar os serviços
         </p>
