@@ -34,7 +34,47 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
   return (
     <Card className="bg-[#d0e0f0] border-none shadow-md w-full h-[150px]">
       <CardContent className="p-2">
+        
+        <div className='flex flex-row'>
+          <div className="flex items-center space-x-2 w-[200px]">
+            <Checkbox 
+              id="codServ" 
+              checked={filters.codServ}
+              onCheckedChange={(checked) => 
+                handleFilterChange('codServ', checked as boolean)
+              }
+            />
+            <Label htmlFor="codServ" className="text-xs">Cód Serv</Label>
+          </div>
+  
+          <div className="flex items-center space-x-2 w-[200px]">
+            <Checkbox 
+              id="status" 
+              checked={filters.status}
+              onCheckedChange={(checked) => 
+                handleFilterChange('status', checked as boolean)
+              }
+            />
+            <Label htmlFor="status" className="text-xs">Status</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2 w-[200px]">
+            <Checkbox 
+              id="dtLimite" 
+              checked={filters.dtLimite}
+              onCheckedChange={(checked) => 
+                handleFilterChange('dtLimite', checked as boolean)
+              }
+            />
+            <Label htmlFor="dtLimite" className="text-xs">Dt.Limite</Label>
+          </div>
+        </div>
+
+
+
+        
         <div className="grid grid-cols-3 gap-2">
+          
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Checkbox 
