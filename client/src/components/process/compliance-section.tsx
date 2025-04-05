@@ -83,9 +83,9 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
           </div>
         </div>
         
-        <div className="rounded-l-none rounded-r-md border overflow-hidden h-full">
+        <div className="rounded-l-none rounded-r-md border overflow-hidden">
           {!selectedUnit ? (
-            <div className="flex items-center justify-center p-10 h-full">
+            <div className="flex items-center justify-center p-10">
               <p className="text-gray-500 text-sm">Selecione uma unidade para visualizar os documentos de conformidade.</p>
             </div>
           ) : (
