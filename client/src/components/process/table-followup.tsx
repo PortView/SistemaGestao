@@ -120,21 +120,21 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
   if (!codserv) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">
-          Selecione um serviço para visualizar as tarefas
+      <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
+        <p className="text-md text-zinc-900">
+          Selecione um serviço para visualizar as tarefas.
         </p>
-      </Card>
+      </div>
     );
   }
   
   if (data.length === 0) {
     return (
-      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">
-          Não foram encontradas tarefas para o serviço #{codserv}
+      <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
+        <p className="text-md text-zinc-900">
+          Não foram encontradas tarefas para o serviço.
         </p>
-      </Card>
+      </div>
     );
   }
 

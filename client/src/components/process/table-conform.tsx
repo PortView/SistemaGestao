@@ -120,11 +120,9 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
   
   if (!codimov) {
     return (
-      <Card className="border border-slate-200 h-[400px]">
-        <CardContent className="p-4 flex justify-center items-center h-full">
-          <p className="text-gray-500 text-sm">Selecione uma unidade para visualizar os documentos de conformidade.</p>
-        </CardContent>
-      </Card>
+      <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
+        <p className="text-md text-zinc-900">Selecione uma unidade para visualizar os documentos de conformidade.</p>
+      </div>
     );
   }
 
@@ -169,7 +167,7 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
   return (
     <div style={{ width: '100%'}}>
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
-        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '100%', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
           <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
             <div style={{ overflow: 'visible' }}>
               <div style={{ position: 'relative' }}>
