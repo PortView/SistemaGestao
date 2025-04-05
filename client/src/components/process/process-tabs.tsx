@@ -10,10 +10,10 @@ interface ProcessTabsProps {
 
 export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) {
   return (
-    <div className="w-full flex max-w-[1920px] mx-auto h-full">
+    <div className="w-full flex mx-auto h-full">
       {/* Tabs na vertical seguindo o exemplo da imagem */}
       <Tabs defaultValue="conformidade" orientation="vertical" className="flex w-full h-full">
-        <TabsList className="bg-[#d0e0f0] text-gray-600 h-[400px] flex flex-col shrink-0 rounded-r-none">
+        <TabsList className="bg-[#d0e0f0] text-gray-600 h-full flex flex-col shrink-0 rounded-r-none">
           <TabsTrigger 
             value="conformidade" 
             className="data-[state=active]:bg-white data-[state=active]:text-blue-800 px-2 py-6 h-24 w-10 rounded-r-none"

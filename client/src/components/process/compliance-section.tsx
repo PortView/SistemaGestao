@@ -33,12 +33,12 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
   });
   
   return (
-    <Card className="bg-[#d0e0f0] border-none shadow-md w-full rounded-l-none">
+    <div className="bg-[#d0e0f0] border-none shadow-md w-full rounded-l-none">
       <CardContent className="p-2">
         <div className="flex justify-between items-end mb-2">
-          <div className="flex items-end gap-2">
-            <div className="space-y-0.5">
-              <Label htmlFor="cnpj" className="text-xs font-medium">CNPJ</Label>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-row items-center gap-1">
+              <Label htmlFor="cnpj" className="text-xs text-black font-medium">CNPJ</Label>
               <Select
                 disabled={!selectedClient || cnpjs.length === 0}
                 onValueChange={(value) => setCnpj(value)}
@@ -63,7 +63,7 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
                 onCheckedChange={(checked) => setOnlyForReport(!!checked)}
                 className="h-3 w-3"
               />
-              <Label htmlFor="onlyForReport" className="text-xs">Somente p/ relatório</Label>
+              <Label htmlFor="onlyForReport" className="text-xs text-black">Somente p/ relatório</Label>
             </div>
           </div>
           
@@ -101,6 +101,6 @@ export function ComplianceSection({ selectedClient, selectedUnit }: ComplianceSe
           )}
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 }

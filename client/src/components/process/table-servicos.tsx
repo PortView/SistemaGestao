@@ -197,7 +197,8 @@ export function TableServicos({
   ];
 
   return (
-    <Card className="bg-background shadow-md w-full h-[460px] overflow-hidden">
+    // <Card className="bg-background shadow-md w-full h-[460px] overflow-hidden">
+      <div className="bg-[#d0e0f0] border-none shadow-md w-full h-[460px] rounded-sm">
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
         <div style={{ 
           overflowX: 'auto', 
@@ -316,6 +317,6 @@ export function TableServicos({
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

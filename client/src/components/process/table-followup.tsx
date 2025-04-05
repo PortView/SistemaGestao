@@ -157,7 +157,8 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   ];
 
   return (
-    <Card className="p-0 bg-background shadow-md w-full overflow-hidden">
+    // <Card className="p-0 bg-background shadow-md w-full overflow-hidden">
+      <div className="bg-[#d0e0f0] border-none shadow-md w-full h-[460px] rounded-sm">
       <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '460px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
         <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
           <div style={{ overflow: 'visible' }}>
@@ -232,6 +233,6 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

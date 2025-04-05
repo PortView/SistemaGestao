@@ -10,13 +10,13 @@ interface ProcessFilterPanelProps {
 
 export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) {
   return (
-    <Card className="bg-card/20 backdrop-blur shadow-md w-full h-[150px]">
-      <CardContent className="p-2 space-y-2">
+      <div className="bg-[#d0e0f0] border-none shadow-md w-[940px] h-[150px] rounded-sm">
+      <CardContent className="p-2 space-y-1">
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Checkbox id="codserv" />
-            <Label htmlFor="codserv" className="text-xs">Cód.Serv.</Label>
+            <Label htmlFor="codserv" className="text-xs text-slate-800 font-semibold">Cód.Serv.</Label>
             <Select defaultValue="8">
               <SelectTrigger className="h-7 w-20">
                 <SelectValue />
@@ -29,7 +29,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
 
           <div className="flex items-center gap-2">
             <Checkbox id="status" />
-            <Label htmlFor="status" className="text-xs">Status</Label>
+            <Label htmlFor="status" className="text-xs text-slate-800 font-semibold">Status</Label>
             <Select>
               <SelectTrigger className="h-7 w-40">
                 <SelectValue placeholder="Selecione..." />
@@ -43,7 +43,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
 
           <div className="flex items-center gap-2">
             <Checkbox id="dtlimite" />
-            <Label htmlFor="dtlimite" className="text-xs">Dt.Limite</Label>
+            <Label htmlFor="dtlimite" className="text-xs text-slate-800 font-semibold">Dt.Limite</Label>
             <Input type="date" className="h-7 w-32" defaultValue="2010-06-16" />
           </div>
         </div>
@@ -52,68 +52,81 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Checkbox id="servNaoConcluidos" />
-            <Label htmlFor="servNaoConcluidos" className="text-xs">Só Serv. não Concluídos</Label>
+            <Label htmlFor="servNaoConcluidos" className="text-xs text-slate-800 font-semibold">Só Serv. não Concluídos</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="novos" />
-            <Label htmlFor="novos" className="text-xs">Novos</Label>
+            <Label htmlFor="novos" className="text-xs text-slate-800 font-semibold">Novos</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="suspensos" />
-            <Label htmlFor="suspensos" className="text-xs">Suspensos</Label>
+            <Label htmlFor="suspensos" className="text-xs text-slate-800 font-semibold">Suspensos</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="semNota" />
-            <Label htmlFor="semNota" className="text-xs">Sem Nota</Label>
+            <Label htmlFor="semNota" className="text-xs text-slate-800 font-semibold">Sem Nota</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="pendencia" />
-            <Label htmlFor="pendencia" className="text-xs">Pendência</Label>
+            <Label htmlFor="pendencia" className="text-xs text-slate-800 font-semibold">Pendência</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="docInternet" />
-            <Label htmlFor="docInternet" className="text-xs">Doc.Internet</Label>
+            <Label htmlFor="docInternet" className="text-xs text-slate-800 font-semibold">Doc.Internet</Label>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox id="soOS" />
-            <Label htmlFor="soOS" className="text-xs">Só O.S.</Label>
+            <Label htmlFor="soOS" className="text-xs text-slate-800 font-semibold">Só O.S.</Label>
           </div>
         </div>
 
         {/* Row 3: Services and Tasks */}
-        <div className="flex gap-4">
+        <div className="flex flex-row place-items-end gap-4">
           <div className="flex items-center gap-2">
-            <Label className="text-xs">Gerente</Label>
-            <Input value="Mauro.Luiz" className="h-7 w-24" readOnly />
+            <Label className="text-xs text-slate-800 font-semibold">Gerente Mauro.Luiz</Label>
           </div>
 
-          <div className="flex items-center gap-1">
-            <Label className="text-xs">Serviço</Label>
+          <div className="flex items-center gap-1 ml-8">
             <div className="flex gap-2">
-              <Label className="text-xs">H.Tramit</Label>
+              <div className="flex flex-col">
+                <label className="text-[10px] font-light text-gray-600 mb-0.5 tracking-tighter">
+                  H. tramit.
+                </label>
+                <Input className="h-7 w-20" />
+              </div>
+              <div className="flex flex-col">
+              <label className="text-[10px] font-light text-gray-600 mb-0.5 tracking-tighter">
+                H. assess.
+              </label>
               <Input className="h-7 w-20" />
-              <Label className="text-xs">H.Assoc.</Label>
-              <Input className="h-7 w-20" />
+                </div>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
-            <Label className="text-xs">Tarefas</Label>
             <div className="flex gap-2">
-              <Label className="text-xs">TE tramit.</Label>
+              <div className="flex flex-col">
+                <label className="text-[10px] font-light text-gray-600 mb-0.5 tracking-tighter">
+                  TE tramit.
+                </label>
+                <Input className="h-7 w-20" />
+              </div>
+              <div className="flex flex-col">
+              <label className="text-[10px] font-light text-gray-600 mb-0.5 tracking-tighter">
+                TE assess.
+              </label>
               <Input className="h-7 w-20" />
-              <Label className="text-xs">TE assoc.</Label>
-              <Input className="h-7 w-20" />
+                </div>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 }

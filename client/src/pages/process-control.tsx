@@ -64,7 +64,7 @@ export default function ProcessControlPage() {
   return (
     <div className="bg-black text-white min-h-screen">
       {/* Conteúdo principal que ocupa a largura total */}
-      <div className="w-full mx-auto px-2 pb-2">
+      <div className="w-full mx-auto px-1 pb-1">
         <div className="text-xs font-light mb-1">Controle de Processos</div>
 
         {/* Layout responsivo condicional - usando classes para targetar exatamente 1920px */}
@@ -72,7 +72,7 @@ export default function ProcessControlPage() {
           {/* Layout para tela grande (1920px) - cards lado a lado */}
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
-            <div className="flex justify-center gap-2 mb-2">
+            <div className="flex justify-center gap-1 mb-1">
               <div className="w-[940px] h-[150px]">
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
@@ -85,7 +85,7 @@ export default function ProcessControlPage() {
             </div>
 
             {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
-            <div className="flex justify-center gap-2 mb-2">
+            <div className="flex justify-center gap-1 mb-1">
               <div className="w-[940px] h-[460px]">
                 <TableServicos
                   qcodCoor={codCoor}
@@ -116,7 +116,7 @@ export default function ProcessControlPage() {
         {/* Layout para telas menores que 1920px - cards empilhados */}
         <div className="block 2xl:hidden">
           {/* Área superior: command panel + filter panel (empilhados) com altura fixa de 150px */}
-          <div className="flex flex-col items-center gap-2 mb-2">
+          <div className="flex flex-col items-center gap-1 mb-1">
             <div className="w-full max-w-[940px] h-[150px]">
               <ProcessCommandPanel
                 onClientChange={handleClientChange}
@@ -129,7 +129,7 @@ export default function ProcessControlPage() {
           </div>
 
           {/* Área do meio: serviços + tarefas (empilhados) com altura fixa de 460px */}
-          <div className="flex flex-col items-center gap-2 mb-2">
+          <div className="flex flex-col items-center gap-1 mb-1">
             <div className="w-full max-w-[940px] h-[460px]">
               <TableServicos
                 qcodCoor={codCoor}
@@ -148,7 +148,8 @@ export default function ProcessControlPage() {
           </div>
 
           {/* Área inferior: abas (largura total) com altura fixa de 400px */}
-          <div className="w-full h-[400px]">
+          {/* <div className="w-full max-h[19100] h-[400px]"> */}
+            <div className="w-full h-full">
             <ProcessTabs
               selectedClient={selectedClient}
               selectedUnit={selectedUnit}
