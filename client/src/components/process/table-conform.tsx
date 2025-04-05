@@ -169,7 +169,7 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
   return (
     <div style={{ width: '100%'}}>
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
-        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '100%', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
           <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
             <div style={{ overflow: 'visible' }}>
               <div style={{ position: 'relative' }}>
