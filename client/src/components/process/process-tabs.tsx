@@ -12,7 +12,7 @@ export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) 
   return (
     <div className="w-full flex mx-auto h-full">
       {/* Tabs na vertical seguindo o exemplo da imagem */}
-      <Tabs defaultValue="conformidade" orientation="vertical" className="flex w-full h-[calc(100vh-180px)]">
+      <Tabs defaultValue="conformidade" orientation="vertical" className="flex w-full h-full">
         <TabsList className="bg-[#d0e0f0] text-gray-600 h-full flex flex-col shrink-0 rounded-r-none">
           <TabsTrigger 
             value="conformidade" 
