@@ -10,7 +10,7 @@ interface ProcessFilterPanelProps {
 
 export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) {
   return (
-    <Card className="bg-card/20 backdrop-blur shadow-md w-full h-[150px]">
+    <Card className="bg-card/20 backdrop-blur shadow-md w-full h-[150px] overflow-hidden">
       <CardContent className="p-2 space-y-2">
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
