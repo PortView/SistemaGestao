@@ -40,9 +40,9 @@ export function ProcessTabs({ selectedClient, selectedUnit }: ProcessTabsProps) 
           </TabsTrigger>
         </TabsList>
         
-        <div className="flex-1 h-full">
+        <div className="flex-1 overflow-x-auto h-full">
           <TabsContent value="conformidade" className="mt-0 h-full">
-            <div className="bg-white rounded-l-none rounded-r-md h-full">
+            <div className="bg-white rounded-l-none rounded-r-md overflow-x-auto h-full">
               <ComplianceSection selectedClient={selectedClient} selectedUnit={selectedUnit} />
             </div>
           </TabsContent>
