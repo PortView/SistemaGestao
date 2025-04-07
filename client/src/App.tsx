@@ -68,7 +68,8 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
         <VerificationDialog
           open={verificationOpen}
           onOpenChange={setVerificationOpen}
@@ -77,6 +78,7 @@ function App() {
         <Router />
         <Toaster />
       </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
