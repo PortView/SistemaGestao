@@ -17,7 +17,8 @@ import { AuthProvider } from "./hooks/use-auth";
 import { ProtectedRoute } from "./components/auth/protected-route";
 import { queryClient } from "./lib/queryClient";
 import { VerificationDialog } from "./components/verification-dialog"; // Added import
-import { useState, useEffect } from "react"; // Added import
+import { useState, useEffect } from "react";
+import { ThemeProvider } from "@/components/theme/theme-provider"; // Added import
 
 function ProtectedRouter() {
   return (
