@@ -54,7 +54,7 @@ export default function ProcessControlPage() {
     setSelectedService(null);
     setSelectedServicoCod(-1);
   };
-  
+
   // Handler para processar a seleção de serviço
   const handleServicoSelect = (codServ: number) => {
     console.log('Serviço selecionado:', codServ);
@@ -73,20 +73,20 @@ export default function ProcessControlPage() {
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[150px]">
+              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px] h-[150px]">
+              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
                 <ProcessFilterPanel />
               </div>
             </div>
 
             {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[460px]">
+              <div className="w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}
@@ -98,13 +98,13 @@ export default function ProcessControlPage() {
                   onSelectServico={handleServicoSelect}
                 />
               </div>
-              <div className="w-[940px] h-[460px]">
+              <div className="w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
                 <TableFollowup codserv={selectedServicoCod} />
               </div>
             </div>
 
             {/* Área inferior: abas (largura total) com altura fixa de 400px */}
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[400px] bg-card"> {/* Added bg-card */}
               <ProcessTabs
                 selectedClient={selectedClient}
                 selectedUnit={selectedUnit}
@@ -117,20 +117,20 @@ export default function ProcessControlPage() {
         <div className="block 2xl:hidden">
           {/* Área superior: command panel + filter panel (empilhados) com altura fixa de 150px */}
           <div className="flex flex-col items-center gap-1 mb-1">
-            <div className="w-full max-w-[940px] h-[150px]">
+            <div className="w-full max-w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
               <ProcessCommandPanel
                 onClientChange={handleClientChange}
                 onUnitChange={handleUnitChange}
               />
             </div>
-            <div className="w-full max-w-[940px] h-[150px]">
+            <div className="w-full max-w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
               <ProcessFilterPanel />
             </div>
           </div>
 
           {/* Área do meio: serviços + tarefas (empilhados) com altura fixa de 460px */}
           <div className="flex flex-col items-center gap-1 mb-1">
-            <div className="w-full max-w-[940px] h-[460px]">
+            <div className="w-full max-w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
               <TableServicos
                 qcodCoor={codCoor}
                 qcontrato={selectedUnit?.contrato || null}
@@ -142,14 +142,14 @@ export default function ProcessControlPage() {
                 onSelectServico={handleServicoSelect}
               />
             </div>
-            <div className="w-full max-w-[940px] h-[460px]">
+            <div className="w-full max-w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
               <TableFollowup codserv={selectedServicoCod} />
             </div>
           </div>
 
           {/* Área inferior: abas (largura total) com altura fixa de 400px */}
           {/* <div className="w-full max-h[19100] h-[400px]"> */}
-            <div className="w-full h-full">
+            <div className="w-full h-full bg-card"> {/* Added bg-card */}
             <ProcessTabs
               selectedClient={selectedClient}
               selectedUnit={selectedUnit}
