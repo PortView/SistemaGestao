@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +19,13 @@ import { SiscopUser } from "@/lib/types";
 const Header = () => {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  // Cast para SiscopUser se necessário - se os dados vierem da API do Siscop
+  const { theme, setTheme } = useTheme();
   const siscopUser = user as SiscopUser;
   const [activeMenu, setActiveMenu] = useState("");
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   // Fetch unread notifications
   const { data: notifications } = useQuery<any>({
@@ -160,6 +164,16 @@ const Header = () => {
               {(localStorage.getItem('user_name') || 'U')[0]}
             </AvatarFallback>
           </Avatar>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-gray-800 mr-2"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
 
           <Button 
             variant="ghost" 
