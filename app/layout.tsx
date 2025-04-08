@@ -15,7 +15,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <title>Siscop - Sistema de Controle de Processos</title>
         <meta name="description" content="Sistema de gerenciamento de documentos imobiliários" />
       </head>
-      <body className={cn('min-h-screen bg-black font-sans antialiased text-white')}>
+      <body className={cn('min-h-screen font-sans antialiased bg-background text-foreground')}>
         <Providers>
           {children}
           <Toaster />

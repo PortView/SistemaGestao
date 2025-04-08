@@ -93,10 +93,10 @@ const Header = () => {
     <header className="h-16 px-4 flex items-center justify-between border-b dark:border-gray-700 border-gray-200 bg-white dark:bg-black text-black dark:text-white fixed w-full z-50">
       <div className="flex items-center">
         <span 
-          className="text-xl font-bold text-black dark:text-white mr-8 cursor-pointer" 
+          className="text-2xl font-bold text-black dark:text-white mr-8 mb-2 cursor-pointer" 
           onClick={() => setLocation("/")}
         >
-          Siscop
+          Siscop        
         </span>
 
         <nav className="flex">
