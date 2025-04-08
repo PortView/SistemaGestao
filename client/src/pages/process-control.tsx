@@ -62,7 +62,7 @@ export default function ProcessControlPage() {
   };
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
       {/* Conteúdo principal que ocupa a largura total */}
       <div className="w-full mx-auto px-1 pb-1">
         <div className="text-xs font-light mb-1">Controle de Processos</div>

@@ -449,7 +449,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   }, [selectedUnit, onUnitChange]);
   
   return (
-      <div className="bg-[#d0e0f0] border-none shadow-md w-[940px] h-[150px] rounded-sm">
+      <Card className="border-none shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-1 flex flex-col gap-1">
         {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos */}
         <div className="flex items-center gap-2">
@@ -896,6 +896,6 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         onConfirm={handleConfirmApiCall}
         params={apiParams}
       />
-    </div>
+    </Card>
   );
 }

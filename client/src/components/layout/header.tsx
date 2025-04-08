@@ -33,10 +33,7 @@ const Header = () => {
     ? notifications.data.length 
     : 0;
 
-  const toggleTheme = () => {
-    // In a real implementation, you'd also need to update the document class or a theme context
-    setIsDarkMode(!isDarkMode);
-  };
+  // Função de alternância de tema já implementada com next-themes
 
   const handleLogout = () => {
     logout();
@@ -93,10 +90,10 @@ const Header = () => {
   ];
 
   return (
-    <header className="h-16 px-4 flex items-center justify-between border-b border-gray-700 bg-black text-white fixed w-full z-50">
+    <header className="h-16 px-4 flex items-center justify-between border-b dark:border-gray-700 border-gray-200 bg-white dark:bg-black text-black dark:text-white fixed w-full z-50">
       <div className="flex items-center">
         <span 
-          className="text-xl font-bold text-white mr-8 cursor-pointer" 
+          className="text-xl font-bold text-black dark:text-white mr-8 cursor-pointer" 
           onClick={() => setLocation("/")}
         >
           Siscop
@@ -109,15 +106,15 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   className={cn(
-                    "text-white hover:bg-gray-800 rounded-none",
+                    "text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-none",
                     (activeMenu === menu.name || (menu.name === "Gerência" && location === "/controle-processos")) && 
-                      "bg-amber-800"
+                      "bg-blue-600 dark:bg-amber-800 text-white"
                   )}
                 >
                   {menu.name}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-700 text-white border-gray-800 w-56 rounded-none">
+              <DropdownMenuContent className="bg-white dark:bg-gray-700 text-black dark:text-white border-gray-200 dark:border-gray-800 w-56 rounded-none">
                 {menu.items.map((item) => (
                   <DropdownMenuItem 
                     key={item}
@@ -132,7 +129,7 @@ const Header = () => {
                     }}
                   >
                     <div 
-                      className="cursor-pointer hover:bg-gray-600 w-full text-white px-4 py-2"
+                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-black dark:text-white px-4 py-2"
                     >
                       {item}
                     </div>
@@ -147,16 +144,16 @@ const Header = () => {
       <div className="flex items-center space-x-2">
         <div className="flex items-center mr-4">
           <div className="mr-4 text-right">
-            <p className="text-sm font-medium text-white">
+            <p className="text-sm font-medium text-black dark:text-white">
               {localStorage.getItem('user_name') || 'Carregando...'}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               {localStorage.getItem('user_tipo') || 'Analista'}
             </p>
           </div>
 
           <Avatar className="h-8 w-8 mr-2">
-            <AvatarFallback className="bg-gray-700">
+            <AvatarFallback className="bg-gray-200 dark:bg-gray-700 text-black dark:text-white">
               {(localStorage.getItem('user_name') || 'U')[0]}
             </AvatarFallback>
           </Avatar>
@@ -164,7 +161,7 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-gray-800 mr-2"
+            className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 mr-2"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
           >
@@ -174,7 +171,7 @@ const Header = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-white hover:bg-gray-800"
+            className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={handleLogout}
             title="Sair do sistema"
           >
