@@ -20,10 +20,10 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
-    --dropdown: 210, 52%, 88%;
-    --dropdown-foreground: 0, 0%, 20%;
+    --dropdown: 210 52% 88%;
+    --dropdown-foreground: 0 0% 20%;
 
-    --card: 210 86% 60%;
+    --card: 210 78% 74%;
     --card-foreground: 0 0% 20%;
 
     --primary: 222.2 47.4% 11.2%;
@@ -56,7 +56,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
 
-    --card: 210 86% 60%;
+    --card: 210 78% 10%;
     --card-foreground: 0 0% 20%;
 
     --primary: 210 40% 98%;
