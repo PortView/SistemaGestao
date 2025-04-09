@@ -681,7 +681,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             size="sm" 
             className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
           >
-            Contr: 03119
+            {`Contr: ${selectedUnit?.contrato ? ('00' + selectedUnit.contrato).slice(-6) : '-----'}`}
           </Button>
         </div>
         
