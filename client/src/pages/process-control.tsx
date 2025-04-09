@@ -74,13 +74,13 @@ export default function ProcessControlPage() {
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
                 <ProcessFilterPanel />
               </div>
             </div>

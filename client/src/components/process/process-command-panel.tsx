@@ -449,9 +449,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   }, [selectedUnit, onUnitChange]);
   
   return (
-      <Card className="border-2 border-zinc-200 shadow-md w-[940px] h-[150px] rounded-sm bg-blue-200">
+      <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 flex flex-col gap-2">
-        {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos */}
+        {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos ----- bg-blue-200  bg-[#bfdbfe] */}
         <div className="flex items-center gap-2">
           {/* Cliente */}
           <Select
@@ -681,13 +681,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             size="sm" 
             className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
           >
-            {`Contr: ${selectedUnit?.contrato ? ('00' + selectedUnit.contrato).slice(-6) : '-----'}`}
+            {`Contr: ${selectedUnit?.contrato ? ('00' + selectedUnit.contrato).slice(-7) : '-----'}`}
           </Button>
         </div>
         
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-1">
-          <Label htmlFor="unidades" className="text-slate-800 text-xs font-semibold mr-2">Unidades</Label>
+          <Label htmlFor="unidades" className="text-zinc-900 text-xs font-semibold mr-2">Unidades</Label>
           {unitsError ? (
             <div className="flex items-center gap-2">
               <span className="text-red-500 text-xs">Erro ao carregar unidades</span>

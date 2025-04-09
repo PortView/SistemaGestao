@@ -10,7 +10,7 @@ interface ProcessFilterPanelProps {
 
 export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) {
   return (
-      <div className="bg-[#d0e0f0] border-none shadow-md w-[940px] h-[150px] rounded-sm">
+      <Card className="border-none shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 space-y-1">
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
@@ -127,6 +127,6 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
           </div>
         </div>
       </CardContent>
-    </div>
+    </Card>
   );
 }
