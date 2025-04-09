@@ -94,7 +94,7 @@ const Header = () => {
       <div className="flex items-center">
         <span 
           className="text-2xl font-bold text-black dark:text-white mr-8 mb-2 cursor-pointer" 
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/dashboard")}
         >
           Siscop        
         </span>
