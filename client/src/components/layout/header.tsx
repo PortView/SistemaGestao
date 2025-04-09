@@ -90,7 +90,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="h-16 px-4 flex items-center justify-between border-b dark:border-gray-700 border-gray-200 bg-white dark:bg-black text-black dark:text-white fixed w-full z-50">
+    <header className="h-16 px-4 flex items-center justify-between border-b dark:border-gray-700 border-gray-500 bg-zinc-400 dark:bg-zinc-700 text-black dark:text-white fixed w-full z-50">
       <div className="flex items-center">
         <span 
           className="text-2xl font-bold text-black dark:text-white mr-8 mb-2 cursor-pointer" 
