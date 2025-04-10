@@ -2,6 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { ApiService } from "@/lib/api-service";
 import {
   Select,
   SelectContent,
@@ -17,6 +19,21 @@ interface ProcessFilterPanelProps {
 export function ProcessFilterPanel({
   onFilterChange,
 }: ProcessFilterPanelProps) {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await ApiService.get('/ger-clientes/servicos');
+        setData(response || []);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setData([]);
+      }
+    };
+
+    fetchServices();
+  }, []);
   return (
      <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 flex flex-col gap-2">
@@ -47,8 +64,13 @@ export function ProcessFilterPanel({
                   <SelectValue placeholder="Sele..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="8">8888</SelectItem>
-                  <SelectItem value="9">9999</SelectItem>
+                  {data?.map(service => (
+                    <SelectItem key={service.codServ} value={service.codServ.toString()}>
+                      {service.codServ}
+                    </SelectItem>
+                  )).filter((item, index, self) => 
+                    index === self.findIndex((t) => t.props.value === item.props.value)
+                  )}
                 </SelectContent>
               </Select>
             </div>
