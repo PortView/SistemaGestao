@@ -57,11 +57,14 @@
 
     --bborder: 217.2 32.6% 17.5%;
     --border: 240 5% 96%;
+
+    --select: 240 5% 86%;
+    --select-foreground: 0 0% 20%;
     
     --input: 240 5% 96%;
     --input-foreground: 0 0% 20%;
 
-    --card: 210 78% 10%;
+    --card: 210 78% 20%;
     --card-foreground: 0 0% 20%;
 
     --primary: 210 40% 98%;
