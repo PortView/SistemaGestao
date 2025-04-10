@@ -232,29 +232,8 @@ export class ApiService {
               signal: controller.signal
             };
             
-            const maxRetries = 3;
-  let attempt = 1;
-  let lastError;
-
-  while (attempt <= maxRetries) {
-    try {
-      response = await fetch(fullUrl, fetchOptionsWithSignal);
-      break;
-    } catch (error) {
-      console.log(`ApiService.request - Tentativa ${attempt} falhou:`, error);
-      lastError = error;
-      
-      if (attempt === maxRetries) {
-        console.log('ApiService.request - Todas as 3 tentativas falharam');
-        throw error;
-      }
-      
-      // Wait 2 seconds before retrying
-      console.log('ApiService.request - Aguardando 2 segundos antes da próxima tentativa');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      attempt++;
-    }
-  }
+            // Fazer a requisição usando o fetch
+            response = await fetch(fullUrl, fetchOptionsWithSignal);
             
             // Limpar o timeout se a requisição foi bem-sucedida
             clearTimeout(timeoutId);
