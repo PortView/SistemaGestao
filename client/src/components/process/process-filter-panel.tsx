@@ -45,7 +45,7 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
             <Checkbox id="dtlimite" />
             <Label htmlFor="dtlimite" className="text-secondary-foreground text-xs font-semibold">Dt.Limite</Label>
             
-            <Input type="date" className="h-7 w-36 bg-input text-input-foreground border-border [&::-webkit-calendar-picker-indicator]:text-input-foreground [&::-webkit-calendar-picker-indicator]:filter-[color:var(--input-foreground)]" defaultValue="2010-06-16" />
+            <Input type="date" className="h-7 w-36 bg-input text-input-foreground border-border [&::-webkit-calendar-picker-indicator]:text-input-foreground dark:[&::-webkit-calendar-picker-indicator]:invert" defaultValue="2010-06-16" />
           </div>
         </div>
 
