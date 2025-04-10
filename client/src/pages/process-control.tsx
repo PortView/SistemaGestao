@@ -87,7 +87,7 @@ export default function ProcessControlPage() {
 
             {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[460px] bg-card "> {/* Added bg-card */}
+              <div className="w-[940px] h-[460px] bg-card rounded-lg"> {/* Added bg-card and rounded-lg */}
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}
