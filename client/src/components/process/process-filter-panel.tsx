@@ -21,8 +21,8 @@ export function ProcessFilterPanel({
     <Card className=" w-[940px] h-[50px] rounded-sm bg-black">
       <CardContent className="p-2 flex flex-col gap-2">
         {/* Row 1: Main filters */}
-        <div className="flex items-center gap-4">
-          <div className="flex w-full">
+        <div className="flex items-start gap-4">
+          <div className="flex w-full justify-start">
             <div className="flex flex-row items-center gap-2">
               <Checkbox
                 id="codserv"
@@ -54,7 +54,7 @@ export function ProcessFilterPanel({
             </div>
             
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-start">
             <Checkbox id="status" />
             <Label
               htmlFor="status"
