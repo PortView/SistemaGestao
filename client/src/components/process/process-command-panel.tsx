@@ -449,7 +449,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   }, [selectedUnit, onUnitChange]);
   
   return (
-      <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-md">
+      <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 flex flex-col gap-2">
         {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos ----- bg-blue-200  bg-[#bfdbfe] */}
         <div className="flex items-center gap-2">
