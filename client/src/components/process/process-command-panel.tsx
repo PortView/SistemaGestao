@@ -23,19 +23,19 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const isProcessingClientChange = useRef(false);
   const isProcessingUfChange = useRef(false);
   const lastFetchedParams = useRef<{ codcli?: number, uf?: string } | null>(null);
-  
+
   // Estados principais
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
   const [selectedUF, setSelectedUF] = useState<string | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<SiscopUnidade | null>(null);
   const [manualUFSelection, setManualUFSelection] = useState<boolean>(false);
-  
+
   // Estados para dados e operações
   const [codCoor, setCodCoor] = useState<number>(0);
   const [units, setUnits] = useState<SiscopUnidade[]>([]);
   const [isLoadingUnits, setIsLoadingUnits] = useState(false);
   const [unitsError, setUnitsError] = useState<Error | null>(null);
-  
+
   // Estados UI e filtragem
   const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false);
   const [apiParams, setApiParams] = useState({
@@ -53,28 +53,28 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [shouldShowPagination, setShouldShowPagination] = useState(false);
-  
+
   // Carregar dados do usuário uma única vez e inicializar estados
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     // Ao carregar a página, o checkbox deve estar unchecked e desabilitado
     setAllUfs(false);
-    
+
     // Limpar todos os estados iniciais
     setSelectedClient(null);
     setSelectedUF(null);
     setSelectedUnit(null);
     setUnits([]);
-    
+
     try {
       // Obter token
       const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-      
+
       // Obter dados do usuário
       const userJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
       if (!userJson) return;
-      
+
       const userData = JSON.parse(userJson);
       if (userData?.cod) {
         setCodCoor(userData.cod);
@@ -83,7 +83,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       console.error('Erro ao carregar dados do usuário:', e);
     }
   }, []);
-  
+
   // Query para carregar clientes (com cache e retry)
   const { 
     data: clients = [], 
@@ -92,7 +92,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     queryKey: ['siscop-clientes', codCoor],
     queryFn: async () => {
       if (!codCoor) return [];
-      
+
       const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
       if (!token) return [];
 
@@ -150,13 +150,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   // Função interna para limpar o cache de unidades
   const clearUnitsCacheInternal = (client: number, uf: string, coorCode: number) => {
     if (!client || !uf || !coorCode) return;
-    
+
     // Limpar chave específica do localStorage
     const cacheKey = `units_${coorCode}_${client}_${uf}_1`;
     console.log(`Limpando cache para ${cacheKey}`);
     localStorage.removeItem(cacheKey);
   };
-  
+
   // Função para limpar o cache de unidades (versão com hook)
   const clearUnitsCache = useCallback((client: number, uf: string) => {
     clearUnitsCacheInternal(client, uf, codCoor);
@@ -173,60 +173,60 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     if (processingRef.current) {
       return null;
     }
-    
+
     // Verificar se é uma mudança real de cliente/UF ou se é apenas um recarregamento
     const isParameterChange = 
       lastFetchedParams.current?.codcli !== codcli || 
       lastFetchedParams.current?.uf !== uf;
-    
+
     // Sempre limpar cache quando mudar cliente ou UF
     if (isParameterChange && codCoor) {
       clearUnitsCacheInternal(codcli, uf, codCoor);
     }
-    
+
     // Marcar como em processamento
     processingRef.current = true;
-    
+
     // Limpar unidades enquanto carrega novos dados
     setUnits([]);
-    
+
     // Atualizar parâmetros da última busca
     lastFetchedParams.current = { codcli, uf };
-    
+
     if (!codCoor) {
       processingRef.current = false;
       return null;
     }
-    
+
     setIsLoadingUnits(true);
     setUnitsError(null);
-    
+
     try {
       const params = { codcoor: codCoor, codcli, uf, page: 1 };
-      
+
       console.log(`Buscando unidades para cliente ${codcli} e UF ${uf}`);
-      
+
       // Sempre forçar recarga de dados (sem usar cache) para garantir dados atualizados
       // Independente se é troca de cliente, UF ou não
       const options = { skipCache: true };
       const response = await fetchUnidades(params, options);
-      
+
       if (!response?.folowups) {
         setUnits([]);
         processingRef.current = false;
         setSelectedUnit(null); // Garantir que nenhuma unidade esteja selecionada se não houver dados
         return null;
       }
-      
+
       // Atualizar unidades
       setUnits(response.folowups);
-      
+
       // Atualizar informações de paginação
       if (response.pagination) {
         setCurrentPage(response.pagination.currentPage);
         setTotalPages(response.pagination.lastPage);
         setTotalItems(response.pagination.totalItems);
-        
+
         // Mostrar paginação apenas se houver mais de 100 itens
         setShouldShowPagination(response.pagination.totalItems > 100);
       } else {
@@ -236,7 +236,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         setTotalItems(0);
         setShouldShowPagination(false);
       }
-      
+
       // Verificar se há unidades
       if (response.folowups.length === 0) {
         toast({
@@ -248,7 +248,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         setSelectedUnit(null); // Garantir que nenhuma unidade esteja selecionada
         return null;
       }
-      
+
       // Selecionar primeira unidade com timeout para evitar renders excessivos
       if (response.folowups.length > 0) {
         const firstUnit = response.folowups[0];
@@ -257,7 +257,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           processingRef.current = false;
         }, 100);
       }
-      
+
       return response;
     } catch (error) {
       console.error('Erro ao buscar unidades:', error);
@@ -285,47 +285,47 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       });
       return;
     }
-    
+
     fetchUnitsIfNeeded(selectedClient, selectedUF, isProcessingUfChange, true);
   }, [selectedClient, selectedUF, fetchUnitsIfNeeded]);
-  
+
   // Função para carregar unidades com paginação
   const loadPagedUnits = useCallback((pageNumber: number) => {
     if (!selectedClient || !codCoor) return;
-    
+
     // Se não houver UF selecionada e o checkbox Todas UFs estiver desmarcado, não fazer nada
     if (!selectedUF && !allUfs) return;
-    
+
     // Determinar a UF a ser usada
     const ufParam = allUfs ? "ZZ" : selectedUF;
-    
+
     if (!ufParam) return;
-    
+
     setIsLoadingUnits(true);
-    
+
     const params = {
       codcoor: codCoor,
       codcli: selectedClient,
       uf: ufParam,
       page: pageNumber
     };
-    
+
     // Força o refresh do cache
     fetchUnidades(params, { skipCache: true })
       .then(response => {
         if (response?.folowups) {
           setUnits(response.folowups);
-          
+
           // Atualizar informações de paginação
           if (response.pagination) {
             setCurrentPage(response.pagination.currentPage);
             setTotalPages(response.pagination.lastPage);
             setTotalItems(response.pagination.totalItems);
-            
+
             // Mostrar paginação apenas se houver mais de 100 itens
             setShouldShowPagination(response.pagination.totalItems > 100);
           }
-          
+
           if (response.folowups.length > 0) {
             // Selecionar primeira unidade
             setTimeout(() => {
@@ -350,7 +350,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   // Handler para o diálogo de API
   const showParamsDialog = useCallback(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-    
+
     setApiParams({
       token: token || 'não disponível',
       codcoor: Number(codCoor) || 0,
@@ -358,7 +358,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       uf: selectedUF || 'não disponível',
       page: 1
     });
-    
+
     setIsVerifyDialogOpen(true);
   }, [codCoor, selectedClient, selectedUF]);
 
@@ -373,17 +373,17 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     if (selectedClient && selectedUF) {
       clearUnitsCache(selectedClient, selectedUF);
     }
-    
+
     // Definir o novo cliente
     setSelectedClient(codcli);
-    
+
     // Forçar remoção da seleção manual de UF para permitir seleção automática
     setManualUFSelection(false);
-    
+
     // Limpar seleções atuais
     setSelectedUnit(null);
     setUnits([]);
-    
+
     // Encontrar a primeira UF do novo cliente selecionado e defini-la imediatamente
     const clientData = clients.find(c => c.codcli === codcli);
     if (clientData?.lc_ufs?.length) {
@@ -394,7 +394,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
       // Se o cliente não tiver UFs, limpar a UF selecionada
       setSelectedUF(null);
     }
-    
+
     // Notificar o componente pai
     if (onClientChange) {
       onClientChange(codcli);
@@ -407,12 +407,12 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
     if (selectedClient && selectedUF) {
       clearUnitsCache(selectedClient, selectedUF);
     }
-    
+
     // Limpar possível cache para a nova combinação cliente/UF
     if (selectedClient && uf) {
       clearUnitsCache(selectedClient, uf);
     }
-    
+
     setSelectedUF(uf);
     setManualUFSelection(true);
     setSelectedUnit(null);
@@ -427,27 +427,27 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   // Efeito: carregar unidades quando UF e cliente estiverem definidos
   useEffect(() => {
     if (!selectedClient || !selectedUF) return;
-    
+
     // Limpar cache atual antes de buscar novas unidades
     clearUnitsCache(selectedClient, selectedUF);
-    
+
     // Use a referência apropriada dependendo se foi mudança manual de UF ou automática
     const processingRef = manualUFSelection ? isProcessingUfChange : isProcessingClientChange;
-    
+
     fetchUnitsIfNeeded(selectedClient, selectedUF, processingRef);
   }, [selectedClient, selectedUF, manualUFSelection, fetchUnitsIfNeeded, clearUnitsCache]);
 
   // Efeito: quando a unidade muda, notificar o componente pai
   useEffect(() => {
     if (!selectedUnit || !onUnitChange) return;
-    
+
     const timer = setTimeout(() => {
       onUnitChange(selectedUnit);
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, [selectedUnit, onUnitChange]);
-  
+
   return (
       <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 flex flex-col gap-2">
@@ -473,7 +473,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     // Manter a referência ao input atual
                     const inputElement = e.target;
                     setClientSearchTerm(e.target.value);
-                    
+
                     // Manter o foco no input após atualizar o valor
                     setTimeout(() => {
                       if (inputElement) {
@@ -497,7 +497,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               )}
             </SelectContent>
           </Select>
-          
+
           {/* UF - Dropdown com seleção real */}
           <Select
             disabled={!selectedClient || ufs.length === 0 || allUfs}
@@ -519,7 +519,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     // Manter a referência ao input atual
                     const inputElement = e.target;
                     setUfSearchTerm(e.target.value);
-                    
+
                     // Manter o foco no input após atualizar o valor
                     setTimeout(() => {
                       if (inputElement) {
@@ -543,7 +543,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               )}
             </SelectContent>
           </Select>
-          
+
           {/* Checkbox Todas UFs */}
           <div className="flex items-center h-8 px-2">
             <Checkbox 
@@ -553,7 +553,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               onCheckedChange={(checked) => {
                 const isChecked = !!checked;
                 setAllUfs(isChecked);
-                
+
                 // Se marcado, buscar unidades com UF="ZZ", senão usar o UF selecionado
                 if (isChecked) {
                   // Buscar todas as UFs com parâmetro especial "ZZ"
@@ -565,20 +565,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       uf: "ZZ", // Código especial para todas as UFs
                       page: 1
                     };
-                    
+
                     setIsLoadingUnits(true);
                     // Forçar requisição nova ao mudar o filtro para todas UFs
                     fetchUnidades(params, { skipCache: true })
                       .then(response => {
                         if (response?.folowups) {
                           setUnits(response.folowups);
-                          
+
                           // Atualizar informações de paginação
                           if (response.pagination) {
                             setCurrentPage(response.pagination.currentPage);
                             setTotalPages(response.pagination.lastPage);
                             setTotalItems(response.pagination.totalItems);
-                            
+
                             // Mostrar paginação apenas se houver mais de 100 itens
                             setShouldShowPagination(response.pagination.totalItems > 100);
                           } else {
@@ -587,7 +587,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                             setTotalItems(0);
                             setShouldShowPagination(false);
                           }
-                          
+
                           if (response.folowups.length > 0) {
                             // Selecionar primeira unidade
                             setTimeout(() => {
@@ -616,20 +616,20 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     uf: selectedUF,
                     page: 1
                   };
-                  
+
                   setIsLoadingUnits(true);
                   // Forçar requisição nova ao desmarcar "Todas UFs"
                   fetchUnidades(params, { skipCache: true })
                     .then(response => {
                       if (response?.folowups) {
                         setUnits(response.folowups);
-                        
+
                         // Atualizar informações de paginação
                         if (response.pagination) {
                           setCurrentPage(response.pagination.currentPage);
                           setTotalPages(response.pagination.lastPage);
                           setTotalItems(response.pagination.totalItems);
-                          
+
                           // Mostrar paginação apenas se houver mais de 100 itens
                           setShouldShowPagination(response.pagination.totalItems > 100);
                         } else {
@@ -638,7 +638,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                           setTotalItems(0);
                           setShouldShowPagination(false);
                         }
-                        
+
                         if (response.folowups.length > 0) {
                           // Selecionar primeira unidade
                           setTimeout(() => {
@@ -664,7 +664,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             />
             <Label htmlFor="todas-ufs" className="text-secondary-foreground text-xs font-semibold">Todas UFs</Label>
           </div>
-          
+
           {/* Botão Planilhas */}
           <Button 
             variant="outline" 
@@ -674,7 +674,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             <FileText className="h-4 w-4 mr-1" />
             Planilhas
           </Button>
-          
+
           {/* Botão Contrato */}
           <Button 
             variant="outline" 
@@ -684,7 +684,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             {`Contr: ${selectedUnit?.contrato ? ('00' + selectedUnit.contrato).slice(-7) : '-----'}`}
           </Button>
         </div>
-        
+
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-1">
           <Label htmlFor="unidades" className="text-secondary-foreground text-xs font-semibold mr-2">Unidades</Label>
@@ -734,7 +734,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                         // Manter a referência ao input atual
                         const inputElement = e.target;
                         setUnitSearchTerm(e.target.value);
-                        
+
                         // Manter o foco no input após atualizar o valor
                         setTimeout(() => {
                           if (inputElement) {
@@ -758,7 +758,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   )}
                 </SelectContent>
               </Select>
-              
+
               {/* <div className="flex gap-1">
                 <Button 
                   variant="outline" 
@@ -771,7 +771,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               </div> */}
             </div>
           )}
-          
+
           {/* Paginação - Visível apenas quando há mais de 100 itens */}
           {shouldShowPagination && (
             <div className="flex items-center gap-[2px] ml-2">
@@ -785,7 +785,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
-              
+
               {/* Página anterior */}
               <Button 
                 variant="outline" 
@@ -796,14 +796,14 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
+
               {/* Exibição da página atual e total */}
               <div className="bg-blue-900 rounded h-8 px-3 flex items-center text-sm font-medium text-white border border-blue-600">
                 <span>{currentPage}</span>
                 <span className="mx-1">/</span>
                 <span>{totalPages}</span>
               </div>
-              
+
               {/* Próxima página */}
               <Button 
                 variant="outline" 
@@ -814,7 +814,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              
+
               {/* Última página */}
               <Button 
                 variant="outline" 
@@ -825,7 +825,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>
-              
+
               {/* Input para ir para uma página específica */}
               <Input
                 type="number"
@@ -845,7 +845,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     } else {
                       toast({
                         title: 'Página inválida',
-                        description: `Informe um número entre 1 e ${totalPages}`,
+                        description: `Informe um númeroentre 1 e ${totalPages}`,
                         variant: 'destructive',
                       });
                     }
@@ -855,7 +855,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             </div>
           )}
         </div>
-        
+
         {/* Terceira linha: 7 botões com ícones */}
         <div className="flex items-center gap-1">
           <Button variant="outline" size="sm" className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200">
@@ -888,7 +888,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Button>
         </div>
       </CardContent>
-      
+
       {/* Diálogo de verificação de parâmetros da API */}
       <ApiParamDialog 
         isOpen={isVerifyDialogOpen}
