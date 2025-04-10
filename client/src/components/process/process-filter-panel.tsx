@@ -15,10 +15,18 @@ export function ProcessFilterPanel({ onFilterChange }: ProcessFilterPanelProps) 
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Checkbox id="codserv" />
+            <Checkbox 
+              id="codserv" 
+              onCheckedChange={(checked) => {
+                const select = document.getElementById('codserv-select');
+                if (select) {
+                  select.style.display = checked ? 'block' : 'none';
+                }
+              }}
+            />
             <Label htmlFor="codserv" className="text-secondary-foreground text-xs font-semibold">Cód.Serv.</Label>
             <Select defaultValue="8">
-              <SelectTrigger className="h-7 w-20 bg-select text-select-foreground border-border">
+              <SelectTrigger id="codserv-select" className="h-7 w-20 bg-select text-select-foreground border-border hidden">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
