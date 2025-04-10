@@ -18,11 +18,11 @@ export function ProcessFilterPanel({
   onFilterChange,
 }: ProcessFilterPanelProps) {
   return (
-    <Card className=" w-[940px] h-[50px] rounded-sm bg-black">
+     <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
       <CardContent className="p-2 flex flex-col gap-2">
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
-          <div className="flex w-full">
+          <div className="flex w-[190px]">
             <div className="flex flex-row items-center gap-2">
               <Checkbox
                 id="codserv"
@@ -42,7 +42,7 @@ export function ProcessFilterPanel({
               <Select>
                 <SelectTrigger
                   id="codserv-select"
-                  className="h-7 w-[90px] bg-select text-select-foreground border-border hidden"
+                  className="h-7 w-[90px] bg-select text-select-foreground border-border"
                 >
                   <SelectValue placeholder="Sele..." />
                 </SelectTrigger>
@@ -54,6 +54,7 @@ export function ProcessFilterPanel({
             </div>
             
           </div>
+          
           <div className="flex items-center gap-2">
             <Checkbox id="status" />
             <Label
