@@ -461,7 +461,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               handleClientChange(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 text-xs w-[380px] border-slate-500 bg-zinc-100 text-zinc-900">
+            <SelectTrigger className="h-8 text-xs w-[380px] bg-select text-select-foreground border-border">
               <SelectValue placeholder="Cliente" />
             </SelectTrigger>
             <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border border-slate-500 bg-popover text-popover-foreground shadow-md">
@@ -507,7 +507,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               handleUFChange(value);
             }}
           >
-            <SelectTrigger className="h-8 text-xs w-[100px]  border-slate-500 bg-zinc-100 text-zinc-900">
+            <SelectTrigger className="h-8 text-xs w-[100px] border-border bg-select text-select-foreground">
               <SelectValue placeholder="UF" />
             </SelectTrigger>
             <SelectContent className="z-50 w-[30px] overflow-hidden rounded-md border border-slate-500 bg-popover text-popover-foreground shadow-md">
@@ -545,7 +545,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Select>
           
           {/* Checkbox Todas UFs */}
-          <div className="flex items-center h-8 px-2 rounded border border-slate-200">
+          <div className="flex items-center h-8 px-2">
             <Checkbox 
               id="todas-ufs" 
               checked={allUfs}
@@ -662,7 +662,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               }}
               className="mr-1"
             />
-            <Label htmlFor="todas-ufs" className="text-xs text-blue-800">Todas UFs</Label>
+            <Label htmlFor="todas-ufs" className="text-secondary-foreground text-xs font-semibold">Todas UFs</Label>
           </div>
           
           {/* Botão Planilhas */}
@@ -687,7 +687,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
         
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-1">
-          <Label htmlFor="unidades" className="text-zinc-900 text-xs font-semibold mr-2">Unidades</Label>
+          <Label htmlFor="unidades" className="text-secondary-foreground text-xs font-semibold mr-2">Unidades</Label>
           {unitsError ? (
             <div className="flex items-center gap-2">
               <span className="text-red-500 text-xs">Erro ao carregar unidades</span>
@@ -715,7 +715,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   }
                 }}
               >
-                <SelectTrigger id="unidades" className="h-8 text-xs w-[450px] border-slate-500 bg-zinc-100 text-zinc-900">
+                <SelectTrigger id="unidades" className="h-8 text-xs w-[450px] border-slate-500 bg-select text-select-foreground border-border">
                   {isLoadingUnits ? (
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-3 w-3 animate-spin" />

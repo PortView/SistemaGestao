@@ -17,11 +17,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 240 6% 10%;
 
-    --dropdown: 210 52% 88%;
-    --dropdown-foreground: 0 0% 20%;
+    --select: 240 5% 96%;
+    --select-foreground: 0 0% 20%;
+    
+    --input: 240 5% 96%;
+    --input-foreground: 0 0% 20%;
 
     --card: 210 78% 74%;
     --card-foreground: 0 0% 20%;
@@ -53,8 +55,11 @@
     --popover: 0 0% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --bborder: 217.2 32.6% 17.5%;
+    --border: 240 5% 96%;
+    
+    --input: 240 5% 96%;
+    --input-foreground: 0 0% 20%;
 
     --card: 210 78% 10%;
     --card-foreground: 0 0% 20%;
