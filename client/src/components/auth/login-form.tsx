@@ -163,10 +163,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         // Busca os dados do usuário imediatamente após o login
         fetchUserProfile(data.access_token);
 
-        // toast({
-        //   title: "Login realizado com sucesso",
-        //   description: "Redirecionando para a tela principal",
-        // });
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Redirecionando para a tela principal",
+        });
 
         // Callback de sucesso
         onSuccess();
@@ -200,7 +200,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       <CardHeader>
         <CardTitle className="text-2xl text-white">Login</CardTitle>
         <CardDescription className="text-gray-300">
-          Entre com suas credenciais
+          Entre com suas credenciais para acessar o sistema
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -261,7 +261,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </Form>
       </CardContent>
       <CardFooter className="flex justify-center text-sm text-gray-400">
-        
+        Sistema de Gerenciamento de Documentos Imobiliários
       </CardFooter>
     </Card>
   );

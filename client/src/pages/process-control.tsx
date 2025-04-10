@@ -62,8 +62,7 @@ export default function ProcessControlPage() {
   };
 
   return (
-    // <div className="bg-zinc-400 dark:bg-zinc-800 text-foreground min-h-screen">
-      <div className="bg-zinc-600 text-white min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
       {/* Conteúdo principal que ocupa a largura total */}
       <div className="w-full mx-auto px-1 pb-1">
         <div className="text-xs font-light mb-1">Controle de Processos</div>
@@ -74,20 +73,20 @@ export default function ProcessControlPage() {
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
                 <ProcessFilterPanel />
               </div>
             </div>
 
             {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[460px] bg-card "> {/* Added bg-card */}
+              <div className="w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}

@@ -32,7 +32,7 @@ export default function LoginPage() {
             SISCOP
           </h1>
           <h2 className="mt-2 text-lg text-gray-400">
-            Sistema de Controle de processos
+            Sistema de Gerenciamento de Documentos Imobiliários
           </h2>
         </div>
         
