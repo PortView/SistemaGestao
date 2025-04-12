@@ -22,67 +22,67 @@ export function ProcessFilterPanel() {
   const [showCodServ, setShowCodServ] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [showDtLimite, setShowDtLimite] = useState(false);
-  
+
   // Estados para armazenar as listas de valores únicos
   const [codServOptions, setCodServOptions] = useState<number[]>([]);
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [dtLimiteOptions, setDtLimiteOptions] = useState<string[]>([]);
-  
+
   // Função para atualizar um filtro e disparar evento de atualização
   const updateFilter = (key: string, value: string) => {
     localStorage.setItem(key, value);
     window.dispatchEvent(new CustomEvent('filters-updated'));
   };
-  
+
   // Handler para mudança no filtro de serviço
   const handleCodServChange = (value: string) => {
     setCodServValue(value);
     updateFilter("v_codServ", value);
   };
-  
+
   // Handler para mudança no filtro de status
   const handleStatusChange = (value: string) => {
     setStatusValue(value);
     updateFilter("v_status", value);
   };
-  
+
   // Handler para mudança no filtro de data limite
   const handleDtLimiteChange = (value: string) => {
     setDtLimiteValue(value);
     updateFilter("v_dtLimite", value);
   };
-  
+
   // Função para recarregar valores do localStorage
   const loadFilterValuesFromLocalStorage = () => {
     try {
       console.log("ProcessFilterPanel: Recarregando valores dos filtros");
-      
+
       // Carregar valores dos filtros selecionados
       const storedCodServ = localStorage.getItem("v_codServ");
       const storedStatus = localStorage.getItem("v_status");
       const storedDtLimite = localStorage.getItem("v_dtLimite");
-      
+
       console.log("ProcessFilterPanel: Valores armazenados:", {
         codServ: storedCodServ,
         status: storedStatus,
         dtLimite: storedDtLimite
       });
-      
+
       if (storedCodServ) {
         setCodServValue(storedCodServ);
         setShowCodServ(storedCodServ !== "-1");
       }
-      
+
       if (storedStatus) {
         setStatusValue(storedStatus);
         setShowStatus(storedStatus !== "ALL");
       }
-      
+
       if (storedDtLimite) {
         setDtLimiteValue(storedDtLimite);
         setShowDtLimite(storedDtLimite !== "2001-01-01");
       }
-      
+
       // Carregar listas de opções
       const codServListStr = localStorage.getItem("v_codServ_list");
       if (codServListStr) {
@@ -92,7 +92,7 @@ export function ProcessFilterPanel() {
           console.log("Lista de códigos de serviço carregada:", codServList);
         }
       }
-      
+
       const statusListStr = localStorage.getItem("v_status_list");
       if (statusListStr) {
         const statusList = JSON.parse(statusListStr);
@@ -101,7 +101,7 @@ export function ProcessFilterPanel() {
           console.log("Lista de status carregada:", statusList);
         }
       }
-      
+
       const dtLimiteListStr = localStorage.getItem("v_dtLimite_list");
       if (dtLimiteListStr) {
         const dtLimiteList = JSON.parse(dtLimiteListStr);
@@ -114,7 +114,7 @@ export function ProcessFilterPanel() {
             }
             return '';
           }).filter(Boolean);
-          
+
           setDtLimiteOptions(formattedDates);
           console.log("Lista de datas limite carregada:", formattedDates);
         }
@@ -122,6 +122,10 @@ export function ProcessFilterPanel() {
     } catch (error) {
       console.error("Erro ao carregar dados do localStorage:", error);
     }
+  };
+
+  useEffect(() => {
+    loadFilterValuesFromLocalStorage();
   }, []);
 
   return (
