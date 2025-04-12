@@ -449,9 +449,9 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
   }, [selectedUnit, onUnitChange]);
   
   return (
-      <Card className="border-none shadow-md w-[940px] h-[150px] rounded-sm">
-      <CardContent className="p-1 flex flex-col gap-1">
-        {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos */}
+      <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
+      <CardContent className="p-2 flex flex-col gap-2">
+        {/* Primeira linha: Cliente, UF, Todas UFs, Planilhas, Contratos ----- bg-blue-200  bg-[#bfdbfe] */}
         <div className="flex items-center gap-2">
           {/* Cliente */}
           <Select
@@ -461,10 +461,10 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               handleClientChange(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 text-xs w-[380px] border-slate-200">
+            <SelectTrigger className="h-8 text-xs w-[380px] bg-select text-select-foreground border-border">
               <SelectValue placeholder="Cliente" />
             </SelectTrigger>
-            <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
+            <SelectContent className="z-50 fixed w-[380px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border border-slate-500 bg-popover text-popover-foreground shadow-md">
               <div className="px-2 py-2">
                 <Input
                   placeholder="Buscar cliente... (min. 3 letras)"
@@ -481,7 +481,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       }
                     }, 0);
                   }}
-                  className="h-8 mb-2"
+                  className="h-8 mb-2 bg-zink-100 border-slate-600"
                 />
               </div>
               {filteredClients.length > 0 ? (
@@ -507,13 +507,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               handleUFChange(value);
             }}
           >
-            <SelectTrigger className="h-8 text-xs w-[100px] border-slate-200">
+            <SelectTrigger className="h-8 text-xs w-[100px] border-border bg-select text-select-foreground">
               <SelectValue placeholder="UF" />
             </SelectTrigger>
-            <SelectContent className="z-50">
+            <SelectContent className="z-50 w-[30px] overflow-hidden rounded-md border border-slate-500 bg-popover text-popover-foreground shadow-md">
               <div className="px-2 py-2">
                 <Input
-                  placeholder="Buscar UF... (min. 3 letras)"
+                  placeholder="Buscar UF"
                   value={ufSearchTerm}
                   onChange={(e) => {
                     // Manter a referência ao input atual
@@ -527,7 +527,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                       }
                     }, 0);
                   }}
-                  className="h-8 mb-2"
+                  className="h-8 mb-2 bg-zink-100 border-slate-600"
                 />
               </div>
               {filteredUfs.length > 0 ? (
@@ -545,7 +545,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
           </Select>
           
           {/* Checkbox Todas UFs */}
-          <div className="flex items-center h-8 px-2 rounded border border-slate-200">
+          <div className="flex items-center h-8 px-2">
             <Checkbox 
               id="todas-ufs" 
               checked={allUfs}
@@ -662,7 +662,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
               }}
               className="mr-1"
             />
-            <Label htmlFor="todas-ufs" className="text-xs text-blue-800">Todas UFs</Label>
+            <Label htmlFor="todas-ufs" className="text-secondary-foreground text-xs font-semibold">Todas UFs</Label>
           </div>
           
           {/* Botão Planilhas */}
@@ -681,13 +681,13 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
             size="sm" 
             className="h-8 bg-blue-100 border-blue-300 text-blue-800 hover:bg-blue-200"
           >
-            Contr: 03119
+            {`Contr: ${selectedUnit?.contrato ? ('00' + selectedUnit.contrato).slice(-7) : '-----'}`}
           </Button>
         </div>
         
         {/* Segunda linha: Unidades e Paginação */}
         <div className="flex items-center gap-1">
-          <Label htmlFor="unidades" className="text-slate-800 text-xs font-semibold">Unidades</Label>
+          <Label htmlFor="unidades" className="text-secondary-foreground text-xs font-semibold mr-2">Unidades</Label>
           {unitsError ? (
             <div className="flex items-center gap-2">
               <span className="text-red-500 text-xs">Erro ao carregar unidades</span>
@@ -715,7 +715,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                   }
                 }}
               >
-                <SelectTrigger id="unidades" className="h-8 text-xs w-[450px] border-slate-200">
+                <SelectTrigger id="unidades" className="h-8 text-xs w-[450px] border-slate-500 bg-select text-select-foreground border-border">
                   {isLoadingUnits ? (
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-3 w-3 animate-spin" />
@@ -725,7 +725,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                     <SelectValue placeholder="Unidades" />
                   )}
                 </SelectTrigger>
-                <SelectContent className="z-50 fixed w-[510px] max-h-[var(--radix-select-content-available-height)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md text-xs">
+                <SelectContent className="z-50 fixed w-[510px] overflow-hidden rounded-md border border-slate-500 bg-popover text-popover-foreground shadow-md">
                   <div className="px-2 py-2">
                     <Input
                       placeholder="Buscar unidade... (min. 3 letras)"
@@ -742,7 +742,7 @@ export function ProcessCommandPanel({ onClientChange, onUnitChange }: ProcessCom
                           }
                         }, 0);
                       }}
-                      className="h-8 mb-2"
+                      className="h-8 mb-2 bg-zink-100 border-slate-600"
                     />
                   </div>
                   {filteredUnits.length > 0 ? (

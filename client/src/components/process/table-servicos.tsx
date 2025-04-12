@@ -53,71 +53,97 @@ export function TableServicos({
   const [error, setError] = useState<string | null>(null);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
-  // Efeito para carregar dados sempre que as props mudarem
-  useEffect(() => {
-    const fetchData = async () => {
-      // Se não tivermos contrato ou unidade selecionados, não fazemos a requisição
-      if (!qcontrato || !qUnidade) {
-        console.log('TableServicos: Contrato ou unidade não selecionados, cancelando busca');
+  // Função para buscar dados da API
+  const fetchData = async () => {
+    // Se não tivermos contrato ou unidade selecionados, não fazemos a requisição
+    if (!qcontrato || !qUnidade) {
+      console.log('TableServicos: Contrato ou unidade não selecionados, cancelando busca');
+      setLoading(false);
+      setData([]);
+      setSelectedRow(null); // Limpar a seleção quando a unidade muda
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      setSelectedRow(null); // Limpar a seleção quando a unidade muda
+      
+      // Obter o token do localStorage
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+
+      // Obter valores do localStorage para qCodServ, qStatus e qDtlimite
+      const storedCodServ = localStorage.getItem("v_codServ") || "-1";
+      const storedStatus = localStorage.getItem("v_status") || "ALL";
+      const storedDtLimite = localStorage.getItem("v_dtLimite") || "2001-01-01";
+
+      if (!token) {
+        setError('Não autorizado: Token não encontrado');
         setLoading(false);
-        setData([]);
-        setSelectedRow(null); // Limpar a seleção quando a unidade muda
         return;
       }
 
-      try {
-        setLoading(true);
-        setError(null);
-        setSelectedRow(null); // Limpar a seleção quando a unidade muda
+      console.log('TableServicos: Buscando serviços com parâmetros:', {
+        qcodCoor, 
+        qcontrato, 
+        qUnidade, 
+        qConcluido,
+        codServ: storedCodServ, 
+        status: storedStatus, 
+        dtLimite: storedDtLimite
+      });
+
+      // Construir a URL com os parâmetros do localStorage
+      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
+      const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${qConcluido}&qCodServ=${storedCodServ}&qStatus=${storedStatus}&qDtlimite=${storedDtLimite}`;
+      
+      // Usar o ApiService para fazer a requisição (já configurado para adicionar o token)
+      const response = await ApiService.get<ServicosData[]>(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        skipCache: true  // Sempre buscar dados frescos
+      });
+
+      if (Array.isArray(response)) {
+        setData(response);
         
-        // Obter o token do localStorage
-        const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-
-        if (!token) {
-          setError('Não autorizado: Token não encontrado');
-          setLoading(false);
-          return;
+        // Se temos dados e uma função de callback, selecionamos o primeiro item
+        if (response.length > 0 && onSelectServico) {
+          const firstItem = response[0];
+          setSelectedRow(firstItem.codccontra);
+          onSelectServico(firstItem.codccontra);
         }
-
-        console.log('TableServicos: Buscando serviços com parâmetros:', {
-          qcodCoor, qcontrato, qUnidade, qConcluido, qCodServ, qStatus, qDtlimite
-        });
-
-        // Construir a URL com os parâmetros
-        const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
-        const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${qConcluido}&qCodServ=${qCodServ}&qStatus=${qStatus}&qDtlimite=${qDtlimite}`;
-        
-        // Usar o ApiService para fazer a requisição (já configurado para adicionar o token)
-        const response = await ApiService.get<ServicosData[]>(url, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
-          skipCache: true  // Sempre buscar dados frescos
-        });
-
-        if (Array.isArray(response)) {
-          setData(response);
-          
-          // Se temos dados e uma função de callback, selecionamos o primeiro item
-          if (response.length > 0 && onSelectServico) {
-            const firstItem = response[0];
-            setSelectedRow(firstItem.codccontra);
-            onSelectServico(firstItem.codccontra);
-          }
-        } else {
-          console.error('Resposta da API não é um array:', response);
-          setData([]);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar serviços:', err);
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados do serviço');
-      } finally {
-        setLoading(false);
+      } else {
+        console.error('Resposta da API não é um array:', response);
+        setData([]);
       }
-    };
+    } catch (err) {
+      console.error('Erro ao carregar serviços:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar dados do serviço');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Efeito para carregar dados sempre que as props mudarem
+  useEffect(() => {
     fetchData();
-  }, [qcodCoor, qcontrato, qUnidade, qConcluido, qCodServ, qStatus, qDtlimite]);
+  }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
+  
+  // Efeito para ouvir o evento de atualização de filtros
+  useEffect(() => {
+    const handleFiltersUpdated = () => {
+      console.log('TableServicos: Evento filters-updated recebido, recarregando dados');
+      fetchData();
+    };
+    
+    window.addEventListener('filters-updated', handleFiltersUpdated);
+    
+    return () => {
+      window.removeEventListener('filters-updated', handleFiltersUpdated);
+    };
+  }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
 
   // Renderiza um estado de carregamento
   if (loading) {

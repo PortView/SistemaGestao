@@ -5,11 +5,11 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     screens: {
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1920px', // Definindo a resolução exata de 1920px para o breakpoint 2xl
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1920px", // Definindo a resolução exata de 1920px para o breakpoint 2xl
     },
     extend: {
       borderRadius: {
@@ -18,12 +18,26 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        dropdown: {
+          DEFAULT: "hsl(var(--dropdown))",
+          foreground: "hsl(var(--dropdown-foreground))",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        select: {
+          DEFAULT: "hsl(var(--select))",
+          foreground: "hsl(var(--select-foreground))",
+        },
+        
+        input: {
+          DEFAULT: "hsl(var(--input))",
+          foreground: "hsl(var(--input-foreground))",
+        },
+        
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -49,7 +63,7 @@ export default {
           foreground: "hsl(var(--destructive-foreground))",
         },
         border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
+        iinput: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
           "1": "hsl(var(--chart-1))",

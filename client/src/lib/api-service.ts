@@ -232,6 +232,7 @@ export class ApiService {
               signal: controller.signal
             };
             
+            // Fazer a requisição usando o fetch
             response = await fetch(fullUrl, fetchOptionsWithSignal);
             
             // Limpar o timeout se a requisição foi bem-sucedida

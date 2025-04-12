@@ -33,6 +33,21 @@ export default function ProcessControlPage() {
     }
   }, []);
 
+  // Efeito para inicializar os valores de localStorage se não existirem
+  useEffect(() => {
+    // Verificar se as variáveis já existem no localStorage
+    if (!localStorage.getItem("v_codServ")) {
+      localStorage.setItem("v_codServ", "-1");
+    }
+    if (!localStorage.getItem("v_status")) {
+      localStorage.setItem("v_status", "ALL");
+    }
+    if (!localStorage.getItem("v_dtLimite")) {
+      // Definir data inicial como 2001-01-01
+      localStorage.setItem("v_dtLimite", "2001-01-01");
+    }
+  }, []);
+
   // Handler para mudança de cliente
   const handleClientChange = (clientId: number) => {
     // Este é um mock - na implementação real, você buscaria o cliente completo
@@ -50,19 +65,32 @@ export default function ProcessControlPage() {
   const handleUnitChange = (unit: SiscopUnidade) => {
     console.log('ProcessControl: Unidade selecionada:', unit);
     setSelectedUnit(unit);
+    
     // Quando a unidade muda, limpar o serviço selecionado
     setSelectedService(null);
     setSelectedServicoCod(-1);
+    
+    // Atualizar o localStorage com valores padrão quando seleciona uma unidade
+    localStorage.setItem("v_codServ", "-1");
+    localStorage.setItem("v_status", "ALL");
+    localStorage.setItem("v_dtLimite", "2001-01-01");
+    
+    console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
   };
 
   // Handler para processar a seleção de serviço
   const handleServicoSelect = (codServ: number) => {
     console.log('Serviço selecionado:', codServ);
     setSelectedServicoCod(codServ);
+    
+    // Atualizar o localStorage com o código do serviço selecionado
+    localStorage.setItem("v_codServ", codServ.toString());
+    console.log("LocalStorage v_codServ atualizado:", codServ);
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
+    // <div className="bg-zinc-400 dark:bg-zinc-800 text-foreground min-h-screen">
+      <div className="bg-zinc-600 text-white min-h-screen">
       {/* Conteúdo principal que ocupa a largura total */}
       <div className="w-full mx-auto px-1 pb-1">
         <div className="text-xs font-light mb-1">Controle de Processos</div>
@@ -73,20 +101,20 @@ export default function ProcessControlPage() {
           <div>
             {/* Área superior: command panel + filter panel (lado a lado) com altura fixa de 150px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
                 <ProcessCommandPanel
                   onClientChange={handleClientChange}
                   onUnitChange={handleUnitChange}
                 />
               </div>
-              <div className="w-[940px] h-[150px] bg-card"> {/* Added bg-card */}
+              <div className="w-[940px] h-[150px]"> {/* Added bg-card */}
                 <ProcessFilterPanel />
               </div>
             </div>
 
             {/* Área do meio: serviços + tarefas (lado a lado) com altura fixa de 460px */}
             <div className="flex justify-center gap-1 mb-1">
-              <div className="w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
+              <div className="w-[940px] h-[460px] bg-card "> {/* Added bg-card */}
                 <TableServicos
                   qcodCoor={codCoor}
                   qcontrato={selectedUnit?.contrato || null}
