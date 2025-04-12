@@ -140,9 +140,12 @@ export function TableServicos({
           
           // Disparar evento customizado para notificar outras partes da aplicação
           // sobre a atualização dos dados de filtro no localStorage
+          // apenas quando estamos carregando os dados pela primeira vez
           try {
-            console.log("Disparando evento filters-updated");
-            window.dispatchEvent(new Event('filters-updated'));
+            if (response.length > 0) {
+              console.log("Disparando evento filters-updated após carregar dados");
+              window.dispatchEvent(new Event('filters-updated'));
+            }
           } catch (e) {
             console.error("Erro ao disparar evento filters-updated:", e);
           }
@@ -171,19 +174,7 @@ export function TableServicos({
     fetchData();
   }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
   
-  // Efeito para ouvir o evento de atualização de filtros
-  useEffect(() => {
-    const handleFiltersUpdated = () => {
-      console.log('TableServicos: Evento filters-updated recebido, recarregando dados');
-      fetchData();
-    };
-    
-    window.addEventListener('filters-updated', handleFiltersUpdated);
-    
-    return () => {
-      window.removeEventListener('filters-updated', handleFiltersUpdated);
-    };
-  }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
+  // Não precisamos mais disso, pois já recarregamos os dados quando as props mudam
 
   // Renderiza um estado de carregamento
   if (loading) {
