@@ -52,10 +52,28 @@ export function ProcessFilterPanel() {
     updateFilter("v_dtLimite", value);
   };
   
-  // Função para recarregar valores do localStorage
-  const loadFilterValuesFromLocalStorage = () => {
+  // Função para ouvir eventos de localStorage
+  useEffect(() => {
+    const handleLocalStorageChange = () => {
+      loadFilterData();
+    };
+    
+    // Registra os ouvintes de evento
+    window.addEventListener('storage', handleLocalStorageChange);
+    
+    // Carrega dados iniciais
+    loadFilterData();
+    
+    // Limpa os ouvintes de evento quando o componente é desmontado
+    return () => {
+      window.removeEventListener('storage', handleLocalStorageChange);
+    };
+  }, []);
+  
+  // Carrega dados de filtros e opções do localStorage
+  const loadFilterData = () => {
     try {
-      console.log("ProcessFilterPanel: Recarregando valores dos filtros");
+      console.log("ProcessFilterPanel: Carregando dados de filtros");
       
       // Carregar valores dos filtros selecionados
       const storedCodServ = localStorage.getItem("v_codServ");
@@ -86,43 +104,64 @@ export function ProcessFilterPanel() {
       // Carregar listas de opções
       const codServListStr = localStorage.getItem("v_codServ_list");
       if (codServListStr) {
-        const codServList = JSON.parse(codServListStr);
-        if (Array.isArray(codServList)) {
-          setCodServOptions(codServList);
-          console.log("Lista de códigos de serviço carregada:", codServList);
+        try {
+          const codServList = JSON.parse(codServListStr);
+          if (Array.isArray(codServList)) {
+            setCodServOptions(codServList);
+            console.log("Lista de códigos de serviço carregada:", codServList);
+          }
+        } catch (e) {
+          console.error("Erro ao processar lista de códigos de serviço:", e);
         }
       }
       
       const statusListStr = localStorage.getItem("v_status_list");
       if (statusListStr) {
-        const statusList = JSON.parse(statusListStr);
-        if (Array.isArray(statusList)) {
-          setStatusOptions(statusList);
-          console.log("Lista de status carregada:", statusList);
+        try {
+          const statusList = JSON.parse(statusListStr);
+          if (Array.isArray(statusList)) {
+            setStatusOptions(statusList);
+            console.log("Lista de status carregada:", statusList);
+          }
+        } catch (e) {
+          console.error("Erro ao processar lista de status:", e);
         }
       }
       
       const dtLimiteListStr = localStorage.getItem("v_dtLimite_list");
       if (dtLimiteListStr) {
-        const dtLimiteList = JSON.parse(dtLimiteListStr);
-        if (Array.isArray(dtLimiteList)) {
-          // Converter formato ISO para YYYY-MM-DD para o input date
-          const formattedDates = dtLimiteList.map(date => {
-            if (date) {
-              const d = new Date(date);
-              return d.toISOString().split('T')[0];
-            }
-            return '';
-          }).filter(Boolean);
-          
-          setDtLimiteOptions(formattedDates);
-          console.log("Lista de datas limite carregada:", formattedDates);
+        try {
+          const dtLimiteList = JSON.parse(dtLimiteListStr);
+          if (Array.isArray(dtLimiteList)) {
+            // Converter formato ISO para YYYY-MM-DD para o input date
+            const formattedDates = dtLimiteList
+              .filter(date => date !== null && date !== undefined)
+              .map(date => {
+                try {
+                  const d = new Date(date);
+                  return d.toISOString().split('T')[0];
+                } catch {
+                  return '';
+                }
+              })
+              .filter(Boolean);
+            
+            setDtLimiteOptions(formattedDates);
+            console.log("Lista de datas limite carregada:", formattedDates);
+          }
+        } catch (e) {
+          console.error("Erro ao processar lista de datas:", e);
         }
       }
     } catch (error) {
       console.error("Erro ao carregar dados do localStorage:", error);
     }
-  }, []);
+  };
+  
+  // Função para limpar filtros e recarregar
+  const handleReloadClick = () => {
+    loadFilterData();
+  };
 
   return (
     <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
@@ -235,6 +274,15 @@ export function ProcessFilterPanel() {
                 })}
               </SelectContent>
             </Select>
+            
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="h-7 ml-2" 
+              onClick={handleReloadClick}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 

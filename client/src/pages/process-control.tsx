@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ProcessCommandPanel } from "@/components/process/process-command-panel";
-import { ProcessFilterPanel } from "@/components/process/process-filter-panel";
+import { ProcessFilterPanel } from "@/components/process/process-filter-panel-new";
 import { TableServicos } from "@/components/process/table-servicos";
 import { TableFollowup } from "@/components/process/table-followup";
 import { ProcessTabs } from "@/components/process/process-tabs";
