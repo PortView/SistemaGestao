@@ -108,11 +108,30 @@ export function TableServicos({
       if (Array.isArray(response)) {
         setData(response);
         
-        // Se temos dados e uma função de callback, selecionamos o primeiro item
-        if (response.length > 0 && onSelectServico) {
-          const firstItem = response[0];
-          setSelectedRow(firstItem.codccontra);
-          onSelectServico(firstItem.codccontra);
+        // Extrair valores únicos para codServ, mStatus e dtLimite
+        if (response.length > 0) {
+          // Extrair codServ únicos
+          const uniqueCodServs = [...new Set(response.map(item => item.codServ))];
+          localStorage.setItem("v_codServ_list", JSON.stringify(uniqueCodServs));
+          console.log("Lista de códigos de serviço únicos armazenada:", uniqueCodServs);
+          
+          // Extrair mStatus únicos
+          const uniqueStatuses = [...new Set(response.map(item => item.mStatus))];
+          localStorage.setItem("v_status_list", JSON.stringify(uniqueStatuses));
+          console.log("Lista de status únicos armazenada:", uniqueStatuses);
+          
+          // Extrair dtLimite únicos (formato original)
+          const uniqueDates = [...new Set(response.map(item => item.dtLimite))]
+            .filter(date => date !== null && date !== undefined);
+          localStorage.setItem("v_dtLimite_list", JSON.stringify(uniqueDates));
+          console.log("Lista de datas limite únicas armazenada:", uniqueDates);
+          
+          // Se temos dados e uma função de callback, selecionamos o primeiro item
+          if (onSelectServico) {
+            const firstItem = response[0];
+            setSelectedRow(firstItem.codccontra);
+            onSelectServico(firstItem.codccontra);
+          }
         }
       } else {
         console.error('Resposta da API não é um array:', response);

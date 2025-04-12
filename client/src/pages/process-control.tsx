@@ -70,10 +70,15 @@ export default function ProcessControlPage() {
     setSelectedService(null);
     setSelectedServicoCod(-1);
     
-    // Atualizar o localStorage com valores padrão quando seleciona uma unidade
+    // Atualizar o localStorage com valores padrão para filtragem quando seleciona uma unidade
     localStorage.setItem("v_codServ", "-1");
     localStorage.setItem("v_status", "ALL");
     localStorage.setItem("v_dtLimite", "2001-01-01");
+    
+    // Limpar as listas de valores únicos
+    localStorage.setItem("v_codServ_list", JSON.stringify([]));
+    localStorage.setItem("v_status_list", JSON.stringify([]));
+    localStorage.setItem("v_dtLimite_list", JSON.stringify([]));
     
     console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
   };
