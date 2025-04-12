@@ -52,21 +52,28 @@ export function ProcessFilterPanel() {
     updateFilter("v_dtLimite", value);
   };
   
-  // Função para ouvir eventos de localStorage
+  // Função para ouvir eventos de localStorage e atualizações de filtros
   useEffect(() => {
-    const handleLocalStorageChange = () => {
+    const handleFiltersUpdated = () => {
+      console.log("ProcessFilterPanel: Evento 'filters-updated' recebido");
       loadFilterData();
     };
     
-    // Registra os ouvintes de evento
-    window.addEventListener('storage', handleLocalStorageChange);
+    // Registra os ouvintes de evento para o evento personalizado filters-updated
+    window.addEventListener('filters-updated', handleFiltersUpdated);
     
     // Carrega dados iniciais
     loadFilterData();
     
+    // Interval para verificar periodicamente se os dados do localStorage mudaram
+    const checkInterval = setInterval(() => {
+      loadFilterData();
+    }, 2000); // Verifica a cada 2 segundos
+    
     // Limpa os ouvintes de evento quando o componente é desmontado
     return () => {
-      window.removeEventListener('storage', handleLocalStorageChange);
+      window.removeEventListener('filters-updated', handleFiltersUpdated);
+      clearInterval(checkInterval);
     };
   }, []);
   

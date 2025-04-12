@@ -138,6 +138,15 @@ export function TableServicos({
           localStorage.setItem("v_dtLimite_list", JSON.stringify(uniqueDates));
           console.log("Lista de datas limite únicas armazenada:", uniqueDates);
           
+          // Disparar evento customizado para notificar outras partes da aplicação
+          // sobre a atualização dos dados de filtro no localStorage
+          try {
+            console.log("Disparando evento filters-updated");
+            window.dispatchEvent(new Event('filters-updated'));
+          } catch (e) {
+            console.error("Erro ao disparar evento filters-updated:", e);
+          }
+          
           // Se temos dados e uma função de callback, selecionamos o primeiro item
           if (onSelectServico) {
             const firstItem = response[0];
