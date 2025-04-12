@@ -174,7 +174,63 @@ export function TableServicos({
     fetchData();
   }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
   
-  // Não precisamos mais disso, pois já recarregamos os dados quando as props mudam
+  // Efeito para ouvir o evento de aplicação de filtros
+  useEffect(() => {
+    const handleApplyFilters = (event: CustomEvent) => {
+      console.log('TableServicos: Evento apply-filters recebido, aplicando filtros:', event.detail);
+      
+      const { qCodServ, qStatus, qDtlimite, qConcluido } = event.detail;
+      
+      // Atualiza os parâmetros da query com os valores dos filtros
+      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
+      const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${qConcluido}&qCodServ=${qCodServ}&qStatus=${qStatus}&qDtlimite=${qDtlimite}`;
+      
+      console.log('TableServicos: Buscando dados com filtros aplicados:', url);
+      
+      // Busca os dados com os filtros aplicados
+      setLoading(true);
+      
+      // Obter o token do localStorage
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+      
+      if (!token) {
+        setError('Não autorizado: Token não encontrado');
+        setLoading(false);
+        return;
+      }
+      
+      ApiService.get<ServicosData[]>(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        skipCache: true  // Sempre buscar dados frescos
+      })
+        .then((response) => {
+          if (Array.isArray(response)) {
+            setData(response);
+            setSelectedRow(null); // Limpa a seleção
+          } else {
+            console.error('Resposta da API não é um array:', response);
+            setData([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao buscar dados de serviços com filtros aplicados:', error);
+          setError('Erro ao buscar dados de serviços. Por favor, tente novamente mais tarde.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+    
+    // Registra o ouvinte do evento
+    window.addEventListener('apply-filters', handleApplyFilters as EventListener);
+    
+    // Limpa o ouvinte quando o componente é desmontado
+    return () => {
+      window.removeEventListener('apply-filters', handleApplyFilters as EventListener);
+    };
+  }, [qcodCoor, qcontrato, qUnidade]);
 
   // Renderiza um estado de carregamento
   if (loading) {

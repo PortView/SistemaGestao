@@ -24,6 +24,9 @@ export function ProcessFilterPanel() {
   const [showStatus, setShowStatus] = useState(false);
   const [showDtLimite, setShowDtLimite] = useState(false);
   
+  // Estado para o checkbox "servNaoConcluidos"
+  const [servNaoConcluidos, setServNaoConcluidos] = useState(false);
+  
   // Estados para armazenar as listas de valores únicos
   const [codServOptions, setCodServOptions] = useState<number[]>([]);
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
@@ -33,23 +36,8 @@ export function ProcessFilterPanel() {
   const [tempCodServValue, setTempCodServValue] = useState(codServValue);
   const [tempStatusValue, setTempStatusValue] = useState(statusValue);
   const [tempDtLimiteValue, setTempDtLimiteValue] = useState(dtLimiteValue);
-  
-  // Handler para mudança no filtro de serviço
-  const handleCodServChange = (value: string) => {
-    setTempCodServValue(value);
-  };
-  
-  // Handler para mudança no filtro de status
-  const handleStatusChange = (value: string) => {
-    setTempStatusValue(value);
-  };
-  
-  // Handler para mudança no filtro de data limite
-  const handleDtLimiteChange = (value: string) => {
-    setTempDtLimiteValue(value);
-  };
-  
-  // Função para ouvir eventos de atualizações de filtros
+
+  // Função para ouvir eventos de atualizações de filtros (quando uma unidade é selecionada)
   useEffect(() => {
     const handleFiltersUpdated = () => {
       console.log("ProcessFilterPanel: Evento 'filters-updated' recebido");
@@ -68,14 +56,29 @@ export function ProcessFilterPanel() {
     };
   }, []);
 
-  // Atualiza os valores temporários quando os valores atuais mudam
+  // Atualiza os valores temporários quando os valores padrão são carregados inicialmente
   useEffect(() => {
     setTempCodServValue(codServValue);
     setTempStatusValue(statusValue);
     setTempDtLimiteValue(dtLimiteValue);
   }, [codServValue, statusValue, dtLimiteValue]);
   
-  // Carrega dados de filtros e opções do localStorage
+  // Handler para mudança no filtro de serviço (apenas atualiza o valor temporário)
+  const handleCodServChange = (value: string) => {
+    setTempCodServValue(value);
+  };
+  
+  // Handler para mudança no filtro de status (apenas atualiza o valor temporário)
+  const handleStatusChange = (value: string) => {
+    setTempStatusValue(value);
+  };
+  
+  // Handler para mudança no filtro de data limite (apenas atualiza o valor temporário)
+  const handleDtLimiteChange = (value: string) => {
+    setTempDtLimiteValue(value);
+  };
+  
+  // Carrega dados de filtros e opções do localStorage (chamado quando uma unidade é selecionada)
   const loadFilterData = () => {
     try {
       console.log("ProcessFilterPanel: Carregando dados de filtros");
@@ -163,24 +166,41 @@ export function ProcessFilterPanel() {
     }
   };
   
-  // Função para aplicar os filtros
+  // Função para aplicar os filtros quando o botão "Aplicar" é clicado
   const handleApplyFilters = () => {
     // Armazena os valores selecionados no localStorage
     localStorage.setItem("v_codServ", tempCodServValue);
     localStorage.setItem("v_status", tempStatusValue);
     localStorage.setItem("v_dtLimite", tempDtLimiteValue);
+    localStorage.setItem("v_servNaoConcluidos", servNaoConcluidos ? "true" : "false");
     
     // Atualiza os valores no estado
     setCodServValue(tempCodServValue);
     setStatusValue(tempStatusValue);
     setDtLimiteValue(tempDtLimiteValue);
     
-    // Dispara o evento de atualização de filtros
+    // Dispara um evento personalizado para notificar a aplicação dos filtros
     try {
-      console.log("Disparando evento filters-updated após aplicar filtros");
-      window.dispatchEvent(new Event('filters-updated'));
+      console.log("Disparando evento apply-filters com parâmetros:", {
+        qCodServ: tempCodServValue,
+        qStatus: tempStatusValue,
+        qDtlimite: tempDtLimiteValue,
+        qConcluido: !servNaoConcluidos // Inverte o valor já que o API espera true para mostrar concluídos
+      });
+      
+      // Cria um evento personalizado com os parâmetros dos filtros
+      const event = new CustomEvent('apply-filters', {
+        detail: {
+          qCodServ: tempCodServValue,
+          qStatus: tempStatusValue,
+          qDtlimite: tempDtLimiteValue,
+          qConcluido: !servNaoConcluidos
+        }
+      });
+      
+      window.dispatchEvent(event);
     } catch (e) {
-      console.error("Erro ao disparar evento filters-updated:", e);
+      console.error("Erro ao disparar evento apply-filters:", e);
     }
   };
 
@@ -311,7 +331,11 @@ export function ProcessFilterPanel() {
         {/* Row 2: Checkbox filters */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Checkbox id="servNaoConcluidos" />
+            <Checkbox 
+              id="servNaoConcluidos" 
+              checked={servNaoConcluidos}
+              onCheckedChange={(value) => setServNaoConcluidos(!!value)}
+            />
             <Label
               htmlFor="servNaoConcluidos"
               className="text-secondary-foreground text-xs font-semibold"
