@@ -28,10 +28,11 @@ export function ProcessFilterPanel() {
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [dtLimiteOptions, setDtLimiteOptions] = useState<string[]>([]);
   
-  // Função para atualizar um filtro e disparar evento de atualização
+  // Função para atualizar um filtro sem disparar evento de atualização
   const updateFilter = (key: string, value: string) => {
     localStorage.setItem(key, value);
-    window.dispatchEvent(new CustomEvent('filters-updated'));
+    // Não disparamos mais o evento filters-updated aqui
+    // para evitar loops e perda de opções
   };
   
   // Handler para mudança no filtro de serviço
