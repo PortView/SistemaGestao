@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, RefreshCw } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 
 export function ProcessFilterPanel() {
+  // Estados para armazenar valores atuais/aplicados
   const [codServValue, setCodServValue] = useState("-1");
   const [statusValue, setStatusValue] = useState("ALL");
   const [dtLimiteValue, setDtLimiteValue] = useState("2001-01-01");
@@ -28,29 +29,24 @@ export function ProcessFilterPanel() {
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [dtLimiteOptions, setDtLimiteOptions] = useState<string[]>([]);
   
-  // Função para atualizar um filtro sem disparar evento de atualização
-  const updateFilter = (key: string, value: string) => {
-    localStorage.setItem(key, value);
-    // Não disparamos mais o evento filters-updated aqui
-    // para evitar loops e perda de opções
-  };
+  // Estados para armazenar os valores temporários dos filtros
+  const [tempCodServValue, setTempCodServValue] = useState(codServValue);
+  const [tempStatusValue, setTempStatusValue] = useState(statusValue);
+  const [tempDtLimiteValue, setTempDtLimiteValue] = useState(dtLimiteValue);
   
   // Handler para mudança no filtro de serviço
   const handleCodServChange = (value: string) => {
-    setCodServValue(value);
-    updateFilter("v_codServ", value);
+    setTempCodServValue(value);
   };
   
   // Handler para mudança no filtro de status
   const handleStatusChange = (value: string) => {
-    setStatusValue(value);
-    updateFilter("v_status", value);
+    setTempStatusValue(value);
   };
   
   // Handler para mudança no filtro de data limite
   const handleDtLimiteChange = (value: string) => {
-    setDtLimiteValue(value);
-    updateFilter("v_dtLimite", value);
+    setTempDtLimiteValue(value);
   };
   
   // Função para ouvir eventos de atualizações de filtros
@@ -71,6 +67,13 @@ export function ProcessFilterPanel() {
       window.removeEventListener('filters-updated', handleFiltersUpdated);
     };
   }, []);
+
+  // Atualiza os valores temporários quando os valores atuais mudam
+  useEffect(() => {
+    setTempCodServValue(codServValue);
+    setTempStatusValue(statusValue);
+    setTempDtLimiteValue(dtLimiteValue);
+  }, [codServValue, statusValue, dtLimiteValue]);
   
   // Carrega dados de filtros e opções do localStorage
   const loadFilterData = () => {
@@ -160,9 +163,25 @@ export function ProcessFilterPanel() {
     }
   };
   
-  // Função para limpar filtros e recarregar
-  const handleReloadClick = () => {
-    loadFilterData();
+  // Função para aplicar os filtros
+  const handleApplyFilters = () => {
+    // Armazena os valores selecionados no localStorage
+    localStorage.setItem("v_codServ", tempCodServValue);
+    localStorage.setItem("v_status", tempStatusValue);
+    localStorage.setItem("v_dtLimite", tempDtLimiteValue);
+    
+    // Atualiza os valores no estado
+    setCodServValue(tempCodServValue);
+    setStatusValue(tempStatusValue);
+    setDtLimiteValue(tempDtLimiteValue);
+    
+    // Dispara o evento de atualização de filtros
+    try {
+      console.log("Disparando evento filters-updated após aplicar filtros");
+      window.dispatchEvent(new Event('filters-updated'));
+    } catch (e) {
+      console.error("Erro ao disparar evento filters-updated:", e);
+    }
   };
 
   return (
@@ -185,7 +204,7 @@ export function ProcessFilterPanel() {
               Cód.Serv.
             </Label>
             <Select
-              value={codServValue}
+              value={tempCodServValue}
               onValueChange={handleCodServChange}
               disabled={!showCodServ}
             >
@@ -220,7 +239,7 @@ export function ProcessFilterPanel() {
               Status
             </Label>
             <Select
-              value={statusValue}
+              value={tempStatusValue}
               onValueChange={handleStatusChange}
               disabled={!showStatus}
             >
@@ -255,7 +274,7 @@ export function ProcessFilterPanel() {
               Dt.Limite
             </Label>
             <Select
-              value={dtLimiteValue}
+              value={tempDtLimiteValue}
               onValueChange={handleDtLimiteChange}
               disabled={!showDtLimite}
             >
@@ -279,11 +298,12 @@ export function ProcessFilterPanel() {
             
             <Button 
               size="sm" 
-              variant="outline" 
-              className="h-7 ml-2" 
-              onClick={handleReloadClick}
+              variant="default" 
+              className="h-7 ml-2 bg-blue-600 hover:bg-blue-700 text-white" 
+              onClick={handleApplyFilters}
             >
-              <RefreshCw className="h-4 w-4" />
+              <FilterIcon className="h-4 w-4 mr-1" />
+              <span className="text-xs">Aplicar</span>
             </Button>
           </div>
         </div>
