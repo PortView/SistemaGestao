@@ -110,18 +110,30 @@ export function TableServicos({
         
         // Extrair valores únicos para codServ, mStatus e dtLimite
         if (response.length > 0) {
-          // Extrair codServ únicos
-          const uniqueCodServs = [...new Set(response.map(item => item.codServ))];
+          // Extrair codServ únicos usando objetos
+          const codServMap: Record<number, boolean> = {};
+          response.forEach(item => {
+            if (item.codServ) codServMap[item.codServ] = true;
+          });
+          const uniqueCodServs = Object.keys(codServMap).map(Number);
           localStorage.setItem("v_codServ_list", JSON.stringify(uniqueCodServs));
           console.log("Lista de códigos de serviço únicos armazenada:", uniqueCodServs);
           
-          // Extrair mStatus únicos
-          const uniqueStatuses = [...new Set(response.map(item => item.mStatus))];
+          // Extrair mStatus únicos usando objetos
+          const statusMap: Record<string, boolean> = {};
+          response.forEach(item => {
+            if (item.mStatus) statusMap[item.mStatus] = true;
+          });
+          const uniqueStatuses = Object.keys(statusMap);
           localStorage.setItem("v_status_list", JSON.stringify(uniqueStatuses));
           console.log("Lista de status únicos armazenada:", uniqueStatuses);
           
-          // Extrair dtLimite únicos (formato original)
-          const uniqueDates = [...new Set(response.map(item => item.dtLimite))]
+          // Extrair dtLimite únicos usando objetos
+          const dateMap: Record<string, boolean> = {};
+          response.forEach(item => {
+            if (item.dtLimite) dateMap[item.dtLimite] = true;
+          });
+          const uniqueDates = Object.keys(dateMap)
             .filter(date => date !== null && date !== undefined);
           localStorage.setItem("v_dtLimite_list", JSON.stringify(uniqueDates));
           console.log("Lista de datas limite únicas armazenada:", uniqueDates);

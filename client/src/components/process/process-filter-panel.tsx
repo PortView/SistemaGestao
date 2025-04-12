@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Search, RefreshCw } from "lucide-react";
 
 export function ProcessFilterPanel() {
   const [codServValue, setCodServValue] = useState("-1");
@@ -20,6 +22,99 @@ export function ProcessFilterPanel() {
   const [showCodServ, setShowCodServ] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [showDtLimite, setShowDtLimite] = useState(false);
+  
+  // Estados para armazenar as listas de valores únicos
+  const [codServOptions, setCodServOptions] = useState<number[]>([]);
+  const [statusOptions, setStatusOptions] = useState<string[]>([]);
+  const [dtLimiteOptions, setDtLimiteOptions] = useState<string[]>([]);
+  
+  // Função para atualizar um filtro e disparar evento de atualização
+  const updateFilter = (key: string, value: string) => {
+    localStorage.setItem(key, value);
+    window.dispatchEvent(new CustomEvent('filters-updated'));
+  };
+  
+  // Handler para mudança no filtro de serviço
+  const handleCodServChange = (value: string) => {
+    setCodServValue(value);
+    updateFilter("v_codServ", value);
+  };
+  
+  // Handler para mudança no filtro de status
+  const handleStatusChange = (value: string) => {
+    setStatusValue(value);
+    updateFilter("v_status", value);
+  };
+  
+  // Handler para mudança no filtro de data limite
+  const handleDtLimiteChange = (value: string) => {
+    setDtLimiteValue(value);
+    updateFilter("v_dtLimite", value);
+  };
+  
+  // Efeito para carregar os valores do localStorage
+  useEffect(() => {
+    try {
+      // Carregar valores dos filtros selecionados
+      const storedCodServ = localStorage.getItem("v_codServ");
+      const storedStatus = localStorage.getItem("v_status");
+      const storedDtLimite = localStorage.getItem("v_dtLimite");
+      
+      if (storedCodServ) {
+        setCodServValue(storedCodServ);
+        setShowCodServ(storedCodServ !== "-1");
+      }
+      
+      if (storedStatus) {
+        setStatusValue(storedStatus);
+        setShowStatus(storedStatus !== "ALL");
+      }
+      
+      if (storedDtLimite) {
+        setDtLimiteValue(storedDtLimite);
+        setShowDtLimite(storedDtLimite !== "2001-01-01");
+      }
+      
+      // Carregar listas de opções
+      const codServListStr = localStorage.getItem("v_codServ_list");
+      if (codServListStr) {
+        const codServList = JSON.parse(codServListStr);
+        if (Array.isArray(codServList)) {
+          setCodServOptions(codServList);
+          console.log("Lista de códigos de serviço carregada:", codServList);
+        }
+      }
+      
+      const statusListStr = localStorage.getItem("v_status_list");
+      if (statusListStr) {
+        const statusList = JSON.parse(statusListStr);
+        if (Array.isArray(statusList)) {
+          setStatusOptions(statusList);
+          console.log("Lista de status carregada:", statusList);
+        }
+      }
+      
+      const dtLimiteListStr = localStorage.getItem("v_dtLimite_list");
+      if (dtLimiteListStr) {
+        const dtLimiteList = JSON.parse(dtLimiteListStr);
+        if (Array.isArray(dtLimiteList)) {
+          // Converter formato ISO para YYYY-MM-DD para o input date
+          const formattedDates = dtLimiteList.map(date => {
+            if (date) {
+              const d = new Date(date);
+              return d.toISOString().split('T')[0];
+            }
+            return '';
+          }).filter(Boolean);
+          
+          setDtLimiteOptions(formattedDates);
+          console.log("Lista de datas limite carregada:", formattedDates);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados do localStorage:", error);
+    }
+  }, []);
 
   return (
     <Card className="border-2 border-white shadow-md w-[940px] h-[150px] rounded-sm">
@@ -42,7 +137,7 @@ export function ProcessFilterPanel() {
             </Label>
             <Select
               value={codServValue}
-              onValueChange={setCodServValue}
+              onValueChange={handleCodServChange}
               disabled={!showCodServ}
             >
               <SelectTrigger
@@ -51,7 +146,12 @@ export function ProcessFilterPanel() {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="9999">9999</SelectItem>
+                <SelectItem value="-1">Todos</SelectItem>
+                {codServOptions.map((codServ) => (
+                  <SelectItem key={codServ} value={String(codServ)}>
+                    {codServ}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -72,7 +172,7 @@ export function ProcessFilterPanel() {
             </Label>
             <Select
               value={statusValue}
-              onValueChange={setStatusValue}
+              onValueChange={handleStatusChange}
               disabled={!showStatus}
             >
               <SelectTrigger
@@ -81,7 +181,12 @@ export function ProcessFilterPanel() {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PENDENTE">Pendente</SelectItem>
+                <SelectItem value="ALL">Todos</SelectItem>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -102,7 +207,7 @@ export function ProcessFilterPanel() {
             </Label>
             <Select
               value={dtLimiteValue}
-              onValueChange={setDtLimiteValue}
+              onValueChange={handleDtLimiteChange}
               disabled={!showDtLimite}
             >
               <SelectTrigger
@@ -111,7 +216,15 @@ export function ProcessFilterPanel() {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PENDENTE">01/01/2025</SelectItem>
+                <SelectItem value="2001-01-01">Todas</SelectItem>
+                {dtLimiteOptions.map((date) => {
+                  const formattedDate = new Date(date).toLocaleDateString('pt-BR');
+                  return (
+                    <SelectItem key={date} value={date}>
+                      {formattedDate}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
