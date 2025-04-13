@@ -20,18 +20,19 @@ export function ProcessFilterPanel() {
   const [dtLimiteValue, setDtLimiteValue] = useState("2001-01-01");
 
   // Estado para controlar a exibição dos campos
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showCodServ, setShowCodServ] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [showDtLimite, setShowDtLimite] = useState(false);
-  
+
   // Estado para o checkbox "servNaoConcluidos"
   const [servNaoConcluidos, setServNaoConcluidos] = useState(false);
-  
+
   // Estados para armazenar as listas de valores únicos
   const [codServOptions, setCodServOptions] = useState<number[]>([]);
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [dtLimiteOptions, setDtLimiteOptions] = useState<string[]>([]);
-  
+
   // Estados para armazenar os valores temporários dos filtros
   const [tempCodServValue, setTempCodServValue] = useState(codServValue);
   const [tempStatusValue, setTempStatusValue] = useState(statusValue);
@@ -43,16 +44,16 @@ export function ProcessFilterPanel() {
       console.log("ProcessFilterPanel: Evento 'filters-updated' recebido");
       loadFilterData();
     };
-    
+
     // Registra os ouvintes de evento para o evento personalizado filters-updated
-    window.addEventListener('filters-updated', handleFiltersUpdated);
-    
+    window.addEventListener("filters-updated", handleFiltersUpdated);
+
     // Carrega dados iniciais
     loadFilterData();
-    
+
     // Limpa os ouvintes de evento quando o componente é desmontado
     return () => {
-      window.removeEventListener('filters-updated', handleFiltersUpdated);
+      window.removeEventListener("filters-updated", handleFiltersUpdated);
     };
   }, []);
 
@@ -62,53 +63,53 @@ export function ProcessFilterPanel() {
     setTempStatusValue(statusValue);
     setTempDtLimiteValue(dtLimiteValue);
   }, [codServValue, statusValue, dtLimiteValue]);
-  
+
   // Handler para mudança no filtro de serviço (apenas atualiza o valor temporário)
   const handleCodServChange = (value: string) => {
     setTempCodServValue(value);
   };
-  
+
   // Handler para mudança no filtro de status (apenas atualiza o valor temporário)
   const handleStatusChange = (value: string) => {
     setTempStatusValue(value);
   };
-  
+
   // Handler para mudança no filtro de data limite (apenas atualiza o valor temporário)
   const handleDtLimiteChange = (value: string) => {
     setTempDtLimiteValue(value);
   };
-  
+
   // Carrega dados de filtros e opções do localStorage (chamado quando uma unidade é selecionada)
   const loadFilterData = () => {
     try {
       console.log("ProcessFilterPanel: Carregando dados de filtros");
-      
+
       // Carregar valores dos filtros selecionados
       const storedCodServ = localStorage.getItem("v_codServ");
       const storedStatus = localStorage.getItem("v_status");
       const storedDtLimite = localStorage.getItem("v_dtLimite");
-      
+
       console.log("ProcessFilterPanel: Valores armazenados:", {
         codServ: storedCodServ,
         status: storedStatus,
-        dtLimite: storedDtLimite
+        dtLimite: storedDtLimite,
       });
-      
+
       if (storedCodServ) {
         setCodServValue(storedCodServ);
         setShowCodServ(storedCodServ !== "-1");
       }
-      
+
       if (storedStatus) {
         setStatusValue(storedStatus);
         setShowStatus(storedStatus !== "ALL");
       }
-      
+
       if (storedDtLimite) {
         setDtLimiteValue(storedDtLimite);
         setShowDtLimite(storedDtLimite !== "2001-01-01");
       }
-      
+
       // Carregar listas de opções
       const codServListStr = localStorage.getItem("v_codServ_list");
       if (codServListStr) {
@@ -122,7 +123,7 @@ export function ProcessFilterPanel() {
           console.error("Erro ao processar lista de códigos de serviço:", e);
         }
       }
-      
+
       const statusListStr = localStorage.getItem("v_status_list");
       if (statusListStr) {
         try {
@@ -135,7 +136,7 @@ export function ProcessFilterPanel() {
           console.error("Erro ao processar lista de status:", e);
         }
       }
-      
+
       const dtLimiteListStr = localStorage.getItem("v_dtLimite_list");
       if (dtLimiteListStr) {
         try {
@@ -143,17 +144,17 @@ export function ProcessFilterPanel() {
           if (Array.isArray(dtLimiteList)) {
             // Converter formato ISO para YYYY-MM-DD para o input date
             const formattedDates = dtLimiteList
-              .filter(date => date !== null && date !== undefined)
-              .map(date => {
+              .filter((date) => date !== null && date !== undefined)
+              .map((date) => {
                 try {
                   const d = new Date(date);
-                  return d.toISOString().split('T')[0];
+                  return d.toISOString().split("T")[0];
                 } catch {
-                  return '';
+                  return "";
                 }
               })
               .filter(Boolean);
-            
+
             setDtLimiteOptions(formattedDates);
             console.log("Lista de datas limite carregada:", formattedDates);
           }
@@ -165,39 +166,42 @@ export function ProcessFilterPanel() {
       console.error("Erro ao carregar dados do localStorage:", error);
     }
   };
-  
+
   // Função para aplicar os filtros quando o botão "Aplicar" é clicado
   const handleApplyFilters = () => {
     // Armazena os valores selecionados no localStorage
     localStorage.setItem("v_codServ", tempCodServValue);
     localStorage.setItem("v_status", tempStatusValue);
     localStorage.setItem("v_dtLimite", tempDtLimiteValue);
-    localStorage.setItem("v_servNaoConcluidos", servNaoConcluidos ? "true" : "false");
-    
+    localStorage.setItem(
+      "v_servNaoConcluidos",
+      servNaoConcluidos ? "true" : "false",
+    );
+
     // Atualiza os valores no estado
     setCodServValue(tempCodServValue);
     setStatusValue(tempStatusValue);
     setDtLimiteValue(tempDtLimiteValue);
-    
+
     // Dispara um evento personalizado para notificar a aplicação dos filtros
     try {
       console.log("Disparando evento apply-filters com parâmetros:", {
         qCodServ: tempCodServValue,
         qStatus: tempStatusValue,
         qDtlimite: tempDtLimiteValue,
-        qConcluido: !servNaoConcluidos // Inverte o valor já que o API espera true para mostrar concluídos
+        qConcluido: !servNaoConcluidos, // Inverte o valor já que o API espera true para mostrar concluídos
       });
-      
+
       // Cria um evento personalizado com os parâmetros dos filtros
-      const event = new CustomEvent('apply-filters', {
+      const event = new CustomEvent("apply-filters", {
         detail: {
           qCodServ: tempCodServValue,
           qStatus: tempStatusValue,
           qDtlimite: tempDtLimiteValue,
-          qConcluido: !servNaoConcluidos
-        }
+          qConcluido: !servNaoConcluidos,
+        },
       });
-      
+
       window.dispatchEvent(event);
     } catch (e) {
       console.error("Erro ao disparar evento apply-filters:", e);
@@ -210,13 +214,6 @@ export function ProcessFilterPanel() {
         {/* Row 1: Main filters */}
         <div className="flex items-center gap-4">
           <div className="flex flex-row items-center gap-2">
-            <Checkbox
-              id="codserv"
-              checked={showCodServ}
-              onCheckedChange={(checked) => {
-                setShowCodServ(!!checked);
-              }}
-            />
             <Label
               htmlFor="codserv"
               className="text-secondary-foreground text-xs font-semibold"
@@ -226,10 +223,10 @@ export function ProcessFilterPanel() {
             <Select
               value={tempCodServValue}
               onValueChange={handleCodServChange}
-              disabled={!showCodServ}
+              disabled={!showDropdown}
             >
               <SelectTrigger
-                className={`h-7 w-[100px] bg-select text-select-foreground border-border ${!showCodServ ? "opacity-50" : ""}`}
+                className={`h-7 w-[100px] bg-select text-select-foreground border-border ${!showDropdown ? "opacity-50" : ""}`}
               >
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
@@ -245,13 +242,6 @@ export function ProcessFilterPanel() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Checkbox
-              id="status"
-              checked={showStatus}
-              onCheckedChange={(checked) => {
-                setShowStatus(!!checked);
-              }}
-            />
             <Label
               htmlFor="status"
               className="text-secondary-foreground text-xs font-semibold"
@@ -261,10 +251,10 @@ export function ProcessFilterPanel() {
             <Select
               value={tempStatusValue}
               onValueChange={handleStatusChange}
-              disabled={!showStatus}
+              disabled={!showDropdown}
             >
               <SelectTrigger
-                className={`h-7 w-[200px] bg-select text-select-foreground border-border ${!showStatus ? "opacity-50" : ""}`}
+                className={`h-7 w-[200px] bg-select text-select-foreground border-border ${!showDropdown ? "opacity-50" : ""}`}
               >
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
@@ -280,13 +270,6 @@ export function ProcessFilterPanel() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Checkbox
-              id="DTLimite"
-              checked={showDtLimite}
-              onCheckedChange={(checked) => {
-                setShowDtLimite(!!checked);
-              }}
-            />
             <Label
               htmlFor="DTLimite"
               className="text-secondary-foreground text-xs font-semibold"
@@ -296,17 +279,19 @@ export function ProcessFilterPanel() {
             <Select
               value={tempDtLimiteValue}
               onValueChange={handleDtLimiteChange}
-              disabled={!showDtLimite}
+              disabled={!showDropdown}
             >
               <SelectTrigger
-                className={`h-7 w-[150px] bg-select text-select-foreground border-border ${!showDtLimite ? "opacity-50" : ""}`}
+                className={`h-7 w-[150px] bg-select text-select-foreground border-border ${!showDropdown ? "opacity-50" : ""}`}
               >
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="2001-01-01">Todas</SelectItem>
                 {dtLimiteOptions.map((date) => {
-                  const formattedDate = new Date(date).toLocaleDateString('pt-BR');
+                  const formattedDate = new Date(date).toLocaleDateString(
+                    "pt-BR",
+                  );
                   return (
                     <SelectItem key={date} value={date}>
                       {formattedDate}
@@ -315,11 +300,11 @@ export function ProcessFilterPanel() {
                 })}
               </SelectContent>
             </Select>
-            
-            <Button 
-              size="sm" 
-              variant="default" 
-              className="h-7 ml-2 bg-blue-600 hover:bg-blue-700 text-white" 
+
+            <Button
+              size="sm"
+              variant="default"
+              className="h-7 ml-2 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleApplyFilters}
             >
               <FilterIcon className="h-4 w-4 mr-1" />
@@ -331,8 +316,8 @@ export function ProcessFilterPanel() {
         {/* Row 2: Checkbox filters */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Checkbox 
-              id="servNaoConcluidos" 
+            <Checkbox
+              id="servNaoConcluidos"
               checked={servNaoConcluidos}
               onCheckedChange={(value) => setServNaoConcluidos(!!value)}
             />
