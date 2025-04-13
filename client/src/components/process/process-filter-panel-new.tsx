@@ -20,7 +20,7 @@ export function ProcessFilterPanel() {
   const [dtLimiteValue, setDtLimiteValue] = useState("2001-01-01");
 
   // Estado para controlar a exibição dos campos
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(true);
   const [showCodServ, setShowCodServ] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [showDtLimite, setShowDtLimite] = useState(false);
@@ -226,7 +226,7 @@ export function ProcessFilterPanel() {
               disabled={!showDropdown}
             >
               <SelectTrigger
-                className={`h-7 w-[100px] bg-select text-select-foreground border-border ${!showDropdown ? "opacity-50" : ""}`}
+                className={`h-7 w-[100px] bg-select text-select-foreground border-border ${!showDropdown ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
