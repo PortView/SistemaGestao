@@ -17,7 +17,7 @@ export function ProcessFilterPanel() {
   // Estados para armazenar valores atuais/aplicados
   const [codServValue, setCodServValue] = useState("-1");
   const [statusValue, setStatusValue] = useState("ALL");
-  const [dtLimiteValue, setDtLimiteValue] = useState("2001-01-01");
+  const [dtLimiteValue, setDtLimiteValue] = useState("ALL");
 
   // Estado para controlar a exibição dos campos
   const [showDropdown, setShowDropdown] = useState(true);
@@ -26,7 +26,7 @@ export function ProcessFilterPanel() {
   const [showDtLimite, setShowDtLimite] = useState(false);
 
   // Estado para o checkbox "servNaoConcluidos"
-  const [servNaoConcluidos, setServNaoConcluidos] = useState(false);
+  const [servNaoConcluidos, setServNaoConcluidos] = useState(true);
 
   // Estados para armazenar as listas de valores únicos
   const [codServOptions, setCodServOptions] = useState<number[]>([]);
@@ -107,7 +107,7 @@ export function ProcessFilterPanel() {
 
       if (storedDtLimite) {
         setDtLimiteValue(storedDtLimite);
-        setShowDtLimite(storedDtLimite !== "2001-01-01");
+        setShowDtLimite(storedDtLimite !== "ALL");
       }
 
       // Carregar listas de opções
@@ -189,7 +189,7 @@ export function ProcessFilterPanel() {
         qCodServ: tempCodServValue,
         qStatus: tempStatusValue,
         qDtlimite: tempDtLimiteValue,
-        qConcluido: !servNaoConcluidos, // Inverte o valor já que o API espera true para mostrar concluídos
+        qConcluido: servNaoConcluidos, // Manda true para que mostre Só serv. não Concluídos
       });
 
       // Cria um evento personalizado com os parâmetros dos filtros
@@ -198,7 +198,7 @@ export function ProcessFilterPanel() {
           qCodServ: tempCodServValue,
           qStatus: tempStatusValue,
           qDtlimite: tempDtLimiteValue,
-          qConcluido: !servNaoConcluidos,
+          qConcluido: servNaoConcluidos, // Manda true para que mostre Só serv. não Concluídos
         },
       });
 
@@ -287,7 +287,7 @@ export function ProcessFilterPanel() {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2001-01-01">Todas</SelectItem>
+                <SelectItem value="ALL">Todas</SelectItem>
                 {dtLimiteOptions.map((date) => {
                   const formattedDate = new Date(date).toLocaleDateString(
                     "pt-BR",

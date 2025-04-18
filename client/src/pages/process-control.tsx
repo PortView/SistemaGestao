@@ -43,8 +43,7 @@ export default function ProcessControlPage() {
       localStorage.setItem("v_status", "ALL");
     }
     if (!localStorage.getItem("v_dtLimite")) {
-      // Definir data inicial como 2001-01-01
-      localStorage.setItem("v_dtLimite", "2001-01-01");
+      localStorage.setItem("v_dtLimite", "ALL");
     }
   }, []);
 
@@ -73,7 +72,7 @@ export default function ProcessControlPage() {
     // Atualizar o localStorage com valores padrão para filtragem quando seleciona uma unidade
     localStorage.setItem("v_codServ", "-1");
     localStorage.setItem("v_status", "ALL");
-    localStorage.setItem("v_dtLimite", "2001-01-01");
+    localStorage.setItem("v_dtLimite", "ALL");
     
     // Limpar as listas de valores únicos
     localStorage.setItem("v_codServ_list", JSON.stringify([]));
@@ -127,7 +126,7 @@ export default function ProcessControlPage() {
                   qConcluido={true}
                   qCodServ={-1}
                   qStatus="ALL"
-                  qDtlimite="2001-01-01"
+                  qDtlimite="ALL"
                   onSelectServico={handleServicoSelect}
                 />
               </div>
@@ -171,7 +170,7 @@ export default function ProcessControlPage() {
                 qConcluido={true}
                 qCodServ={-1}
                 qStatus="ALL"
-                qDtlimite="2001-01-01"
+                qDtlimite="ALL"
                 onSelectServico={handleServicoSelect}
               />
             </div>
