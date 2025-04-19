@@ -35,7 +35,7 @@ interface TableServicosProps {
   qCodServ: number;
   qStatus: string;
   qDtlimite: string;
-  onSelectServico?: (codServ: number) => void;
+  onSelectServico?: (codccontra: number) => void;
 }
 
 export function TableServicos({ 
@@ -112,12 +112,12 @@ export function TableServicos({
         setData(response);
         setServices(response); 
         
-        // Selecionar automaticamente o primeiro serviço da lista, se disponível
+        // Selecionar automaticamente o primeiro serviço da lista, se disponível- Eu Mudei para codccontra
         if (response.length > 0 && onSelectServico) {
           setTimeout(() => {
-            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
+            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codccontra);
             setSelectedRow(response[0].codccontra);
-            onSelectServico(response[0].codServ);
+            onSelectServico(response[0].codccontra);
           }, 100);
         }
       } else {
@@ -233,11 +233,12 @@ export function TableServicos({
     }
   };
 
-  const handleRowClick = (codServ: number) => {
-    console.log('TableServicos: Linha clicada, serviço ID:', codServ);
-    setSelectedRow(codServ);
+  // Mudei para codccontra quando seleciona a linha
+  const handleRowClick = (codccontra: number) => {
+    console.log('TableServicos: Linha clicada, serviço ID:', codccontra);
+    setSelectedRow(codccontra);
     if (onSelectServico) {
-      onSelectServico(codServ);
+      onSelectServico(codccontra);
     }
   };
 
