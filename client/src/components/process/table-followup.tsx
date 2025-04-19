@@ -5,7 +5,6 @@ import { ApiService } from "@/lib/api-service";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
 /**
@@ -105,10 +104,10 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         // Construir a URL para a API de tarefas
         const apiBaseUrl = import.meta.env.VITE_NEXT_PUBLIC_API_TAREFAS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/tarefas';
         
-        // Usando codserv como o parâmetro para a API (o valor é o mesmo de codccontra)
-        const url = `${apiBaseUrl}?codserv=${codserv}`;
+        // Usando codccontra como o parâmetro para a API
+        const url = `${apiBaseUrl}?codccontra=${codserv}`;
         console.log('URL API Followup:', apiBaseUrl);
-        console.log('Buscando tarefas para o serviço ID (usando parameter codserv):', codserv);
+        console.log('Buscando tarefas para o serviço ID:', codserv);
 
         // Fazer a requisição via ApiService
         const response = await ApiService.get<TarefasData[]>(url, {
@@ -125,22 +124,9 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           console.error('Resposta da API não é um array:', response);
           setData([]);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Erro ao carregar tarefas:', err);
-        
-        // Mensagem de erro mais informativa com base no tipo de erro
-        if (err.name === 'AbortError') {
-          setError('A requisição demorou muito e foi cancelada. Tente novamente mais tarde.');
-        } else if (err.message && err.message.includes('Failed to fetch')) {
-          setError('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
-        } else if (err.message && err.message.includes('NetworkError')) {
-          setError('Erro de rede ao tentar conectar com o servidor. Verifique sua conexão.');
-        } else {
-          setError('Falha ao carregar dados das tarefas: ' + (err.message || 'Erro desconhecido'));
-        }
-        
-        // Em caso de erro, ainda definimos os dados como um array vazio para não quebrar a interface
-        setData([]);
+        setError('Falha ao carregar dados das tarefas.');
       } finally {
         setLoading(false);
       }
@@ -176,69 +162,12 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   // Estado de erro
   if (error) {
     return (
-      <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden rounded-md">
-        <div className="flex flex-col items-center justify-center h-full">
-          <Alert variant="destructive" className="max-w-[80%] mb-4">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          
-          <p className="text-sm text-gray-600 mt-4">
-            A comunicação com o servidor de tarefas falhou. Os outros componentes do sistema continuam funcionando normalmente.
-          </p>
-          
-          <Button 
-            variant="default"
-            size="sm"
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={() => {
-              setError(null);
-              setLastFetchedCode(-1); // Reseta para forçar uma nova busca
-              if (codserv) {
-                // Isso dispara um novo efeito e tenta buscar os dados novamente
-                const fetchTarefas = async () => {
-                  setLoading(true);
-                  try {
-                    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-                    if (!token) {
-                      throw new Error('Token não encontrado');
-                    }
-                    
-                    const apiBaseUrl = import.meta.env.VITE_NEXT_PUBLIC_API_TAREFAS_URL || 
-                      'https://amenirealestate.com.br:5601/ger-clientes/tarefas';
-                      
-                    const url = `${apiBaseUrl}?codserv=${codserv}`;
-                    
-                    const response = await ApiService.get<TarefasData[]>(url, {
-                      headers: { Authorization: `Bearer ${token}` },
-                      skipCache: true
-                    });
-                    
-                    if (Array.isArray(response)) {
-                      setData(response);
-                    } else {
-                      setData([]);
-                    }
-                    
-                    setFetchAttempted(true);
-                    setError(null);
-                  } catch (err: any) {
-                    console.error('Erro ao tentar novamente buscar tarefas:', err);
-                    setError('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
-                    setData([]);
-                  } finally {
-                    setLoading(false);
-                  }
-                };
-                
-                fetchTarefas();
-              }
-            }}
-          >
-            Tentar Novamente
-          </Button>
-        </div>
-      </div>
+      <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </Card>
     );
   }
 

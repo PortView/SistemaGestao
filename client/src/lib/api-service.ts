@@ -1,5 +1,4 @@
-// Utilizamos o AbortController nativo do navegador
-// import { AbortController } from 'node-abort-controller';
+import { AbortController } from 'node-abort-controller';
 import { SiscopCliente, SiscopConformidade, SiscopUnidadesResponse, SiscopUser } from './types';
 
 interface ApiServiceOptions {
