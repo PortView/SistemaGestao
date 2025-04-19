@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { ApiService } from '@/lib/api-service';
@@ -64,7 +65,7 @@ export function TableServicos({
   const [codServ, setCodServ] = useState<string>("-1");
   const [status, setStatus] = useState<string>("ALL");
   const [dtLimite, setDtLimite] = useState<string>("ALL");
-  const [concluido, setConcluido] = useState<boolean>(true);
+  const [concluido, setConcluido] = useState<boolean>(false);
 
   // Controle de renderização e seleção
   const [dataInitialized, setDataInitialized] = useState(false);
@@ -72,6 +73,7 @@ export function TableServicos({
   const previousParams = useRef<string>("");
   const isInitialLoad = useRef(true);
   const isProcessingUnitSelection = useRef(false);
+  const isProcessingServiceSelection = useRef(false);
 
   /**
    * Função para buscar dados da API com verificações adequadas
@@ -184,47 +186,48 @@ export function TableServicos({
   }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite]);
 
   /**
-   * Efeito para selecionar automaticamente o primeiro serviço quando os dados são carregados
-   * Este efeito é separado para maior controle e evitar loop infinito
+   * Efeito separado para seleção automática do primeiro serviço 
+   * apenas quando os dados são carregados inicialmente
    */
   useEffect(() => {
-    // Flag para controlar se já executou a função dentro do timeout
-    let hasExecuted = false;
-    
+    // Evitar execução em loops ou durante transições de unidade
+    if (isProcessingServiceSelection.current || isProcessingUnitSelection.current) {
+      return;
+    }
+
     // Verificar se há dados e se a seleção automática ainda não foi feita
     if (
       data.length > 0 && 
       onSelectServico && 
       !initialAutoSelectDone.current && 
       !loading && 
-      dataInitialized &&
-      !isProcessingUnitSelection.current // Importante: não selecionar durante troca de unidade
+      dataInitialized
     ) {
-      // Imediatamente marcar que a seleção automática foi realizada para evitar execuções repetidas
+      // Marcar que já estamos processando uma seleção para evitar loops
+      isProcessingServiceSelection.current = true;
+      
+      // Marcar que a seleção automática foi realizada
       initialAutoSelectDone.current = true;
       
       console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', data[0].codServ);
       
-      // Usar um setTimeout com delay suficiente para quebrar o ciclo de renderização
-      const timeoutId = setTimeout(() => {
-        // Verificar novamente se já foi executado para evitar execuções duplicadas
-        if (hasExecuted) return;
-        hasExecuted = true;
-        
-        const firstService = data[0];
-        
-        // Atualizar a linha selecionada visualmente
-        setSelectedRow(firstService.codccontra);
-        
-        // Notificar o componente pai sobre a seleção do serviço usando o codccontra
-        onSelectServico(firstService.codccontra);
-      }, 300); // Aumentado para 300ms para dar mais tempo entre ciclos de renderização
+      // Atualizar a linha selecionada visualmente
+      setSelectedRow(data[0].codccontra);
       
-      // Limpar o timeout se o componente for desmontado
+      // Atualizar o localStorage com o serviço selecionado
+      localStorage.setItem("v_codServ", data[0].codccontra.toString());
+      console.log("TableServicos: LocalStorage v_codServ atualizado:", data[0].codccontra);
+      
+      // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
+      const timeoutId = setTimeout(() => {
+        onSelectServico(data[0].codccontra);
+        // Desmarcar o processamento após concluir
+        isProcessingServiceSelection.current = false;
+      }, 100);
+      
       return () => {
         clearTimeout(timeoutId);
       };
-    }
     }
   }, [data, loading, dataInitialized, onSelectServico]);
 
@@ -261,7 +264,7 @@ export function TableServicos({
       setCodServ("-1");
       setStatus("ALL");
       setDtLimite("ALL");
-      setConcluido(true);
+      setConcluido(qConcluido);
 
       // Desmarcar depois de um timeout para permitir o processamento completo
       setTimeout(() => {
@@ -278,21 +281,24 @@ export function TableServicos({
       window.removeEventListener('apply-filters', handleApplyFilters as EventListener);
       window.removeEventListener('unit-selected', handleUnitSelected as EventListener);
     };
-  }, []);
+  }, [qConcluido]);
 
   /**
    * Handler para clique na linha
    */
   const handleRowClick = (codccontra: number, codServ: number) => {
     // Evitar seleção duplicada e processamento desnecessário
-    if (selectedRow === codccontra) {
-      console.log('TableServicos: Linha já selecionada, ignorando clique');
+    if (selectedRow === codccontra || isProcessingServiceSelection.current) {
+      console.log('TableServicos: Linha já selecionada ou processamento em andamento, ignorando clique');
       return;
     }
 
     console.log('TableServicos: Linha clicada, contrato-serviço ID:', codccontra, 'Serviço ID:', codServ);
     
-    // Marcar que já realizamos a seleção para evitar seleção automática posterior
+    // Marcar que estamos processando uma seleção para evitar loops
+    isProcessingServiceSelection.current = true;
+    
+    // Marcar que já realizamos a seleção para evitar seleção automática
     initialAutoSelectDone.current = true;
     
     // Atualizar a linha selecionada visualmente
@@ -304,19 +310,13 @@ export function TableServicos({
     
     // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
     if (onSelectServico) {
-      // Usamos uma variável para indicar que o clique já foi processado
-      let clickProcessed = false;
-      
       const timeoutId = setTimeout(() => {
-        // Verificar se o clique já foi processado
-        if (clickProcessed) return;
-        clickProcessed = true;
-        
-        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+        // Passamos o codccontra para o TableFollowup
         onSelectServico(codccontra);
+        // Desmarcar o processamento após concluir
+        isProcessingServiceSelection.current = false;
       }, 100);
       
-      // Limpeza do timeout se o componente for desmontado antes da execução
       return () => {
         clearTimeout(timeoutId);
       };

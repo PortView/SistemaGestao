@@ -1,29 +1,205 @@
+import { AbortController } from 'node-abort-controller';
 import { SiscopCliente, SiscopConformidade, SiscopUnidadesResponse, SiscopUser } from './types';
+
+interface ApiServiceOptions {
+  headers?: Record<string, string>;
+  skipCache?: boolean;
+  signal?: AbortSignal;
+}
+
+export class ApiService {
+  private static requestTimeouts: Record<string, NodeJS.Timeout> = {};
+
+  // Método principal para fazer requisições HTTP
+  static async request<T>(url: string, options: RequestInit & ApiServiceOptions = {}): Promise<T> {
+    const { headers = {}, skipCache = false, signal, ...rest } = options;
+
+    // Headers padrão
+    const defaultHeaders: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...headers
+    };
+
+    // Adicionar Authorization se existir
+    if (headers.Authorization) {
+      console.log('ApiService.request - Token adicionado ao header de autenticação (parcialmente obscurecido)', 
+        headers.Authorization.substring(0, 12) + '...');
+    }
+
+    // Configurações completas para o fetch
+    const fetchOptions: RequestInit = {
+      ...rest,
+      headers: defaultHeaders,
+      signal,
+    };
+
+    // Imprimir informações sobre a requisição
+    console.log('ApiService.request - Iniciando fetch para', url, 'com opções:', {
+      method: fetchOptions.method || 'GET',
+      headersKeys: Object.keys(defaultHeaders),
+      useProxy: false
+    });
+
+    // Máximo de 3 tentativas com espera entre elas
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        // Fazer a requisição
+        const response = await fetch(url, fetchOptions);
+
+        console.log('ApiService.request - Resposta recebida de', url + ':', {
+          status: response.status,
+          statusText: response.statusText
+        });
+
+        // Verificar se a resposta foi bem-sucedida
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
+        }
+
+        // Verificar se o content-type é JSON
+        const contentType = response.headers.get('Content-Type');
+        console.log('ApiService.request - Content-Type da resposta:', contentType);
+
+        // Processar a resposta como JSON ou texto, dependendo do content-type
+        let data;
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+          console.log('ApiService.request - Dados JSON recebidos:', 
+            Array.isArray(data) ? `Array com ${data.length} itens` : `Objeto com ${Object.keys(data).length} campos`);
+        } else {
+          data = await response.text();
+          console.log('ApiService.request - Dados texto recebidos (tamanho):', data.length);
+        }
+
+        return data as T;
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Erro no fetch para ${url}:`, error);
+
+        // Se for o último retry ou o sinal foi abortado, não retent
+        if (attempt === 3 || error.name === 'AbortError') {
+          console.log(`ApiService.request - Tentativa ${attempt} falhou:`, error);
+          break;
+        }
+
+        // Esperar antes da próxima tentativa (espera exponencial)
+        const waitTime = 2000; // 2 segundos
+        console.log(`ApiService.request - Aguardando ${waitTime / 1000} segundos antes da próxima tentativa`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+
+    console.log(`ApiService.request - Todas as ${3} tentativas falharam`);
+    console.log('ApiService.request - Erro completo na requisição à API:', lastError);
+    throw lastError || new Error('Falha na requisição após múltiplas tentativas');
+  }
+
+  // Método simplificado para requisições GET
+  static async get<T>(url: string, options: ApiServiceOptions = {}): Promise<T> {
+    console.log('ApiService.get - Iniciando requisição para:', url);
+    console.log('ApiService.get - Opções recebidas:', options);
+
+    const { headers = {}, ...rest } = options;
+
+    // Verificar se existe um token no headers.Authorization
+    if (headers.Authorization) {
+      const token = headers.Authorization.replace('Bearer ', '');
+      console.log('ApiService.get - Token encontrado:', token.substring(0, 10) + '...');
+    }
+
+    console.log('ApiService.get - Enviando requisição para servidor:', url);
+    console.log('API request to:', url);
+
+    try {
+      // Cria um controller para abortar a requisição se necessário
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      // Configura um timeout para abortar a requisição após 30 segundos
+      const timeoutId = setTimeout(() => {
+        console.log('ApiService.get - Timeout! Abortando requisição...');
+        controller.abort();
+      }, 30000);
+
+      // Armazena o timeout para poder cancelá-lo depois
+      this.requestTimeouts[url] = timeoutId;
+
+      // Adiciona o signal às opções
+      const requestOptions = {
+        method: 'GET',
+        headers,
+        signal,
+        ...rest
+      };
+
+      // Faz a requisição
+      const response = await this.request<T>(url, requestOptions);
+
+      // Limpa o timeout se a requisição foi bem-sucedida
+      clearTimeout(timeoutId);
+      delete this.requestTimeouts[url];
+
+      console.log('ApiService.get - Resposta recebida para', url + ':', response);
+      return response;
+    } catch (error) {
+      console.error('ApiService.get - Erro na requisição para', url + ':', error);
+      throw error;
+    }
+  }
+
+  // Cancela qualquer requisição pendente para a URL especificada
+  static cancelRequest(url: string): void {
+    if (this.requestTimeouts[url]) {
+      clearTimeout(this.requestTimeouts[url]);
+      delete this.requestTimeouts[url];
+      console.log('ApiService - Requisição cancelada para:', url);
+    }
+  }
+
+  // Método simplificado para requisições POST
+  static async post<T>(url: string, data: any, options: ApiServiceOptions = {}): Promise<T> {
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      ...options
+    };
+
+    return this.request<T>(url, requestOptions);
+  }
+
+  // Método simplificado para requisições PUT
+  static async put<T>(url: string, data: any, options: ApiServiceOptions = {}): Promise<T> {
+    const requestOptions = {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options
+    };
+
+    return this.request<T>(url, requestOptions);
+  }
+
+  // Método simplificado para requisições DELETE
+  static async delete<T>(url: string, options: ApiServiceOptions = {}): Promise<T> {
+    const requestOptions = {
+      method: 'DELETE',
+      ...options
+    };
+
+    return this.request<T>(url, requestOptions);
+  }
+}
+
 
 // Constantes importadas das variáveis de ambiente
 const API_BASE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL || 'https://amenirealestate.com.br:5601';
-const API_AUTH_URL = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL || `${API_BASE_URL}/login`;
-const API_ME_URL = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL || `${API_BASE_URL}/user/me`;
-const API_CLIENTES_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL || `${API_BASE_URL}/ger-clientes/clientes`;
-const API_UNIDADES_URL = import.meta.env.VITE_NEXT_PUBLIC_API_UNIDADES_URL || `${API_BASE_URL}/ger-clientes/unidades`;
-const API_SERVICOS_URL = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || `${API_BASE_URL}/ger-clientes/servicos`;
-const API_CONFORMIDADE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL || `${API_BASE_URL}/ger-clientes/conformidades`;
-
-// Configurações de CORS
-// Desativando temporariamente para debug
-const USE_CORS_PROXY = false; // import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY === 'true';
-const CORS_PROXY_URL = import.meta.env.VITE_NEXT_PUBLIC_CORS_PROXY_URL || 'https://corsproxy.io/?';
-
-// Configurações de timeout e retry
-const TIMEOUT = 60000; // 60 segundos - aumentando para requisições mais lentas
-const MAX_RETRIES = 2;
-
-// Cache expiration
-const CACHE_EXPIRATION = {
-  SHORT: parseInt(import.meta.env.VITE_CACHE_SHORT || '300000'),
-  MEDIUM: parseInt(import.meta.env.VITE_CACHE_MEDIUM || '1800000'),
-  LONG: parseInt(import.meta.env.VITE_CACHE_LONG || '86400000')
-};
+const API_AUTH_URL = `${API_BASE_URL}/login`;
+const API_ME_URL = `${API_BASE_URL}/user/me`;
+const API_CLIENTES_URL = `${API_BASE_URL}/ger-clientes/clientes`;
+const API_UNIDADES_URL = `${API_BASE_URL}/ger-clientes/unidades`;
+const API_SERVICOS_URL = `${API_BASE_URL}/ger-clientes/servicos`;
+const API_CONFORMIDADE_URL = `${API_BASE_URL}/ger-clientes/conformidades`;
 
 // Chaves para localStorage
 const LOCAL_STORAGE_TOKEN_KEY = 'siscop_token';
@@ -31,318 +207,12 @@ const LOCAL_STORAGE_USER_KEY = 'siscop_user';
 const LOCAL_STORAGE_CACHE_PREFIX = 'siscop_cache_';
 const LOCAL_STORAGE_CLIENTES_KEY = 'siscop_clientes';
 
-interface FetchOptions extends RequestInit {
-  skipAuth?: boolean;
-  skipCache?: boolean;
-}
-
-/**
- * Classe para lidar com requisições à API com suporte a bypass SSL e cache
- */
-export class ApiService {
-  /**
-   * Faz uma requisição GET à API com suporte a cache
-   */
-  static async get<T>(url: string, options: FetchOptions = {}, cacheTime?: number): Promise<T> {
-    console.log(`ApiService.get - Iniciando requisição para: ${url}`);
-    console.log(`ApiService.get - Opções recebidas:`, options);
-
-    // Verificar token no início
-    const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
-    console.log(`ApiService.get - Token encontrado:`, token ? `${token.substring(0, 15)}...` : 'null');
-
-    // Desativando cache temporariamente para debug
-    if (url.includes('codcoor')) {
-      console.log(`ApiService.get - Requisição para clientes detectada, ignorando cache temporariamente`);
-    } else {
-      // Tentar obter dados do cache para requisições GET
-      if (typeof window !== 'undefined' && cacheTime) {
-        const cachedData = this.getFromCache<T>(url);
-        if (cachedData) {
-          console.log(`ApiService.get - Usando dados em cache para: ${url}`);
-          return cachedData;
-        }
-      }
-    }
-
-    try {
-      console.log(`ApiService.get - Enviando requisição para servidor: ${url}`);
-      const result = await this.request<T>('GET', url, null, options);
-      console.log(`ApiService.get - Resposta recebida para ${url}:`, result);
-
-      // Salvar no cache se cacheTime estiver definido
-      if (typeof window !== 'undefined' && cacheTime) {
-        this.saveToCache(url, result, cacheTime);
-        console.log(`ApiService.get - Dados salvos no cache com expiração de ${cacheTime}ms`);
-      }
-
-      return result;
-    } catch (error) {
-      console.error(`ApiService.get - Erro na requisição para ${url}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Faz uma requisição POST à API
-   */
-  static async post<T>(url: string, data: any, options: FetchOptions = {}): Promise<T> {
-    return this.request<T>('POST', url, data, options);
-  }
-
-  /**
-   * Faz uma requisição PUT à API
-   */
-  static async put<T>(url: string, data: any, options: FetchOptions = {}): Promise<T> {
-    return this.request<T>('PUT', url, data, options);
-  }
-
-  /**
-   * Faz uma requisição DELETE à API
-   */
-  static async delete<T>(url: string, options: FetchOptions = {}): Promise<T> {
-    return this.request<T>('DELETE', url, null, options);
-  }
-
-  /**
-   * Salva dados no cache com um tempo de expiração
-   */
-  static saveToCache<T>(key: string, data: T, expirationTime: number): void {
-    if (typeof window === 'undefined') return;
-
-    const cacheKey = `${LOCAL_STORAGE_CACHE_PREFIX}${key}`;
-    const cacheData = {
-      data,
-      expiration: Date.now() + expirationTime
-    };
-
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch (error) {
-      console.warn('Erro ao salvar dados no cache:', error);
-    }
-  }
-
-  /**
-   * Obtém dados do cache se ainda forem válidos
-   */
-  static getFromCache<T>(key: string): T | null {
-    if (typeof window === 'undefined') return null;
-
-    const cacheKey = `${LOCAL_STORAGE_CACHE_PREFIX}${key}`;
-    const cachedItem = localStorage.getItem(cacheKey);
-
-    if (!cachedItem) return null;
-
-    try {
-      const { data, expiration } = JSON.parse(cachedItem);
-
-      // Retornar dados se ainda forem válidos
-      if (Date.now() < expiration) {
-        return data as T;
-      }
-
-      // Remover dados expirados
-      localStorage.removeItem(cacheKey);
-      return null;
-    } catch (error) {
-      console.warn('Erro ao ler dados do cache:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Aplica proxy CORS a uma URL se necessário
-   */
-  static applyCorsProxy(url: string): string {
-    if (USE_CORS_PROXY && url.startsWith('http')) {
-      return `${CORS_PROXY_URL}${encodeURIComponent(url)}`;
-    }
-    return url;
-  }
-
-  /**
-   * Método principal para fazer requisições à API
-   */
-  private static async request<T>(
-    method: string,
-    url: string,
-    data: any = null,
-    options: FetchOptions = {}
-  ): Promise<T> {
-    // Construir URL completa e aplicar proxy CORS se necessário
-    const baseUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-    const fullUrl = this.applyCorsProxy(baseUrl);
-
-    console.log(`API request to: ${fullUrl}`);
-
-    // Preparar headers com tipagem correta
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...options.headers,
-    } as Record<string, string>;
-
-    // Adicionar token de autenticação se necessário
-    if (!options.skipAuth) {
-      const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log(`ApiService.request - Token adicionado ao header de autenticação (${token.substring(0, 15)}...)`);
-      } else {
-        console.warn(`ApiService.request - Token de autenticação não encontrado para requisição ${method} ${url}`);
-      }
-    }
-
-    // Configurar opções da requisição
-    const fetchOptions: RequestInit = {
-      method,
-      headers,
-      ...options,
-      body: data ? JSON.stringify(data) : undefined,
-    };
-
-    // Remover a opção credentials para evitar problemas de CORS
-    if (fetchOptions.credentials === 'include') {
-      delete fetchOptions.credentials;
-    }
-
-    try {
-      console.log(`ApiService.request - Iniciando fetch para ${fullUrl} com opções:`, {
-        method: fetchOptions.method,
-        headersKeys: Object.keys(headers),
-        useProxy: USE_CORS_PROXY
-      });
-
-      // Fazer a requisição com retry e timeout
-      let response;
-      const RETRY_DELAY = 2000; // Usando 2 segundos de delay entre tentativas
-
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          // Usar Promise.race para implementar timeout
-          // Envolva a chamada para evitar erros de conexão
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => {
-              controller.abort();
-              console.warn(`Timeout atingido após ${TIMEOUT/1000} segundos para ${fullUrl}`);
-            }, TIMEOUT);
-
-            // Clone dos fetchOptions para evitar modificar o objeto original
-            const fetchOptionsWithSignal = {
-              ...fetchOptions,
-              signal: controller.signal
-            };
-
-            try {
-              // Fazer a requisição usando o fetch com tratamento de erro
-              response = await fetch(fullUrl, fetchOptionsWithSignal);
-              // Limpar o timeout se a requisição foi bem-sucedida
-              clearTimeout(timeoutId);
-
-              // Verificar imediatamente se a resposta foi bem-sucedida
-              if (!response.ok) {
-                console.error(`Erro HTTP: ${response.status} ${response.statusText} para ${fullUrl}`);
-                throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
-              }
-            } catch (error: any) {
-              // Limpar o timeout para evitar vazamento de memória
-              clearTimeout(timeoutId);
-
-              // Tratar erros específicos
-              if (error.name === 'AbortError') {
-                console.error(`Timeout na requisição após ${TIMEOUT/1000} segundos para ${fullUrl}`);
-                throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
-              }
-
-              console.error(`Erro no fetch para ${fullUrl}:`, error);
-
-              // Se for um erro de conexão ou rede, retornar um array vazio para requisições GET
-              // Isso evita que a aplicação quebre completamente por falha de rede
-              if (method === 'GET') {
-                console.warn(`Retornando array vazio para GET com erro de conexão: ${fullUrl}`);
-                return [] as any as T;
-              }
-
-              // Criar um erro mais informativo
-              const errorMessage = error.message || 'Erro desconhecido na requisição';
-              const enhancedError = new Error(`Falha na requisição para ${fullUrl}: ${errorMessage}`);
-              throw enhancedError;
-            }
-          } catch (err: any) {
-            if (err.name === 'AbortError') {
-              throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
-            }
-            throw err;
-          }
-          break; // Se a requisição for bem-sucedida, sair do loop
-        } catch (fetchError) {
-          console.error(`ApiService.request - Tentativa ${attempt + 1} falhou:`, fetchError);
-
-          if (attempt === MAX_RETRIES) {
-            console.warn(`ApiService.request - Todas as ${MAX_RETRIES + 1} tentativas falharam`);
-            throw fetchError; // Propagar o erro após todas as tentativas
-          }
-
-          // Aguardar antes da próxima tentativa
-          console.log(`ApiService.request - Aguardando ${RETRY_DELAY/1000} segundos antes da próxima tentativa`);
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        }
-      }
-
-      if (!response) {
-        throw new Error('Falha na requisição após tentativas');
-      }
-
-      console.log(`ApiService.request - Resposta recebida de ${fullUrl}:`, {
-        status: response.status,
-        statusText: response.statusText
-      });
-
-      // Verificar se a resposta foi bem-sucedida (já verificado anteriormente)
-      //if (!response.ok) {
-      //  console.error(`ApiService.request - Erro na resposta: Status ${response.status} ${response.statusText}`);
-      //  let errorData;
-      //  try {
-      //    errorData = await response.json();
-      //    console.error('ApiService.request - Detalhes do erro:', errorData);
-      //  } catch (e) {
-      //    errorData = {};
-      //    console.error('ApiService.request - Não foi possível obter detalhes do erro');
-      //  }
-
-      //  const error = new Error(errorData.message || `Erro na requisição: ${response.status}`);
-      //  Object.assign(error, { status: response.status, data: errorData });
-      //  throw error;
-      //}
-
-      // Verificar se há conteúdo na resposta
-      const contentType = response.headers.get('content-type');
-      console.log(`ApiService.request - Content-Type da resposta: ${contentType}`);
-
-      if (contentType && contentType.includes('application/json')) {
-        const jsonData = await response.json();
-        console.log(`ApiService.request - Dados JSON recebidos:`,
-          Array.isArray(jsonData) ? `Array com ${jsonData.length} itens` : jsonData);
-        return jsonData;
-      }
-
-      // Se a resposta não for JSON, tentar retornar texto
-      try {
-        const textData = await response.text();
-        console.log(`ApiService.request - Dados de texto recebidos: ${textData.substring(0, 100)}${textData.length > 100 ? '...' : ''}`);
-        return {} as T;
-      } catch (e) {
-        console.log(`ApiService.request - Retornando objeto vazio para resposta não processável`);
-        return {} as T;
-      }
-    } catch (error) {
-      console.error('ApiService.request - Erro completo na requisição à API:', error);
-      throw error;
-    }
-  }
-}
+// Cache expiration (values should be retrieved from environment variables if possible)
+const CACHE_EXPIRATION = {
+  SHORT: 300000, // 5 minutes
+  MEDIUM: 1800000, // 30 minutes
+  LONG: 86400000 // 24 hours
+};
 
 /**
  * Função para autenticar um usuário
@@ -351,7 +221,7 @@ export async function authenticateUser(email: string, password: string): Promise
   return ApiService.post<{ access_token: string }>(
     API_AUTH_URL,
     { email, password },
-    { skipAuth: true }
+    { skipAuth: true } // skipAuth is not used in the new ApiService
   );
 }
 
@@ -402,7 +272,7 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
 
   console.log('fetchClientes - URL completa:', url);
 
-  // Verificar token antes de fazer requisição
+  // Verificar token antes de fazer requisição (this part needs to be revised to utilize the new ApiService)
   const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
   if (!token) {
     console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
@@ -411,35 +281,34 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
 
   try {
     // Buscar do cache primeiro para economizar requisições
+    let cachedClientes: SiscopCliente[] | null = null;
     if (typeof window !== 'undefined') {
-      const cachedClientes = localStorage.getItem(cacheKey);
-      if (cachedClientes) {
+      const cachedClientesString = localStorage.getItem(cacheKey);
+      if (cachedClientesString) {
         try {
-          const { data, expiration } = JSON.parse(cachedClientes);
+          const cachedData = JSON.parse(cachedClientesString);
           // Verificar se o cache ainda é válido
-          if (Date.now() < expiration) {
+          if (Date.now() < cachedData.expiration) {
+            cachedClientes = cachedData.data;
             console.log('Usando dados de clientes em cache');
-            return data;
+          } else {
+            // Remover cache expirado
+            localStorage.removeItem(cacheKey);
           }
-          // Remover cache expirado
-          localStorage.removeItem(cacheKey);
         } catch (e) {
           console.warn('Erro ao ler cache de clientes:', e);
         }
       }
     }
 
+    if (cachedClientes) return cachedClientes;
+
     // Buscar da API com token de autorização
     console.log('fetchClientes - Fazendo requisição para API com token');
 
-    // Usar o sistema padrão de autorização do ApiService, não precisamos
-    // passar headers explicitamente pois o token já está no localStorage
-    // e o ApiService o utilizará automaticamente
-    const clientesData = await ApiService.get<SiscopCliente[]>(
-      url,
-      {}, // Não precisamos passar headers, o ApiService já incluirá o token
-      CACHE_EXPIRATION.MEDIUM
-    );
+    const headers = { Authorization: `Bearer ${token}` };
+    const clientesData = await ApiService.get<SiscopCliente[]>(url, { headers });
+
 
     console.log('fetchClientes - Dados recebidos da API:', clientesData);
 
@@ -458,18 +327,8 @@ export async function fetchClientes(codcoor: number): Promise<SiscopCliente[]> {
     console.error('Erro detalhado ao buscar clientes:', error);
 
     // Em caso de falha, usar dados em cache mesmo que expirados
-    if (typeof window !== 'undefined') {
-      const cachedClientes = localStorage.getItem(cacheKey);
-      if (cachedClientes) {
-        try {
-          const { data } = JSON.parse(cachedClientes);
-          console.log('fetchClientes - Usando dados em cache como fallback após erro');
-          return data;
-        } catch (e) {
-          console.error('Erro ao ler cache para fallback:', e);
-        }
-      }
-    }
+    if (typeof window !== 'undefined' && cachedClientes) return cachedClientes; // Use cached data if available
+
 
     // Se não há dados em cache, propagar o erro para tratamento adequado
     throw error;
@@ -515,26 +374,32 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
 
   try {
     // Buscar do cache primeiro, se não estiver pulando o cache
+    let cachedUnidades: SiscopUnidadesResponse | null = null;
     if (typeof window !== 'undefined' && !options.skipCache) {
-      const cachedUnidades = localStorage.getItem(cacheKey);
-      if (cachedUnidades) {
+      const cachedUnidadesString = localStorage.getItem(cacheKey);
+      if (cachedUnidadesString) {
         try {
-          const { data, expiration } = JSON.parse(cachedUnidades);
+          const cachedData = JSON.parse(cachedUnidadesString);
           // Verificar se o cache ainda é válido
-          if (Date.now() < expiration) {
+          if (Date.now() < cachedData.expiration) {
+            cachedUnidades = cachedData.data;
             console.log('fetchUnidades - Usando dados em cache');
-            return data;
+          } else {
+            // Remover cache expirado
+            localStorage.removeItem(cacheKey);
           }
-          // Remover cache expirado
-          localStorage.removeItem(cacheKey);
         } catch (e) {
           console.warn('fetchUnidades - Erro ao ler cache:', e);
         }
       }
     }
 
+    if (cachedUnidades) return cachedUnidades;
+
     // Buscar dados da API - o ApiService já vai incluir o token nas headers
-    const unidadesData = await ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
+    const headers = { Authorization: `Bearer ${token}` };
+    const unidadesData = await ApiService.get<SiscopUnidadesResponse>(url, { headers });
+
     console.log('fetchUnidades - Dados recebidos da API:', unidadesData);
 
     // Salvar no cache
@@ -552,18 +417,7 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
     console.error('Erro ao buscar unidades:', error);
 
     // Em caso de falha, verificar se temos dados em cache mesmo que expirados
-    if (typeof window !== 'undefined') {
-      const cachedUnidades = localStorage.getItem(cacheKey);
-      if (cachedUnidades) {
-        try {
-          const { data } = JSON.parse(cachedUnidades);
-          console.log('fetchUnidades - Usando dados em cache como fallback após erro');
-          return data;
-        } catch (e) {
-          console.error('Erro ao ler cache para fallback:', e);
-        }
-      }
-    }
+    if (typeof window !== 'undefined' && cachedUnidades) return cachedUnidades; // Return cached data if available
 
     // Se não há dados em cache, retornar uma resposta vazia para evitar quebra da interface
     console.log('fetchUnidades - Retornando estrutura vazia após erro');
@@ -597,24 +451,30 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
 
   try {
     // Verificar cache primeiro
+    let cachedData: SiscopConformidade[] | null = null;
     if (typeof window !== 'undefined') {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
+      const cachedDataString = localStorage.getItem(cacheKey);
+      if (cachedDataString) {
         try {
-          const { data, expiration } = JSON.parse(cachedData);
-          if (Date.now() < expiration) {
+          const cachedDataObj = JSON.parse(cachedDataString);
+          if (Date.now() < cachedDataObj.expiration) {
+            cachedData = cachedDataObj.data;
             console.log('fetchServicos - Usando dados em cache');
-            return data;
+          } else {
+            localStorage.removeItem(cacheKey);
           }
-          localStorage.removeItem(cacheKey);
         } catch (e) {
           console.warn('fetchServicos - Erro ao ler cache:', e);
         }
       }
     }
 
+    if (cachedData) return cachedData;
+
     // Buscar da API
-    const servicosData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+    const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const servicosData = await ApiService.get<SiscopConformidade[]>(url, { headers });
 
     // Salvar no cache
     if (typeof window !== 'undefined' && servicosData) {
@@ -630,18 +490,7 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
     console.error('Erro ao buscar serviços:', error);
 
     // Verificar se há dados em cache como fallback
-    if (typeof window !== 'undefined') {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const { data } = JSON.parse(cachedData);
-          console.log('fetchServicos - Usando dados em cache como fallback após erro');
-          return data;
-        } catch (e) {
-          console.error('Erro ao ler cache para fallback:', e);
-        }
-      }
-    }
+    if (typeof window !== 'undefined' && cachedData) return cachedData; // Return cached data if available
 
     // Se não houver cache, retornar array vazio para não quebrar a interface
     return [];
@@ -666,24 +515,30 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
 
   try {
     // Verificar cache primeiro
+    let cachedData: SiscopConformidade[] | null = null;
     if (typeof window !== 'undefined') {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
+      const cachedDataString = localStorage.getItem(cacheKey);
+      if (cachedDataString) {
         try {
-          const { data, expiration } = JSON.parse(cachedData);
-          if (Date.now() < expiration) {
+          const cachedDataObj = JSON.parse(cachedDataString);
+          if (Date.now() < cachedDataObj.expiration) {
+            cachedData = cachedDataObj.data;
             console.log('fetchConformidades - Usando dados em cache');
-            return data;
+          } else {
+            localStorage.removeItem(cacheKey);
           }
-          localStorage.removeItem(cacheKey);
         } catch (e) {
           console.warn('fetchConformidades - Erro ao ler cache:', e);
         }
       }
     }
 
+    if (cachedData) return cachedData;
+
     // Buscar da API
-    const conformidadesData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
+    const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const conformidadesData = await ApiService.get<SiscopConformidade[]>(url, { headers });
 
     // Salvar no cache
     if (typeof window !== 'undefined' && conformidadesData) {
@@ -699,18 +554,7 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
     console.error('Erro ao buscar conformidades:', error);
 
     // Verificar se há dados em cache como fallback
-    if (typeof window !== 'undefined') {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const { data } = JSON.parse(cachedData);
-          console.log('fetchConformidades - Usando dados em cache como fallback após erro');
-          return data;
-        } catch (e) {
-          console.error('Erro ao ler cache para fallback:', e);
-        }
-      }
-    }
+    if (typeof window !== 'undefined' && cachedData) return cachedData; // Return cached data if available
 
     // Se não houver cache, retornar array vazio para não quebrar a interface
     return [];
