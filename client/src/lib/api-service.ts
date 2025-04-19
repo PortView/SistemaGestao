@@ -243,6 +243,7 @@ export class ApiService {
 
               // Verificar imediatamente se a resposta foi bem-sucedida
               if (!response.ok) {
+                console.error(`Erro HTTP: ${response.status} ${response.statusText} para ${fullUrl}`);
                 throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
               }
             } catch (error: any) {
@@ -256,6 +257,13 @@ export class ApiService {
               }
 
               console.error(`Erro no fetch para ${fullUrl}:`, error);
+
+              // Se for um erro de conexão ou rede, retornar um array vazio para requisições GET
+              // Isso evita que a aplicação quebre completamente por falha de rede
+              if (method === 'GET') {
+                console.warn(`Retornando array vazio para GET com erro de conexão: ${fullUrl}`);
+                return [] as any as T;
+              }
 
               // Criar um erro mais informativo
               const errorMessage = error.message || 'Erro desconhecido na requisição';

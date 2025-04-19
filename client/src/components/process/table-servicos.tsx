@@ -188,6 +188,9 @@ export function TableServicos({
    * Este efeito é separado para maior controle e evitar loop infinito
    */
   useEffect(() => {
+    // Flag para controlar se já executou a função dentro do timeout
+    let hasExecuted = false;
+    
     // Verificar se há dados e se a seleção automática ainda não foi feita
     if (
       data.length > 0 && 
@@ -203,7 +206,11 @@ export function TableServicos({
       console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', data[0].codServ);
       
       // Usar um setTimeout com delay suficiente para quebrar o ciclo de renderização
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
+        // Verificar novamente se já foi executado para evitar execuções duplicadas
+        if (hasExecuted) return;
+        hasExecuted = true;
+        
         const firstService = data[0];
         
         // Atualizar a linha selecionada visualmente
@@ -211,7 +218,13 @@ export function TableServicos({
         
         // Notificar o componente pai sobre a seleção do serviço usando o codccontra
         onSelectServico(firstService.codccontra);
-      }, 200); // Aumentado para 200ms para dar mais tempo entre ciclos de renderização
+      }, 300); // Aumentado para 300ms para dar mais tempo entre ciclos de renderização
+      
+      // Limpar o timeout se o componente for desmontado
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
     }
   }, [data, loading, dataInitialized, onSelectServico]);
 
@@ -282,15 +295,31 @@ export function TableServicos({
     // Marcar que já realizamos a seleção para evitar seleção automática posterior
     initialAutoSelectDone.current = true;
     
-    // Atualizar a seleção em um único passo para evitar renderizações intermediárias
+    // Atualizar a linha selecionada visualmente
     setSelectedRow(codccontra);
+    
+    // Atualizar o localStorage com o serviço selecionado
+    localStorage.setItem("v_codServ", codccontra.toString());
+    console.log("LocalStorage v_codServ atualizado:", codccontra);
     
     // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
     if (onSelectServico) {
-      // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
-      setTimeout(() => {
+      // Usamos uma variável para indicar que o clique já foi processado
+      let clickProcessed = false;
+      
+      const timeoutId = setTimeout(() => {
+        // Verificar se o clique já foi processado
+        if (clickProcessed) return;
+        clickProcessed = true;
+        
+        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
         onSelectServico(codccontra);
-      }, 50);
+      }, 100);
+      
+      // Limpeza do timeout se o componente for desmontado antes da execução
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
   };
 

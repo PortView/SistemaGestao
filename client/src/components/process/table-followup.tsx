@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { ApiService } from '@/lib/api-service';
@@ -29,11 +30,6 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchAttempted, setFetchAttempted] = useState(false);
-
-  // Log quando a prop codserv mudar
-  useEffect(() => {
-    console.log('TableFollowup: codserv prop mudou para:', codserv);
-  }, [codserv]);
 
   // Efeito para buscar dados de tarefas quando o código de serviço muda
   useEffect(() => {
@@ -73,7 +69,10 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
 
         console.log('URL API Followup:', apiUrl);
-        console.log('Buscando tarefas para o serviço ID:', codserv);
+        
+        // CORREÇÃO: Usando codccontra em vez de codserv no parâmetro da requisição
+        // O codserv que chega como prop é na verdade o codccontra
+        console.log('Buscando tarefas para o código de contrato-serviço:', codserv);
 
         if (!apiUrl) {
           if (isMounted) {
@@ -83,7 +82,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           return;
         }
 
-        // Fazer a requisição usando ApiService - usando codccontra como parâmetro
+        // CORREÇÃO: Usando o parâmetro correto codccontra em vez de codserv
         const response = await ApiService.get<TarefasData[]>(
           `${apiUrl}?codccontra=${codserv}`,
           {
@@ -100,15 +99,13 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           setFetchAttempted(true);
           setData(response);
           setError(null);
+          setLoading(false);
         }
       } catch (err) {
         console.error('Erro ao carregar tarefas:', err);
         if (isMounted) {
           setError('Erro ao carregar dados das tarefas');
           setFetchAttempted(true);
-        }
-      } finally {
-        if (isMounted) {
           setLoading(false);
         }
       }
