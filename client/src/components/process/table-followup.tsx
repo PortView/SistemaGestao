@@ -75,9 +75,9 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           return;
         }
 
-        // Fazer a requisição usando ApiService
+        // Fazer a requisição usando ApiService - CORRIGIDO: Usando codccontra em vez de codserv
         const response = await ApiService.get<TarefasData[]>(
-          `${apiUrl}?codserv=${codserv}`,
+          `${apiUrl}?codccontra=${codserv}`,
           {
             headers: {
               Authorization: `Bearer ${token}`

@@ -89,13 +89,13 @@ export default function ProcessControlPage() {
   };
 
   // Handler para processar a seleção de serviço
-  const handleServicoSelect = (codServ: number) => {
-    console.log('Serviço selecionado:', codServ);
-    setSelectedServicoCod(codServ);
+  const handleServicoSelect = (codccontra: number) => {
+    console.log('Contrato-serviço selecionado:', codccontra);
+    setSelectedServicoCod(codccontra);
 
     // Atualizar o localStorage com o código do serviço selecionado
-    localStorage.setItem("v_codServ", codServ.toString());
-    console.log("LocalStorage v_codServ atualizado:", codServ);
+    localStorage.setItem("v_codServ", codccontra.toString());
+    console.log("LocalStorage v_codServ atualizado:", codccontra);
   };
 
   return (
