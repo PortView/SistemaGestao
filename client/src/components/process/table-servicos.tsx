@@ -52,6 +52,12 @@ export function TableServicos({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
+  const [codServ, setCodServ] = useState<string>("-1");
+  const [status, setStatus] = useState<string>("ALL");
+  const [dtLimite, setDtLimite] = useState<string>("ALL");
+  const [concluido, setConcluido] = useState<boolean>(true); 
+  const [forceUpdate, setForceUpdate] = useState(false); 
+  const [services, setServices] = useState<ServicosData[]>([]); 
 
   // Função para buscar dados da API
   const fetchData = async () => {
@@ -60,22 +66,19 @@ export function TableServicos({
       console.log('TableServicos: Contrato ou unidade não selecionados, cancelando busca');
       setLoading(false);
       setData([]);
-      setSelectedRow(null); // Limpar a seleção quando a unidade muda
+      setSelectedRow(null); 
+      setServices([]); 
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      setSelectedRow(null); // Limpar a seleção quando a unidade muda
-      
+      setSelectedRow(null); 
+      setServices([]); 
+
       // Obter o token do localStorage
       const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-
-      // Obter valores do localStorage para qCodServ, qStatus e qDtlimite
-      const storedCodServ = localStorage.getItem("v_codServ") || "-1";
-      const storedStatus = localStorage.getItem("v_status") || "ALL";
-      const storedDtLimite = localStorage.getItem("v_dtLimite") || "2001-01-01";
 
       if (!token) {
         setError('Não autorizado: Token não encontrado');
@@ -88,151 +91,98 @@ export function TableServicos({
         qcontrato, 
         qUnidade, 
         qConcluido,
-        codServ: storedCodServ, 
-        status: storedStatus, 
-        dtLimite: storedDtLimite
+        codServ, 
+        status, 
+        dtLimite
       });
 
       // Construir a URL com os parâmetros do localStorage
       const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
-      const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${qConcluido}&qCodServ=${storedCodServ}&qStatus=${storedStatus}&qDtlimite=${storedDtLimite}`;
-      
+      const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${concluido}&qCodServ=${codServ}&qStatus=${status}&qDtlimite=${dtLimite}`;
+
       // Usar o ApiService para fazer a requisição (já configurado para adicionar o token)
       const response = await ApiService.get<ServicosData[]>(url, {
         headers: {
           Authorization: `Bearer ${token}`
         },
-        skipCache: true  // Sempre buscar dados frescos
+        skipCache: true  
       });
 
       if (Array.isArray(response)) {
         setData(response);
-        
-        // Extrair valores únicos para codServ, mStatus e dtLimite
-        if (response.length > 0) {
-          // Extrair codServ únicos usando objetos
-          const codServMap: Record<number, boolean> = {};
-          response.forEach(item => {
-            if (item.codServ) codServMap[item.codServ] = true;
-          });
-          const uniqueCodServs = Object.keys(codServMap).map(Number);
-          localStorage.setItem("v_codServ_list", JSON.stringify(uniqueCodServs));
-          console.log("Lista de códigos de serviço únicos armazenada:", uniqueCodServs);
-          
-          // Extrair mStatus únicos usando objetos
-          const statusMap: Record<string, boolean> = {};
-          response.forEach(item => {
-            if (item.mStatus) statusMap[item.mStatus] = true;
-          });
-          const uniqueStatuses = Object.keys(statusMap);
-          localStorage.setItem("v_status_list", JSON.stringify(uniqueStatuses));
-          console.log("Lista de status únicos armazenada:", uniqueStatuses);
-          
-          // Extrair dtLimite únicos usando objetos
-          const dateMap: Record<string, boolean> = {};
-          response.forEach(item => {
-            if (item.dtLimite) dateMap[item.dtLimite] = true;
-          });
-          const uniqueDates = Object.keys(dateMap)
-            .filter(date => date !== null && date !== undefined);
-          localStorage.setItem("v_dtLimite_list", JSON.stringify(uniqueDates));
-          console.log("Lista de datas limite únicas armazenada:", uniqueDates);
-          
-          // Disparar evento customizado para notificar outras partes da aplicação
-          // sobre a atualização dos dados de filtro no localStorage
-          // apenas quando estamos carregando os dados pela primeira vez
-          try {
-            if (response.length > 0) {
-              console.log("Disparando evento filters-updated após carregar dados");
-              window.dispatchEvent(new Event('filters-updated'));
-            }
-          } catch (e) {
-            console.error("Erro ao disparar evento filters-updated:", e);
-          }
-          
-          // Se temos dados e uma função de callback, selecionamos o primeiro item
-          if (onSelectServico) {
-            const firstItem = response[0];
-            setSelectedRow(firstItem.codccontra);
-            onSelectServico(firstItem.codccontra);
-          }
-        }
+        setServices(response); 
+
       } else {
         console.error('Resposta da API não é um array:', response);
         setData([]);
+        setServices([]); 
       }
     } catch (err) {
       console.error('Erro ao carregar serviços:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados do serviço');
+      setServices([]); 
     } finally {
       setLoading(false);
     }
   };
 
-  // Efeito para carregar dados sempre que as props mudarem
+  // Efeito para carregar dados sempre que as props mudarem ou forceUpdate mudar
   useEffect(() => {
     fetchData();
-  }, [qcodCoor, qcontrato, qUnidade, qConcluido]);
-  
-  // Efeito para ouvir o evento de aplicação de filtros
+  }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite, forceUpdate]);
+
+  //Novo efeito para ouvir o evento de aplicação de filtros e seleção de unidade
   useEffect(() => {
     const handleApplyFilters = (event: CustomEvent) => {
-      console.log('TableServicos: Evento apply-filters recebido, aplicando filtros:', event.detail);
-      
+      console.log("TableServicos: Evento apply-filters recebido com detalhes:", event.detail);
+
       const { qCodServ, qStatus, qDtlimite, qConcluido } = event.detail;
-      
-      // Atualiza os parâmetros da query com os valores dos filtros
-      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
-      const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${qConcluido}&qCodServ=${qCodServ}&qStatus=${qStatus}&qDtlimite=${qDtlimite}`;
-      
-      console.log('TableServicos: Buscando dados com filtros aplicados:', url);
-      
-      // Busca os dados com os filtros aplicados
-      setLoading(true);
-      
-      // Obter o token do localStorage
-      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-      
-      if (!token) {
-        setError('Não autorizado: Token não encontrado');
-        setLoading(false);
-        return;
-      }
-      
-      ApiService.get<ServicosData[]>(url, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        skipCache: true  // Sempre buscar dados frescos
-      })
-        .then((response) => {
-          if (Array.isArray(response)) {
-            setData(response);
-            setSelectedRow(null); // Limpa a seleção
-          } else {
-            console.error('Resposta da API não é um array:', response);
-            setData([]);
-          }
-        })
-        .catch((error) => {
-          console.error('Erro ao buscar dados de serviços com filtros aplicados:', error);
-          setError('Erro ao buscar dados de serviços. Por favor, tente novamente mais tarde.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+
+      setCodServ(qCodServ);
+      setStatus(qStatus);
+      setDtLimite(qDtlimite);
+      setConcluido(qConcluido);
+
+      setForceUpdate(prev => !prev);
     };
-    
-    // Registra o ouvinte do evento
+
+    const handleUnitSelected = (event: CustomEvent) => {
+      console.log("TableServicos: Evento unit-selected recebido");
+
+      setCodServ("-1");
+      setStatus("ALL");
+      setDtLimite("ALL");
+      setConcluido(true); 
+
+      setForceUpdate(prev => !prev);
+    };
+
     window.addEventListener('apply-filters', handleApplyFilters as EventListener);
-    
-    // Limpa o ouvinte quando o componente é desmontado
+    window.addEventListener('unit-selected', handleUnitSelected as EventListener);
+
     return () => {
       window.removeEventListener('apply-filters', handleApplyFilters as EventListener);
+      window.removeEventListener('unit-selected', handleUnitSelected as EventListener);
     };
-  }, [qcodCoor, qcontrato, qUnidade]);
+  }, []);
 
-  // Renderiza um estado de carregamento
+  useEffect(() => {
+    if (services.length > 0) {
+      const uniqueCodServs = [...new Set(services.map(s => s.codServ))];
+      const uniqueStatus = [...new Set(services.map(s => s.mStatus))];
+      const uniqueDtLimites = [...new Set(services.map(s => s.dtLimite).filter(Boolean))];
+
+      localStorage.setItem("v_codServ_list", JSON.stringify(uniqueCodServs));
+      localStorage.setItem("v_status_list", JSON.stringify(uniqueStatus));
+      localStorage.setItem("v_dtLimite_list", JSON.stringify(uniqueDtLimites));
+
+      console.log("TableServicos: Listas de valores únicos atualizadas no localStorage");
+
+      window.dispatchEvent(new CustomEvent("filters-updated"));
+    }
+  }, [services]);
+
+
   if (loading) {
     return (
       <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
@@ -244,7 +194,6 @@ export function TableServicos({
     );
   }
 
-  // Renderiza um estado de erro
   if (error) {
     return (
       <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
@@ -256,7 +205,6 @@ export function TableServicos({
     );
   }
 
-  // Quando não temos unidade ou contrato selecionados
   if (!qcontrato || !qUnidade) {
     return (
       <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
@@ -267,7 +215,6 @@ export function TableServicos({
     );
   }
 
-  // Função para formatar a data
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     try {
@@ -277,8 +224,7 @@ export function TableServicos({
       return dateStr;
     }
   };
-  
-  // Função para lidar com o clique na linha
+
   const handleRowClick = (codServ: number) => {
     console.log('TableServicos: Linha clicada, serviço ID:', codServ);
     setSelectedRow(codServ);
@@ -287,30 +233,28 @@ export function TableServicos({
     }
   };
 
-  // Definição das larguras das colunas
   const columnWidths = [
-    60, // Codcconta
-    60,  // Cod. Serv.
-    350, // Desc. Serv.
-    26,  // Ok
-    26,  // Os
-    30,  // Resc.
-    30,  // Pdc
-    40,  // Susp.
-    36,  // Doc.I.
-    36,  // Novo
-    40,  // Ocorr.
-    150, // Status
-    40,  // Dt.Limite
-    80,  // Valserv
-    60,  // H.Tramitação
-    60,  // H. Ass.
-    400, // Obs.Serv.
-    400, // Obs.Resc.
+    60, 
+    60,  
+    350, 
+    26,  
+    26,  
+    30,  
+    30,  
+    40,  
+    36,  
+    36,  
+    40,  
+    150, 
+    40,  
+    80,  
+    60,  
+    60,  
+    400, 
+    400, 
   ];
 
   return (
-    // <Card className="bg-background shadow-md w-full h-[460px] overflow-hidden">
       <div className="bg-[#d0e0f0] border-none shadow-md w-full h-[460px] rounded-sm">
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
         <div style={{ 
@@ -326,11 +270,8 @@ export function TableServicos({
               <div style={{ position: 'relative' }}>
                 <table style={{ minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', width: 'max-content' }}>
                   <thead>
-                    
                     <tr style={{ backgroundColor: '#c0c0c0', color: '#333', fontSize: '12px', fontWeight: 'bold' }}>
-                      
                       <th className='hidden' style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Código.</th>
-                    
                       <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Cod.Serv.</th>
                       <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Serv.</th>
                       <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
@@ -372,7 +313,7 @@ export function TableServicos({
                         >
                           <td className='hidden' style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{item.codccontra}</div></td>
-                            
+
                             <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{item.codServ}</div>
                           </td>

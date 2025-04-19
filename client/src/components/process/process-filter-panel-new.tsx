@@ -306,6 +306,7 @@ export function ProcessFilterPanel() {
               variant="default"
               className="h-7 ml-2 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleApplyFilters}
+              disabled={!showDropdown} // Desabilita o botão se os dropdowns estiverem desabilitados
             >
               <FilterIcon className="h-4 w-4 mr-1" />
               <span className="text-xs">Aplicar</span>

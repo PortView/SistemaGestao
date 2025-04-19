@@ -64,21 +64,21 @@ export default function ProcessControlPage() {
   const handleUnitChange = (unit: SiscopUnidade) => {
     console.log('ProcessControl: Unidade selecionada:', unit);
     setSelectedUnit(unit);
-    
+
     // Quando a unidade muda, limpar o serviço selecionado
     setSelectedService(null);
     setSelectedServicoCod(-1);
-    
+
     // Atualizar o localStorage com valores padrão para filtragem quando seleciona uma unidade
     localStorage.setItem("v_codServ", "-1");
     localStorage.setItem("v_status", "ALL");
     localStorage.setItem("v_dtLimite", "ALL");
-    
+
     // Limpar as listas de valores únicos
     localStorage.setItem("v_codServ_list", JSON.stringify([]));
     localStorage.setItem("v_status_list", JSON.stringify([]));
     localStorage.setItem("v_dtLimite_list", JSON.stringify([]));
-    
+
     console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
   };
 
@@ -86,7 +86,7 @@ export default function ProcessControlPage() {
   const handleServicoSelect = (codServ: number) => {
     console.log('Serviço selecionado:', codServ);
     setSelectedServicoCod(codServ);
-    
+
     // Atualizar o localStorage com o código do serviço selecionado
     localStorage.setItem("v_codServ", codServ.toString());
     console.log("LocalStorage v_codServ atualizado:", codServ);
@@ -167,7 +167,7 @@ export default function ProcessControlPage() {
                 qcodCoor={codCoor}
                 qcontrato={selectedUnit?.contrato || null}
                 qUnidade={selectedUnit?.codend || null}
-                qConcluido={true}
+                qConcluido={false} // false = não concluído (conforme fluxograma)
                 qCodServ={-1}
                 qStatus="ALL"
                 qDtlimite="ALL"
