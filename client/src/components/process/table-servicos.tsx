@@ -111,7 +111,15 @@ export function TableServicos({
       if (Array.isArray(response)) {
         setData(response);
         setServices(response); 
-
+        
+        // Selecionar automaticamente o primeiro serviço da lista, se disponível
+        if (response.length > 0 && onSelectServico) {
+          setTimeout(() => {
+            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
+            setSelectedRow(response[0].codccontra);
+            onSelectServico(response[0].codServ);
+          }, 100);
+        }
       } else {
         console.error('Resposta da API não é um array:', response);
         setData([]);
