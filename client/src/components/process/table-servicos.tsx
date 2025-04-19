@@ -113,10 +113,13 @@ export function TableServicos({
         setServices(response); 
         
         // Selecionar automaticamente o primeiro serviço da lista, se disponível e não houver seleção prévia
-        if (response.length > 0 && onSelectServico && !selectedRow) {
-          console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
-          setSelectedRow(response[0].codccontra);
-          onSelectServico(response[0].codServ);
+        if (response.length > 0 && onSelectServico && selectedRow === null) {
+          // Usar setTimeout com delay zero para evitar loops de renderização
+          setTimeout(() => {
+            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
+            setSelectedRow(response[0].codccontra);
+            onSelectServico(response[0].codServ);
+          }, 0);
         }
       } else {
         console.error('Resposta da API não é um array:', response);
@@ -134,7 +137,17 @@ export function TableServicos({
 
   // Efeito para carregar dados sempre que as props mudarem ou forceUpdate mudar
   useEffect(() => {
-    fetchData();
+    // Criar uma string de dependências para comparar mudanças reais
+    const deps = `${qcodCoor}-${qcontrato}-${qUnidade}-${concluido}-${codServ}-${status}-${dtLimite}`;
+    
+    // Armazenar a última string de dependências para evitar fetchs duplicados
+    const lastDeps = React.useRef(deps);
+    
+    // Apenas buscar dados se as dependências mudaram ou se forçar atualização
+    if (lastDeps.current !== deps || forceUpdate) {
+      lastDeps.current = deps;
+      fetchData();
+    }
     
     // Limpar seleção quando a unidade ou contrato mudar
     if (!qcontrato || !qUnidade) {
@@ -166,11 +179,13 @@ export function TableServicos({
       // Resetar a seleção para garantir nova seleção automática
       setSelectedRow(null);
       
+      // Definir os filtros padrão
       setCodServ("-1");
       setStatus("ALL");
       setDtLimite("ALL");
-      setConcluido(true); 
-
+      setConcluido(true);
+      
+      // Usando um único forceUpdate para evitar renderizações em cascata
       setForceUpdate(prev => !prev);
     };
 

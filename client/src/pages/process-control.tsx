@@ -81,8 +81,11 @@ export default function ProcessControlPage() {
 
     console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
     
-    // Disparar evento para notificar que uma unidade foi selecionada
-    window.dispatchEvent(new CustomEvent("unit-selected"));
+    // Usar setTimeout para garantir que os eventos ocorram em ordem e evitar loops de renderização
+    setTimeout(() => {
+      // Disparar evento para notificar que uma unidade foi selecionada
+      window.dispatchEvent(new CustomEvent("unit-selected"));
+    }, 50);
   };
 
   // Handler para processar a seleção de serviço
