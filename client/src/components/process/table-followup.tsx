@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { ApiService } from '@/lib/api-service';
@@ -40,7 +39,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
   useEffect(() => {
     // Resetar o estado de tentativa de busca quando o serviço muda
     setFetchAttempted(false);
-    
+
     const fetchData = async () => {
       try {
         // Se não temos um codserv válido, não fazemos requisição
@@ -53,7 +52,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
         console.log('TableFollowup: Iniciando busca de dados para serviço ID:', codserv);
         setLoading(true);
-        
+
         // Usar o token armazenado no localStorage
         const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
@@ -65,27 +64,28 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
 
         // Usar a URL da API de followup
         const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
-        
+
         console.log('URL API Followup:', apiUrl);
         console.log('Buscando tarefas para o serviço ID:', codserv);
-        
+
         if (!apiUrl) {
           setError('URL da API de tarefas não configurada');
           setLoading(false);
           return;
         }
 
-        // Fazer a requisição usando ApiService - CORRIGIDO: Usando codccontra em vez de codserv
+        // Fazer a requisição usando ApiService - Parâmetro correto na URL da API
         const response = await ApiService.get<TarefasData[]>(
           `${apiUrl}?codccontra=${codserv}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
             },
-            skipCache: true // Garantir dados frescos
+            skipCache: true, // Garantir dados frescos
+            timeout: 10000 // Aumentar o timeout para 10 segundos
           }
         );
-        
+
         // Mesmo que a resposta seja um array vazio, marcar que a busca foi tentada
         setFetchAttempted(true);
         setData(response);
@@ -141,7 +141,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
       </div>
     );
   }
-  
+
   // Renderização quando buscamos tarefas mas não há dados
   if (fetchAttempted && data.length === 0) {
     return (

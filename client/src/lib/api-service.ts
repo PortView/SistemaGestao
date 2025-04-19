@@ -46,7 +46,7 @@ export class ApiService {
   static async get<T>(url: string, options: FetchOptions = {}, cacheTime?: number): Promise<T> {
     console.log(`ApiService.get - Iniciando requisição para: ${url}`);
     console.log(`ApiService.get - Opções recebidas:`, options);
-    
+
     // Verificar token no início
     const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
     console.log(`ApiService.get - Token encontrado:`, token ? `${token.substring(0, 15)}...` : 'null');
@@ -217,7 +217,7 @@ export class ApiService {
       // Fazer a requisição com retry e timeout
       let response;
       const RETRY_DELAY = 2000; // Usando 2 segundos de delay entre tentativas
-      
+
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           // Usar Promise.race para implementar timeout
@@ -225,16 +225,21 @@ export class ApiService {
           try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
-            
+
             // Clone dos fetchOptions para evitar modificar o objeto original
             const fetchOptionsWithSignal = {
               ...fetchOptions,
               signal: controller.signal
             };
-            
-            // Fazer a requisição usando o fetch
-            response = await fetch(fullUrl, fetchOptionsWithSignal);
-            
+
+            try {
+              // Fazer a requisição usando o fetch com tratamento de erro
+              response = await fetch(fullUrl, fetchOptionsWithSignal);
+            } catch (error) {
+              console.error(`Erro no fetch para ${fullUrl}:`, error);
+              throw new Error(`Falha na requisição: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+            }
+
             // Limpar o timeout se a requisição foi bem-sucedida
             clearTimeout(timeoutId);
           } catch (err: any) {
@@ -248,12 +253,12 @@ export class ApiService {
           break; // Se a requisição for bem-sucedida, sair do loop
         } catch (fetchError) {
           console.error(`ApiService.request - Tentativa ${attempt + 1} falhou:`, fetchError);
-          
+
           if (attempt === MAX_RETRIES) {
             console.warn(`ApiService.request - Todas as ${MAX_RETRIES + 1} tentativas falharam`);
             throw fetchError; // Propagar o erro após todas as tentativas
           }
-          
+
           // Aguardar antes da próxima tentativa
           console.log(`ApiService.request - Aguardando ${RETRY_DELAY/1000} segundos antes da próxima tentativa`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -292,7 +297,7 @@ export class ApiService {
 
       if (contentType && contentType.includes('application/json')) {
         const jsonData = await response.json();
-        console.log(`ApiService.request - Dados JSON recebidos:`, 
+        console.log(`ApiService.request - Dados JSON recebidos:`,
           Array.isArray(jsonData) ? `Array com ${jsonData.length} itens` : jsonData);
         return jsonData;
       }
@@ -461,12 +466,12 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
   // https://amenirealestate.com.br:5601/ger-clientes/unidades?codcoor=110&codcli=1448&uf=SP&page=1
   // Se skipCache for true, adicionar timestamp para forçar requisição nova
   let url = `${API_UNIDADES_URL}?codcoor=${params.codcoor}&codcli=${params.codcli}&uf=${params.uf}&page=${params.page || 1}`;
-  
+
   if (options.skipCache) {
     url += `&_timestamp=${Date.now()}`;
     console.log('fetchUnidades - Forçando requisição nova com timestamp');
   }
-  
+
   // Chave de cache usando os mesmos parâmetros
   const cacheKey = `units_${params.codcoor}_${params.codcli}_${params.uf}_${params.page || 1}`;
 
@@ -476,7 +481,7 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
   // Verificar token antes de fazer requisição
   const token = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) : null;
   console.log('fetchUnidades - Token encontrado:', token ? `${token.substring(0, 15)}...` : 'null');
-  
+
   if (!token) {
     console.error('Erro: Token de autenticação não encontrado. Usuário precisa fazer login novamente.');
     throw new Error('Token de autenticação não encontrado. Faça login novamente.');
@@ -505,7 +510,7 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
     // Buscar dados da API - o ApiService já vai incluir o token nas headers
     const unidadesData = await ApiService.get<SiscopUnidadesResponse>(url, {}, CACHE_EXPIRATION.SHORT);
     console.log('fetchUnidades - Dados recebidos da API:', unidadesData);
-    
+
     // Salvar no cache
     if (typeof window !== 'undefined' && unidadesData) {
       const cacheData = {
@@ -515,11 +520,11 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
       console.log('fetchUnidades - Dados salvos no cache');
     }
-    
+
     return unidadesData;
   } catch (error) {
     console.error('Erro ao buscar unidades:', error);
-    
+
     // Em caso de falha, verificar se temos dados em cache mesmo que expirados
     if (typeof window !== 'undefined') {
       const cachedUnidades = localStorage.getItem(cacheKey);
@@ -533,7 +538,7 @@ export async function fetchUnidades(params: any, options: { skipCache?: boolean 
         }
       }
     }
-    
+
     // Se não há dados em cache, retornar uma resposta vazia para evitar quebra da interface
     console.log('fetchUnidades - Retornando estrutura vazia após erro');
     return {
@@ -581,10 +586,10 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
         }
       }
     }
-    
+
     // Buscar da API
     const servicosData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
-    
+
     // Salvar no cache
     if (typeof window !== 'undefined' && servicosData) {
       const cacheData = {
@@ -593,11 +598,11 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     }
-    
+
     return servicosData;
   } catch (error) {
     console.error('Erro ao buscar serviços:', error);
-    
+
     // Verificar se há dados em cache como fallback
     if (typeof window !== 'undefined') {
       const cachedData = localStorage.getItem(cacheKey);
@@ -611,7 +616,7 @@ export async function fetchServicos(params: any): Promise<SiscopConformidade[]> 
         }
       }
     }
-    
+
     // Se não houver cache, retornar array vazio para não quebrar a interface
     return [];
   }
@@ -650,10 +655,10 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
         }
       }
     }
-    
+
     // Buscar da API
     const conformidadesData = await ApiService.get<SiscopConformidade[]>(url, {}, CACHE_EXPIRATION.SHORT);
-    
+
     // Salvar no cache
     if (typeof window !== 'undefined' && conformidadesData) {
       const cacheData = {
@@ -662,11 +667,11 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     }
-    
+
     return conformidadesData;
   } catch (error) {
     console.error('Erro ao buscar conformidades:', error);
-    
+
     // Verificar se há dados em cache como fallback
     if (typeof window !== 'undefined') {
       const cachedData = localStorage.getItem(cacheKey);
@@ -680,7 +685,7 @@ export async function fetchConformidades(params: any): Promise<SiscopConformidad
         }
       }
     }
-    
+
     // Se não houver cache, retornar array vazio para não quebrar a interface
     return [];
   }

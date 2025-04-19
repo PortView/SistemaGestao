@@ -195,14 +195,19 @@ export function TableServicos({
       !loading && 
       dataInitialized
     ) {
-      // Marcar que já realizamos a seleção automática
+      // Marcar que já realizamos a seleção automática antes de fazer qualquer operação
       initialAutoSelectDone.current = true;
 
-      // Selecionar o primeiro serviço da lista
-      const firstService = data[0];
-      console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', firstService.codServ);
-      setSelectedRow(firstService.codccontra);
-      onSelectServico(firstService.codServ);
+      // Selecionar o primeiro serviço da lista após um pequeno delay
+      // Este delay é crítico para evitar loops de renderização
+      setTimeout(() => {
+        const firstService = data[0];
+        console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', firstService.codServ);
+        setSelectedRow(firstService.codccontra);
+        
+        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+        onSelectServico(firstService.codccontra);
+      }, 100);
     }
   }, [data, loading, dataInitialized, onSelectServico]);
 
@@ -266,15 +271,22 @@ export function TableServicos({
     if (selectedRow === codccontra) return;
 
     console.log('TableServicos: Linha clicada, contrato-serviço ID:', codccontra, 'Serviço ID:', codServ);
-    setSelectedRow(codccontra);
-
-    // Marcar que já realizamos a seleção
+    
+    // Marcar que já realizamos a seleção antes de mudar o estado
     initialAutoSelectDone.current = true;
-
-    if (onSelectServico) {
-      // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
-      onSelectServico(codccontra);
-    }
+    
+    // Limpar a seleção primeiro
+    setSelectedRow(null);
+    
+    // Atualizar a seleção em um setTimeout para quebrar o ciclo de renderizações
+    setTimeout(() => {
+      setSelectedRow(codccontra);
+      
+      if (onSelectServico) {
+        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+        onSelectServico(codccontra);
+      }
+    }, 50);
   };
 
   /**

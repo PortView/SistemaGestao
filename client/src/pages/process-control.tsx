@@ -80,7 +80,7 @@ export default function ProcessControlPage() {
     localStorage.setItem("v_dtLimite_list", JSON.stringify([]));
 
     console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
-    
+
     // Usar setTimeout para garantir que os eventos ocorram em ordem e evitar loops de renderização
     setTimeout(() => {
       // Disparar evento para notificar que uma unidade foi selecionada
@@ -91,11 +91,17 @@ export default function ProcessControlPage() {
   // Handler para processar a seleção de serviço
   const handleServicoSelect = (codccontra: number) => {
     console.log('Contrato-serviço selecionado:', codccontra);
-    setSelectedServicoCod(codccontra);
 
-    // Atualizar o localStorage com o código do serviço selecionado
-    localStorage.setItem("v_codServ", codccontra.toString());
-    console.log("LocalStorage v_codServ atualizado:", codccontra);
+    // Limpar o estado anterior antes de definir o novo
+    setSelectedServicoCod(-1);
+
+    // Definir depois de um pequeno delay para quebrar o ciclo de renderização
+    setTimeout(() => {
+      setSelectedServicoCod(codccontra);
+      // Atualizar o localStorage com o código do serviço selecionado
+      localStorage.setItem("v_codServ", codccontra.toString());
+      console.log("LocalStorage v_codServ atualizado:", codccontra);
+    }, 50);
   };
 
   return (
