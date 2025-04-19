@@ -1,22 +1,23 @@
+
 import { useEffect, useState } from 'react';
-import { ApiService } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
-import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ApiService } from '@/lib/api-service';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Clock } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
+// Interface para dados de tarefas retornados da API
 interface TarefasData {
+  id: number;
   analista: string;
-  dttarefa: string;
-  conclusao: boolean;
-  medicao: boolean;
-  desctarefa: string;
+  dataTarefa: string;
+  concluida: boolean;
+  desc_tarefa: string;
   evento: boolean;
-  tetramitacao: number;
-  teassessoria: number;
+  horas_tramitacao: number;
+  horas_assessoria: number;
+  medicao: boolean;
 }
 
 interface TableFollowupProps {
@@ -24,16 +25,22 @@ interface TableFollowupProps {
 }
 
 export function TableFollowup({ codserv }: TableFollowupProps) {
+  // Estados para gerenciar dados e estado da UI
   const [data, setData] = useState<TarefasData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchAttempted, setFetchAttempted] = useState(false);
 
   // Log quando a prop codserv mudar
   useEffect(() => {
     console.log('TableFollowup: codserv prop mudou para:', codserv);
   }, [codserv]);
 
+  // Efeito para buscar dados de tarefas quando o código de serviço muda
   useEffect(() => {
+    // Resetar o estado de tentativa de busca quando o serviço muda
+    setFetchAttempted(false);
+    
     const fetchData = async () => {
       try {
         // Se não temos um codserv válido, não fazemos requisição
@@ -45,6 +52,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         }
 
         console.log('TableFollowup: Iniciando busca de dados para serviço ID:', codserv);
+        setLoading(true);
         
         // Usar o token armazenado no localStorage
         const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
@@ -78,17 +86,20 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           }
         );
         
+        // Mesmo que a resposta seja um array vazio, marcar que a busca foi tentada
+        setFetchAttempted(true);
         setData(response);
-        setLoading(false);
+        setError(null);
       } catch (err) {
         console.error('Erro ao carregar tarefas:', err);
         setError('Erro ao carregar dados das tarefas');
+        setFetchAttempted(true);
+      } finally {
         setLoading(false);
       }
     };
 
     if (codserv > 0) {
-      setLoading(true);
       fetchData();
     } else {
       setData([]);
@@ -96,6 +107,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     }
   }, [codserv]);
 
+  // Renderização para estado de carregamento
   if (loading) {
     return (
       <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
@@ -107,6 +119,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     );
   }
 
+  // Renderização para estado de erro
   if (error) {
     return (
       <Card className="p-4 bg-background shadow-md w-full h-[460px] overflow-hidden">
@@ -118,7 +131,8 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     );
   }
 
-  if (!codserv) {
+  // Renderização quando não há serviço selecionado
+  if (!codserv || codserv <= 0) {
     return (
       <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
         <p className="text-md text-zinc-900">
@@ -128,20 +142,26 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     );
   }
   
-  if (data.length === 0) {
+  // Renderização quando buscamos tarefas mas não há dados
+  if (fetchAttempted && data.length === 0) {
     return (
       <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">
         <p className="text-md text-zinc-900">
-          Não foram encontradas tarefas para o serviço.
+          Não foram encontradas tarefas para o serviço #{codserv}.
         </p>
       </div>
     );
   }
 
+  // Função auxiliar para formatar datas
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR');
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('pt-BR');
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   // Definição das larguras das colunas
@@ -156,79 +176,82 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     60,  // H.Ass
   ];
 
+  // Renderização da tabela principal
   return (
-    // <Card className="p-0 bg-background shadow-md w-full overflow-hidden">
-      <div className="bg-[#d0e0f0] border-none shadow-md w-full h-[460px] rounded-sm">
-      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '460px', position: 'relative', WebkitOverflowScrolling: 'touch', willChange: 'transform' }}>
-        <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
-          <div style={{ overflow: 'visible' }}>
-            <div style={{ position: 'relative' }}>
-              <table style={{ minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', width: 'max-content' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#c0c0c0', opacity: 1, color: '#333', fontSize: '12px', fontWeight: 'bold' }}>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Analista</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Dt.Tarefa</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Med</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[4]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Tarefa</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[5]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Evento</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[6]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Tram.</th>
-                    <th style={{ position: 'sticky', top: 0, width: `${columnWidths[7]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Ass.</th>
-                  </tr>
-                </thead>
-                <tbody style={{ backgroundColor: '#fff', opacity: 1, color: '#333' }}>
-                  {data.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '20px 0', color: '#666' }}>
-                        Não foram encontradas tarefas para este serviço
-                      </td>
+    <div className="bg-[#d0e0f0] border-none shadow-md w-full h-[460px] rounded-sm">
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ 
+          overflowX: 'auto', 
+          overflowY: 'auto', 
+          maxHeight: '460px', 
+          position: 'relative', 
+          WebkitOverflowScrolling: 'touch', 
+          willChange: 'transform'
+        }}>
+          <div style={{ display: 'inline-block', minWidth: '100%', textAlign: 'center' }}>
+            <div style={{ overflow: 'visible' }}>
+              <div style={{ position: 'relative' }}>
+                <table style={{ minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', width: 'max-content' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#c0c0c0', color: '#333', fontSize: '12px', fontWeight: 'bold' }}>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[0]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Analista</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[1]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Dt.Tarefa</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[2]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Ok</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[3]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Med</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[4]}px`, zIndex: 10, padding: '8px 0', textAlign: 'left', backgroundColor: '#c0c0c0' }}>Desc.Tarefa</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[5]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>Evento</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[6]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Tram.</th>
+                      <th style={{ position: 'sticky', top: 0, width: `${columnWidths[7]}px`, zIndex: 10, padding: '8px 0', textAlign: 'center', backgroundColor: '#c0c0c0' }}>H.Ass.</th>
                     </tr>
-                  ) : (
-                    data.map((item, index) => (
-                      <tr 
-                        key={index} 
-                        style={{ 
-                          fontSize: '12px', 
-                          cursor: 'pointer', 
-                          borderBottom: '1px solid #eee'
-                        }} 
-                        className="hover:bg-slate-100"
-                      >
-                        <td style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff' }}>
-                          <div style={{ width: '100%', textAlign: 'left', padding: '0 4px' }}>{item.analista}</div>
-                        </td>
-                        <td style={{ width: `${columnWidths[1]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ width: '100%', textAlign: 'center' }}>{formatDate(item.dttarefa)}</div>
-                        </td>
-                        <td style={{ width: `${columnWidths[2]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Checkbox checked={item.conclusao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                          </div>
-                        </td>
-                        <td style={{ width: `${columnWidths[3]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Checkbox checked={item.medicao} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                          </div>
-                        </td>
-                        <td style={{ width: `${columnWidths[4]}px`, zIndex: 150, padding: '4px 0', textAlign: 'left', backgroundColor: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                          <div style={{ width: '100%', textAlign: 'left', padding: '0 4px' }}>{item.desctarefa}</div>
-                        </td>
-                        <td style={{ width: `${columnWidths[5]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Checkbox checked={item.evento} disabled className="h-3 w-3 data-[disabled]:opacity-100" />
-                          </div>
-                        </td>
-                        <td style={{ width: `${columnWidths[6]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.tetramitacao)}</div>
-                        </td>
-                        <td style={{ width: `${columnWidths[7]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: '#fff' }}>
-                          <div style={{ width: '100%', textAlign: 'center' }}>{Number(item.teassessoria)}</div>
+                  </thead>
+                  <tbody style={{ backgroundColor: '#fff', opacity: 1, color: '#333' }}>
+                    {data.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} style={{ textAlign: 'center', padding: '20px 0', color: '#666' }}>
+                          Não foram encontradas tarefas para este serviço
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      data.map((item, index) => (
+                        <tr 
+                          key={index} 
+                          style={{ 
+                            fontSize: '12px', 
+                            cursor: 'pointer', 
+                            borderBottom: '1px solid #eee'
+                          }}
+                          className="hover:bg-slate-100"
+                        >
+                          <td style={{ width: `${columnWidths[0]}px`, padding: '4px 5px', textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.analista}
+                          </td>
+                          <td style={{ width: `${columnWidths[1]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            {formatDate(item.dataTarefa)}
+                          </td>
+                          <td style={{ width: `${columnWidths[2]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            <input type="checkbox" checked={item.concluida} readOnly />
+                          </td>
+                          <td style={{ width: `${columnWidths[3]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            <input type="checkbox" checked={item.medicao} readOnly />
+                          </td>
+                          <td style={{ width: `${columnWidths[4]}px`, padding: '4px 5px', textAlign: 'left' }}>
+                            {item.desc_tarefa}
+                          </td>
+                          <td style={{ width: `${columnWidths[5]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            <input type="checkbox" checked={item.evento} readOnly />
+                          </td>
+                          <td style={{ width: `${columnWidths[6]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            {item.horas_tramitacao}
+                          </td>
+                          <td style={{ width: `${columnWidths[7]}px`, padding: '4px 0', textAlign: 'center' }}>
+                            {item.horas_assessoria}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
