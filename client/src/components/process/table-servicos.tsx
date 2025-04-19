@@ -60,21 +60,20 @@ export function TableServicos({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
-
+  
   // Estados de filtros
   const [codServ, setCodServ] = useState<string>("-1");
   const [status, setStatus] = useState<string>("ALL");
   const [dtLimite, setDtLimite] = useState<string>("ALL");
-  const [concluido, setConcluido] = useState<boolean>(false);
-
+  const [concluido, setConcluido] = useState<boolean>(true);
+  
   // Controle de renderização e seleção
   const [dataInitialized, setDataInitialized] = useState(false);
   const initialAutoSelectDone = useRef(false);
   const previousParams = useRef<string>("");
   const isInitialLoad = useRef(true);
   const isProcessingUnitSelection = useRef(false);
-  const isProcessingServiceSelection = useRef(false);
-
+  
   /**
    * Função para buscar dados da API com verificações adequadas
    */
@@ -127,7 +126,7 @@ export function TableServicos({
       if (Array.isArray(response)) {
         setData(response);
         setDataInitialized(true);
-
+        
         // Processar dados para localStorage e filtros
         processServiceData(response);
       } else {
@@ -147,7 +146,7 @@ export function TableServicos({
    */
   const processServiceData = (services: ServicosData[]) => {
     if (services.length === 0) return;
-
+    
     // Extrair valores únicos para os filtros
     const uniqueCodServs = [...new Set(services.map(s => s.codServ))];
     const uniqueStatus = [...new Set(services.map(s => s.mStatus))];
@@ -170,32 +169,26 @@ export function TableServicos({
   useEffect(() => {
     // Criar uma string de dependências para comparar mudanças reais
     const currentParams = `${qcodCoor}-${qcontrato}-${qUnidade}-${concluido}-${codServ}-${status}-${dtLimite}`;
-
+    
     // Evitar chamadas duplicadas e execuções desnecessárias
     if (previousParams.current !== currentParams) {
       previousParams.current = currentParams;
-
+      
       // Se for a carga inicial ou mudança de unidade, resetar controles
       if (isInitialLoad.current || isProcessingUnitSelection.current) {
         initialAutoSelectDone.current = false;
         isInitialLoad.current = false;
       }
-
+      
       fetchData();
     }
   }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite]);
 
   /**
-   * Efeito separado para seleção automática do primeiro serviço 
-   * apenas quando os dados são carregados inicialmente
+   * Efeito para selecionar automaticamente o primeiro serviço quando os dados são carregados
+   * Este efeito é separado para maior controle e evitar loop infinito
    */
   useEffect(() => {
-    // Evitar execução em loops ou durante transições de unidade
-    if (isProcessingServiceSelection.current || isProcessingUnitSelection.current) {
-      return;
-    }
-
-    // Verificar se há dados e se a seleção automática ainda não foi feita
     if (
       data.length > 0 && 
       onSelectServico && 
@@ -203,31 +196,14 @@ export function TableServicos({
       !loading && 
       dataInitialized
     ) {
-      // Marcar que já estamos processando uma seleção para evitar loops
-      isProcessingServiceSelection.current = true;
-      
-      // Marcar que a seleção automática foi realizada
+      // Marcar que já realizamos a seleção automática
       initialAutoSelectDone.current = true;
       
-      console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', data[0].codServ);
-      
-      // Atualizar a linha selecionada visualmente
-      setSelectedRow(data[0].codccontra);
-      
-      // Atualizar o localStorage com o serviço selecionado
-      localStorage.setItem("v_codServ", data[0].codccontra.toString());
-      console.log("TableServicos: LocalStorage v_codServ atualizado:", data[0].codccontra);
-      
-      // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
-      const timeoutId = setTimeout(() => {
-        onSelectServico(data[0].codccontra);
-        // Desmarcar o processamento após concluir
-        isProcessingServiceSelection.current = false;
-      }, 100);
-      
-      return () => {
-        clearTimeout(timeoutId);
-      };
+      // Selecionar o primeiro serviço da lista
+      const firstService = data[0];
+      console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', firstService.codServ);
+      setSelectedRow(firstService.codccontra);
+      onSelectServico(firstService.codServ);
     }
   }, [data, loading, dataInitialized, onSelectServico]);
 
@@ -237,13 +213,13 @@ export function TableServicos({
   useEffect(() => {
     const handleApplyFilters = (event: CustomEvent) => {
       console.log("TableServicos: Evento apply-filters recebido com detalhes:", event.detail);
-
+      
       const { qCodServ, qStatus, qDtlimite, qConcluido } = event.detail;
-
+      
       // Resetar o estado de seleção
       setSelectedRow(null);
       initialAutoSelectDone.current = false;
-
+      
       // Atualizar filtros
       setCodServ(qCodServ);
       setStatus(qStatus);
@@ -253,19 +229,19 @@ export function TableServicos({
 
     const handleUnitSelected = () => {
       console.log("TableServicos: Evento unit-selected recebido");
-
+      
       // Marcar que estamos processando uma seleção de unidade
       isProcessingUnitSelection.current = true;
-
+      
       // Resetar a seleção e filtros
       setSelectedRow(null);
       initialAutoSelectDone.current = false;
-
+      
       setCodServ("-1");
       setStatus("ALL");
       setDtLimite("ALL");
-      setConcluido(qConcluido);
-
+      setConcluido(true);
+      
       // Desmarcar depois de um timeout para permitir o processamento completo
       setTimeout(() => {
         isProcessingUnitSelection.current = false;
@@ -281,45 +257,23 @@ export function TableServicos({
       window.removeEventListener('apply-filters', handleApplyFilters as EventListener);
       window.removeEventListener('unit-selected', handleUnitSelected as EventListener);
     };
-  }, [qConcluido]);
+  }, []);
 
   /**
    * Handler para clique na linha
    */
   const handleRowClick = (codccontra: number, codServ: number) => {
-    // Evitar seleção duplicada e processamento desnecessário
-    if (selectedRow === codccontra || isProcessingServiceSelection.current) {
-      console.log('TableServicos: Linha já selecionada ou processamento em andamento, ignorando clique');
-      return;
-    }
-
-    console.log('TableServicos: Linha clicada, contrato-serviço ID:', codccontra, 'Serviço ID:', codServ);
+    // Evitar seleção duplicada
+    if (selectedRow === codccontra) return;
     
-    // Marcar que estamos processando uma seleção para evitar loops
-    isProcessingServiceSelection.current = true;
-    
-    // Marcar que já realizamos a seleção para evitar seleção automática
-    initialAutoSelectDone.current = true;
-    
-    // Atualizar a linha selecionada visualmente
+    console.log('TableServicos: Linha clicada, serviço ID:', codServ);
     setSelectedRow(codccontra);
     
-    // Atualizar o localStorage com o serviço selecionado
-    localStorage.setItem("v_codServ", codccontra.toString());
-    console.log("LocalStorage v_codServ atualizado:", codccontra);
+    // Marcar que já realizamos a seleção
+    initialAutoSelectDone.current = true;
     
-    // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
     if (onSelectServico) {
-      const timeoutId = setTimeout(() => {
-        // Passamos o codccontra para o TableFollowup
-        onSelectServico(codccontra);
-        // Desmarcar o processamento após concluir
-        isProcessingServiceSelection.current = false;
-      }, 100);
-      
-      return () => {
-        clearTimeout(timeoutId);
-      };
+      onSelectServico(codServ);
     }
   };
 
