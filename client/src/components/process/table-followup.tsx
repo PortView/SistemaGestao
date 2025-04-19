@@ -105,10 +105,10 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         // Construir a URL para a API de tarefas
         const apiBaseUrl = import.meta.env.VITE_NEXT_PUBLIC_API_TAREFAS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/tarefas';
         
-        // Usando codccontra como o parâmetro para a API
-        const url = `${apiBaseUrl}?codccontra=${codserv}`;
+        // Usando codserv como o parâmetro para a API (o valor é o mesmo de codccontra)
+        const url = `${apiBaseUrl}?codserv=${codserv}`;
         console.log('URL API Followup:', apiBaseUrl);
-        console.log('Buscando tarefas para o serviço ID:', codserv);
+        console.log('Buscando tarefas para o serviço ID (usando parameter codserv):', codserv);
 
         // Fazer a requisição via ApiService
         const response = await ApiService.get<TarefasData[]>(url, {
@@ -207,7 +207,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
                     const apiBaseUrl = import.meta.env.VITE_NEXT_PUBLIC_API_TAREFAS_URL || 
                       'https://amenirealestate.com.br:5601/ger-clientes/tarefas';
                       
-                    const url = `${apiBaseUrl}?codccontra=${codserv}`;
+                    const url = `${apiBaseUrl}?codserv=${codserv}`;
                     
                     const response = await ApiService.get<TarefasData[]>(url, {
                       headers: { Authorization: `Bearer ${token}` },
