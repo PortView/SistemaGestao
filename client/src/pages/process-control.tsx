@@ -80,14 +80,6 @@ export default function ProcessControlPage() {
     localStorage.setItem("v_dtLimite_list", JSON.stringify([]));
 
     console.log("LocalStorage atualizado com valores padrão após seleção de unidade");
-    
-    // Disparar evento personalizado para notificar que uma unidade foi selecionada
-    try {
-      const event = new CustomEvent("unit-selected");
-      window.dispatchEvent(event);
-    } catch (e) {
-      console.error("Erro ao disparar evento unit-selected:", e);
-    }
   };
 
   // Handler para processar a seleção de serviço

@@ -190,7 +190,6 @@ export function ProcessFilterPanel() {
         qStatus: tempStatusValue,
         qDtlimite: tempDtLimiteValue,
         qConcluido: servNaoConcluidos, // Manda true para que mostre Só serv. não Concluídos
-        forceSelection: true // Sinaliza que deve forçar a seleção do primeiro item
       });
 
       // Cria um evento personalizado com os parâmetros dos filtros
@@ -200,7 +199,6 @@ export function ProcessFilterPanel() {
           qStatus: tempStatusValue,
           qDtlimite: tempDtLimiteValue,
           qConcluido: servNaoConcluidos, // Manda true para que mostre Só serv. não Concluídos
-          forceSelection: true // Sinaliza que deve forçar a seleção do primeiro item
         },
       });
 
