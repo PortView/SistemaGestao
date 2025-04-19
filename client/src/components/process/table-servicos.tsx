@@ -112,13 +112,11 @@ export function TableServicos({
         setData(response);
         setServices(response); 
         
-        // Selecionar automaticamente o primeiro serviço da lista, se disponível
-        if (response.length > 0 && onSelectServico) {
-          setTimeout(() => {
-            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
-            setSelectedRow(response[0].codccontra);
-            onSelectServico(response[0].codServ);
-          }, 100);
+        // Selecionar automaticamente o primeiro serviço da lista, se disponível e não houver seleção prévia
+        if (response.length > 0 && onSelectServico && !selectedRow) {
+          console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
+          setSelectedRow(response[0].codccontra);
+          onSelectServico(response[0].codServ);
         }
       } else {
         console.error('Resposta da API não é um array:', response);
@@ -137,6 +135,11 @@ export function TableServicos({
   // Efeito para carregar dados sempre que as props mudarem ou forceUpdate mudar
   useEffect(() => {
     fetchData();
+    
+    // Limpar seleção quando a unidade ou contrato mudar
+    if (!qcontrato || !qUnidade) {
+      setSelectedRow(null);
+    }
   }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite, forceUpdate]);
 
   //Novo efeito para ouvir o evento de aplicação de filtros e seleção de unidade
@@ -146,6 +149,9 @@ export function TableServicos({
 
       const { qCodServ, qStatus, qDtlimite, qConcluido } = event.detail;
 
+      // Resetar a seleção para garantir seleção automática do primeiro item após filtro
+      setSelectedRow(null);
+      
       setCodServ(qCodServ);
       setStatus(qStatus);
       setDtLimite(qDtlimite);
@@ -156,7 +162,10 @@ export function TableServicos({
 
     const handleUnitSelected = (event: CustomEvent) => {
       console.log("TableServicos: Evento unit-selected recebido");
-
+      
+      // Resetar a seleção para garantir nova seleção automática
+      setSelectedRow(null);
+      
       setCodServ("-1");
       setStatus("ALL");
       setDtLimite("ALL");
@@ -233,9 +242,12 @@ export function TableServicos({
     }
   };
 
-  const handleRowClick = (codServ: number) => {
+  const handleRowClick = (codccontra: number, codServ: number) => {
+    // Se já estiver selecionado, não faz nada para evitar refresh desnecessário
+    if (selectedRow === codccontra) return;
+    
     console.log('TableServicos: Linha clicada, serviço ID:', codServ);
-    setSelectedRow(codServ);
+    setSelectedRow(codccontra);
     if (onSelectServico) {
       onSelectServico(codServ);
     }
@@ -317,7 +329,7 @@ export function TableServicos({
                             backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff'
                           }} 
                           className="hover:bg-slate-100"
-                          onClick={() => handleRowClick(item.codccontra)}
+                          onClick={() => handleRowClick(item.codccontra, item.codServ)}
                         >
                           <td className='hidden' style={{ width: `${columnWidths[0]}px`, zIndex: 150, padding: '4px 0', textAlign: 'center', backgroundColor: selectedRow === item.codccontra ? '#e6f7ff' : '#fff' }}>
                             <div style={{ width: '100%', textAlign: 'center' }}>{item.codccontra}</div></td>
