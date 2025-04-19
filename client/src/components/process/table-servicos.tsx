@@ -135,17 +135,17 @@ export function TableServicos({
     }
   };
 
+  // Referência para controlar fetches duplicados
+  const lastDepsRef = React.useRef("");
+  
   // Efeito para carregar dados sempre que as props mudarem ou forceUpdate mudar
   useEffect(() => {
     // Criar uma string de dependências para comparar mudanças reais
     const deps = `${qcodCoor}-${qcontrato}-${qUnidade}-${concluido}-${codServ}-${status}-${dtLimite}`;
     
-    // Armazenar a última string de dependências para evitar fetchs duplicados
-    const lastDeps = React.useRef(deps);
-    
     // Apenas buscar dados se as dependências mudaram ou se forçar atualização
-    if (lastDeps.current !== deps || forceUpdate) {
-      lastDeps.current = deps;
+    if (lastDepsRef.current !== deps || forceUpdate) {
+      lastDepsRef.current = deps;
       fetchData();
     }
     
