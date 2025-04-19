@@ -58,6 +58,8 @@ export function TableServicos({
   const [concluido, setConcluido] = useState<boolean>(true); 
   const [forceUpdate, setForceUpdate] = useState(false); 
   const [services, setServices] = useState<ServicosData[]>([]); 
+  const [autoSelectCompleted, setAutoSelectCompleted] = useState(false);
+  const autoSelectInProgress = React.useRef(false); // Flag para controlar a seleção automática 
 
   // Função para buscar dados da API
   const fetchData = async () => {
@@ -113,13 +115,20 @@ export function TableServicos({
         setServices(response); 
         
         // Selecionar automaticamente o primeiro serviço da lista, se disponível e não houver seleção prévia
-        if (response.length > 0 && onSelectServico && selectedRow === null) {
-          // Usar setTimeout com delay zero para evitar loops de renderização
+        // Apenas fazer isto se ainda não foi feito (controle pela flag)
+        if (response.length > 0 && onSelectServico && selectedRow === null && !autoSelectInProgress.current && !autoSelectCompleted) {
+          // Definir a flag para evitar seleções automáticas recursivas
+          autoSelectInProgress.current = true;
+          
+          console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
+          setSelectedRow(response[0].codccontra);
+          setAutoSelectCompleted(true); // Marca que já foi feita a seleção automática
+          onSelectServico(response[0].codServ);
+          
+          // Resetar a flag após um tempo
           setTimeout(() => {
-            console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
-            setSelectedRow(response[0].codccontra);
-            onSelectServico(response[0].codServ);
-          }, 0);
+            autoSelectInProgress.current = false;
+          }, 500);
         }
       } else {
         console.error('Resposta da API não é um array:', response);
@@ -146,12 +155,19 @@ export function TableServicos({
     // Apenas buscar dados se as dependências mudaram ou se forçar atualização
     if (lastDepsRef.current !== deps || forceUpdate) {
       lastDepsRef.current = deps;
+      // Se mudou a unidade ou contrato, resetar as flags de seleção
+      if (deps.split('-')[1] !== lastDepsRef.current.split('-')[1] || 
+          deps.split('-')[2] !== lastDepsRef.current.split('-')[2]) {
+        setAutoSelectCompleted(false);
+        autoSelectInProgress.current = false;
+      }
       fetchData();
     }
     
     // Limpar seleção quando a unidade ou contrato mudar
     if (!qcontrato || !qUnidade) {
       setSelectedRow(null);
+      setAutoSelectCompleted(false);
     }
   }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite, forceUpdate]);
 
@@ -164,12 +180,16 @@ export function TableServicos({
 
       // Resetar a seleção para garantir seleção automática do primeiro item após filtro
       setSelectedRow(null);
+      setAutoSelectCompleted(false); // Resetar flag para permitir nova seleção automática
       
       setCodServ(qCodServ);
       setStatus(qStatus);
       setDtLimite(qDtlimite);
       setConcluido(qConcluido);
 
+      // Garantir que a flag de progresso está resetada
+      autoSelectInProgress.current = false;
+      
       setForceUpdate(prev => !prev);
     };
 
@@ -178,12 +198,16 @@ export function TableServicos({
       
       // Resetar a seleção para garantir nova seleção automática
       setSelectedRow(null);
+      setAutoSelectCompleted(false); // Resetar flag para permitir nova seleção automática
       
       // Definir os filtros padrão
       setCodServ("-1");
       setStatus("ALL");
       setDtLimite("ALL");
       setConcluido(true);
+      
+      // Garantir que a flag de progresso está resetada
+      autoSelectInProgress.current = false;
       
       // Usando um único forceUpdate para evitar renderizações em cascata
       setForceUpdate(prev => !prev);
@@ -263,6 +287,9 @@ export function TableServicos({
     
     console.log('TableServicos: Linha clicada, serviço ID:', codServ);
     setSelectedRow(codccontra);
+    setAutoSelectCompleted(true); // Marca seleção como completada para evitar seleção automática
+    autoSelectInProgress.current = false; // Garante que a flag de progresso está resetada
+    
     if (onSelectServico) {
       onSelectServico(codServ);
     }
