@@ -40,25 +40,32 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
     // Resetar o estado de tentativa de busca quando o serviço muda
     setFetchAttempted(false);
 
+    // Variável para controlar se o componente ainda está montado
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
         // Se não temos um codserv válido, não fazemos requisição
         if (!codserv || codserv <= 0) {
           console.log('TableFollowup: Código de serviço inválido, ignorando requisição:', codserv);
-          setData([]);
-          setLoading(false);
+          if (isMounted) {
+            setData([]);
+            setLoading(false);
+          }
           return;
         }
 
         console.log('TableFollowup: Iniciando busca de dados para serviço ID:', codserv);
-        setLoading(true);
+        if (isMounted) setLoading(true);
 
         // Usar o token armazenado no localStorage
         const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
         if (!token) {
-          setError('Não autorizado: Token não encontrado');
-          setLoading(false);
+          if (isMounted) {
+            setError('Não autorizado: Token não encontrado');
+            setLoading(false);
+          }
           return;
         }
 
@@ -69,12 +76,14 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         console.log('Buscando tarefas para o serviço ID:', codserv);
 
         if (!apiUrl) {
-          setError('URL da API de tarefas não configurada');
-          setLoading(false);
+          if (isMounted) {
+            setError('URL da API de tarefas não configurada');
+            setLoading(false);
+          }
           return;
         }
 
-        // Fazer a requisição usando ApiService - Parâmetro correto na URL da API
+        // Fazer a requisição usando ApiService - usando codccontra como parâmetro
         const response = await ApiService.get<TarefasData[]>(
           `${apiUrl}?codccontra=${codserv}`,
           {
@@ -85,16 +94,23 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
           }
         );
 
-        // Mesmo que a resposta seja um array vazio, marcar que a busca foi tentada
-        setFetchAttempted(true);
-        setData(response);
-        setError(null);
+        // Verificar se o componente ainda está montado antes de atualizar o estado
+        if (isMounted) {
+          // Mesmo que a resposta seja um array vazio, marcar que a busca foi tentada
+          setFetchAttempted(true);
+          setData(response);
+          setError(null);
+        }
       } catch (err) {
         console.error('Erro ao carregar tarefas:', err);
-        setError('Erro ao carregar dados das tarefas');
-        setFetchAttempted(true);
+        if (isMounted) {
+          setError('Erro ao carregar dados das tarefas');
+          setFetchAttempted(true);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -104,6 +120,11 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
       setData([]);
       setLoading(false);
     }
+
+    // Cleanup function para evitar memory leaks
+    return () => {
+      isMounted = false;
+    };
   }, [codserv]);
 
   // Renderização para estado de carregamento

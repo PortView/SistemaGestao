@@ -240,6 +240,11 @@ export class ApiService {
               response = await fetch(fullUrl, fetchOptionsWithSignal);
               // Limpar o timeout se a requisição foi bem-sucedida
               clearTimeout(timeoutId);
+
+              // Verificar imediatamente se a resposta foi bem-sucedida
+              if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
+              }
             } catch (error: any) {
               // Limpar o timeout para evitar vazamento de memória
               clearTimeout(timeoutId);
@@ -251,7 +256,11 @@ export class ApiService {
               }
 
               console.error(`Erro no fetch para ${fullUrl}:`, error);
-              throw error;
+
+              // Criar um erro mais informativo
+              const errorMessage = error.message || 'Erro desconhecido na requisição';
+              const enhancedError = new Error(`Falha na requisição para ${fullUrl}: ${errorMessage}`);
+              throw enhancedError;
             }
           } catch (err: any) {
             if (err.name === 'AbortError') {
@@ -283,22 +292,22 @@ export class ApiService {
         statusText: response.statusText
       });
 
-      // Verificar se a resposta foi bem-sucedida
-      if (!response.ok) {
-        console.error(`ApiService.request - Erro na resposta: Status ${response.status} ${response.statusText}`);
-        let errorData;
-        try {
-          errorData = await response.json();
-          console.error('ApiService.request - Detalhes do erro:', errorData);
-        } catch (e) {
-          errorData = {};
-          console.error('ApiService.request - Não foi possível obter detalhes do erro');
-        }
+      // Verificar se a resposta foi bem-sucedida (já verificado anteriormente)
+      //if (!response.ok) {
+      //  console.error(`ApiService.request - Erro na resposta: Status ${response.status} ${response.statusText}`);
+      //  let errorData;
+      //  try {
+      //    errorData = await response.json();
+      //    console.error('ApiService.request - Detalhes do erro:', errorData);
+      //  } catch (e) {
+      //    errorData = {};
+      //    console.error('ApiService.request - Não foi possível obter detalhes do erro');
+      //  }
 
-        const error = new Error(errorData.message || `Erro na requisição: ${response.status}`);
-        Object.assign(error, { status: response.status, data: errorData });
-        throw error;
-      }
+      //  const error = new Error(errorData.message || `Erro na requisição: ${response.status}`);
+      //  Object.assign(error, { status: response.status, data: errorData });
+      //  throw error;
+      //}
 
       // Verificar se há conteúdo na resposta
       const contentType = response.headers.get('content-type');
