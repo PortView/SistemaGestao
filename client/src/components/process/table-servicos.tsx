@@ -113,7 +113,7 @@ export function TableServicos({
         setServices(response); 
         
         // Selecionar automaticamente o primeiro serviço da lista, se disponível
-        if (response.length > 0 && onSelectServico) {
+        if (response.length > 0 && onSelectServico && !selectedRow) {
           setTimeout(() => {
             console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', response[0].codServ);
             setSelectedRow(response[0].codccontra);
@@ -152,6 +152,9 @@ export function TableServicos({
       setConcluido(qConcluido);
 
       setForceUpdate(prev => !prev);
+      
+      // Reseta seleção para garantir que após busca o primeiro item seja selecionado
+      setSelectedRow(null);
     };
 
     const handleUnitSelected = (event: CustomEvent) => {
@@ -163,6 +166,9 @@ export function TableServicos({
       setConcluido(true); 
 
       setForceUpdate(prev => !prev);
+      
+      // Reseta seleção para garantir que após busca o primeiro item seja selecionado
+      setSelectedRow(null);
     };
 
     window.addEventListener('apply-filters', handleApplyFilters as EventListener);
