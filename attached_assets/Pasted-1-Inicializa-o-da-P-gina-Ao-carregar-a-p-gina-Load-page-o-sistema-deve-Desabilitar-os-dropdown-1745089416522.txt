@@ -1,0 +1,149 @@
+1. Inicialização da Página
+Ao carregar a página (Load page), o sistema deve:
+Desabilitar os dropdowns: UF, Unidades, Aplicar filtros
+Ocultar a régua de paginação de unidades
+2. Carregamento de Dados Iniciais
+Fazer requisição à API de Clientes
+Popular o dropdown de Clientes com a resposta obtida
+3. Fluxo de Seleção e Interações
+3.1 Seleção de Cliente
+Quando um cliente é selecionado (S):
+Habilitar os dropdowns: UF, Unidades, Aplicar filtros
+Popular o dropdown UF com as UFs do cliente
+Selecionar automaticamente o primeiro item do dropdown UF
+Se nenhum cliente for selecionado (N):
+Manter os dropdowns desabilitados
+3.2 Seleção de UF
+Quando uma UF é selecionada (S):
+Fazer requisição à API de Unidades
+Popular o dropdown Unidades com a resposta
+Selecionar automaticamente o primeiro item
+Se nenhuma UF for selecionada (N):
+Manter o dropdown Unidades desabilitado
+3.3 Checkbox "Todas UFs"
+Quando marcado como True (S):
+Desabilitar o dropdown UF
+Manter a régua de paginação de unidades oculta
+Quando marcado como False (S):
+Habilitar o dropdown UF
+Manter a régua de paginação de unidades oculta
+3.4 Seleção de Unidade
+Quando uma unidade é selecionada (S):
+Consultar API de Serviços com os parâmetros:
+qcodCoor = user.cod
+qcontrato = folowups.contrato
+qUnidade = folowups.coend
+qConcluido = false
+qCodServ = -1
+qStatus = ALL
+qDtlimite = ALL
+Com o resultado:
+Salvar no local-store sem valores repetidos (distinct):
+codserv = codServ
+status = mStatus
+DtLimte = dtlimite
+Verificar na resposta da API se o total de unidades > 100:
+Se sim (S): Tornar visível a régua de paginação de unidades
+Se não (N): Manter a régua oculta
+3.5 Seleção de "Aplicar filtros"
+Quando selecionado (S):
+Consultar API de Serviços com os parâmetros:
+qcodCoor = user.cod
+qcontrato = folowups.contrato
+qUnidade = folowups.coend
+qConcluido = !checkbox.soservnaoconcluidos
+qCodServ = dropdown.codserv
+qStatus = dropdown.status
+qDtlimite = dropdown.dtlimite
+3.6 Exibição de Dados
+Após consulta à API de Serviços:
+Popular a grade de serviços com a resposta
+Selecionar automaticamente o primeiro item
+3.7 Seleção de Serviço
+Quando um serviço é selecionado (S):
+Consultar API de Tarefas
+Popular a grade de tarefas com a resposta
+Selecionar automaticamente o primeiro item
+4. Fluxo de Retorno
+Se qualquer condição não for atendida (N), o fluxo retorna para o início do processo de seleção, aguardando novas interações do usuário
+5. Considerações para Implementação
+Implementar validações para cada etapa do fluxo
+Garantir que os elementos da interface sejam habilitados/desabilitados conforme o fluxo
+Implementar o armazenamento local (local-store) para os dados filtrados
+Garantir que a seleção automática do primeiro item ocorra em todos os dropdowns e grades
+Implementar a lógica de paginação baseada no número de unidades retornadas
+Esta descrição detalhada fornece todas as informações necessárias para que uma IA possa modificar ou implementar o código seguindo exatamente a lógica apresentada no fluxograma.
+
+
+
+FluxoTelaGerente.png
+
+
+Analize a imagem e descreva menuciosamente toda a lógica do fluxo para que uma IA modifique o codigo aplicando toda a logica.
+
+GPT-4.1
+Segue a descrição minuciosa de toda a lógica do fluxo da tela do gerente, conforme o fluxograma apresentado, para que uma IA possa modificar o código e aplicar toda a lógica corretamente:
+
+1. Inicialização da Página
+Ao carregar a página, desabilite os dropdowns de UF, Unidades e Aplicar filtros.
+Oculte a régua de paginação de unidades.
+2. Carregamento Inicial
+Popule o dropdown de Clientes com a resposta da API de Clientes.
+3. Seleção de Cliente
+Se um cliente for selecionado:
+Habilite os dropdowns de UF, Unidades e Aplicar filtros.
+Popule o dropdown de UF com as UFs do cliente e selecione automaticamente o primeiro item.
+Se nenhum cliente for selecionado:
+Mantenha os dropdowns desabilitados e aguarde a seleção.
+4. Seleção de UF
+Se uma UF for selecionada:
+Popule o dropdown de Unidades com a resposta da API de Unidades e selecione automaticamente o primeiro item.
+Se nenhuma UF for selecionada:
+Mantenha o dropdown de Unidades desabilitado e aguarde a seleção.
+5. Checkbox "Todas UFs"
+Se o checkbox "Todas UFs" for marcado como True:
+Desabilite o dropdown de UF.
+Oculte a régua de paginação de unidades.
+Se o checkbox "Todas UFs" for marcado como False:
+Habilite o dropdown de UF.
+6. Seleção de Unidade
+Se uma unidade for selecionada:
+Consulte a API de Serviços com os seguintes parâmetros:
+qcodCoor = user.cod
+qcontrato = followups.contrato
+qUnidade = followups.coend
+qConcluido = false
+qCodServ = -1
+qStatus = ALL
+qDtlimite = ALL
+Com o resultado:
+Salve no local-store, sem valores repetidos (distinct), os campos:
+codserv = codServ
+status = mStatus
+DtLimite = dtlimite
+Verifique o total de unidades na resposta da API:
+Se o total for maior que 100, torne a régua de paginação de unidades visível.
+Caso contrário, mantenha a régua oculta.
+7. Seleção de "Aplicar filtros"
+Se o botão "Aplicar filtros" for selecionado:
+Consulte a API de Serviços com os seguintes parâmetros:
+qcodCoor = user.cod
+qcontrato = followups.contrato
+qUnidade = followups.coend
+qConcluido = checkbox.soservnaoconcluidos
+qCodServ = dropdown.codserv
+qStatus = dropdown.status
+qDtlimite = dropdown.dtlimite
+Com o resultado:
+Popule a grade de serviços e selecione automaticamente o primeiro item.
+8. Seleção de Serviço
+Se um serviço for selecionado:
+Popule a grade de tarefas com a resposta da API de Tarefas e selecione automaticamente o primeiro item.
+9. Observações Gerais para Implementação
+A lógica é sequencial e dependente das seleções anteriores. Cada etapa só é habilitada após a conclusão da anterior.
+Os elementos de interface (dropdowns, checkboxes, botões) devem ser habilitados/desabilitados e populados conforme o fluxo.
+A consulta à API deve ser feita sempre que uma seleção relevante for alterada, utilizando os parâmetros corretos.
+O local-store deve ser utilizado para armazenar dados de filtros sem duplicidade.
+A régua de paginação de unidades só aparece se houver mais de 100 unidades.
+A grade de serviços e tarefas deve ser atualizada conforme as seleções e filtros aplicados.
+Sempre que um item for populado em um dropdown ou grade, selecione automaticamente o primeiro item disponível.
