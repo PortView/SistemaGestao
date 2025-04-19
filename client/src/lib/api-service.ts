@@ -224,7 +224,10 @@ export class ApiService {
           // Envolva a chamada para evitar erros de conexão
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
+            const timeoutId = setTimeout(() => {
+              controller.abort();
+              console.warn(`Timeout atingido após ${TIMEOUT/1000} segundos para ${fullUrl}`);
+            }, TIMEOUT);
 
             // Clone dos fetchOptions para evitar modificar o objeto original
             const fetchOptionsWithSignal = {
@@ -235,19 +238,25 @@ export class ApiService {
             try {
               // Fazer a requisição usando o fetch com tratamento de erro
               response = await fetch(fullUrl, fetchOptionsWithSignal);
-            } catch (error) {
-              console.error(`Erro no fetch para ${fullUrl}:`, error);
-              throw new Error(`Falha na requisição: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-            }
+              // Limpar o timeout se a requisição foi bem-sucedida
+              clearTimeout(timeoutId);
+            } catch (error: any) {
+              // Limpar o timeout para evitar vazamento de memória
+              clearTimeout(timeoutId);
 
-            // Limpar o timeout se a requisição foi bem-sucedida
-            clearTimeout(timeoutId);
+              // Tratar erros específicos
+              if (error.name === 'AbortError') {
+                console.error(`Timeout na requisição após ${TIMEOUT/1000} segundos para ${fullUrl}`);
+                throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
+              }
+
+              console.error(`Erro no fetch para ${fullUrl}:`, error);
+              throw error;
+            }
           } catch (err: any) {
-            // Verificar se o erro é um timeout (AbortError)
             if (err.name === 'AbortError') {
               throw new Error(`Timeout na requisição após ${TIMEOUT/1000} segundos`);
             }
-            // Outros erros de rede
             throw err;
           }
           break; // Se a requisição for bem-sucedida, sair do loop

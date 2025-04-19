@@ -81,8 +81,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
             headers: {
               Authorization: `Bearer ${token}`
             },
-            skipCache: true, // Garantir dados frescos
-            timeout: 10000 // Aumentar o timeout para 10 segundos
+            skipCache: true // Garantir dados frescos
           }
         );
 

@@ -188,26 +188,30 @@ export function TableServicos({
    * Este efeito é separado para maior controle e evitar loop infinito
    */
   useEffect(() => {
+    // Verificar se há dados e se a seleção automática ainda não foi feita
     if (
       data.length > 0 && 
       onSelectServico && 
       !initialAutoSelectDone.current && 
       !loading && 
-      dataInitialized
+      dataInitialized &&
+      !isProcessingUnitSelection.current // Importante: não selecionar durante troca de unidade
     ) {
-      // Marcar que já realizamos a seleção automática antes de fazer qualquer operação
+      // Imediatamente marcar que a seleção automática foi realizada para evitar execuções repetidas
       initialAutoSelectDone.current = true;
-
-      // Selecionar o primeiro serviço da lista após um pequeno delay
-      // Este delay é crítico para evitar loops de renderização
+      
+      console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', data[0].codServ);
+      
+      // Usar um setTimeout com delay suficiente para quebrar o ciclo de renderização
       setTimeout(() => {
         const firstService = data[0];
-        console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', firstService.codServ);
+        
+        // Atualizar a linha selecionada visualmente
         setSelectedRow(firstService.codccontra);
         
-        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+        // Notificar o componente pai sobre a seleção do serviço usando o codccontra
         onSelectServico(firstService.codccontra);
-      }, 100);
+      }, 200); // Aumentado para 200ms para dar mais tempo entre ciclos de renderização
     }
   }, [data, loading, dataInitialized, onSelectServico]);
 
@@ -267,26 +271,27 @@ export function TableServicos({
    * Handler para clique na linha
    */
   const handleRowClick = (codccontra: number, codServ: number) => {
-    // Evitar seleção duplicada
-    if (selectedRow === codccontra) return;
+    // Evitar seleção duplicada e processamento desnecessário
+    if (selectedRow === codccontra) {
+      console.log('TableServicos: Linha já selecionada, ignorando clique');
+      return;
+    }
 
     console.log('TableServicos: Linha clicada, contrato-serviço ID:', codccontra, 'Serviço ID:', codServ);
     
-    // Marcar que já realizamos a seleção antes de mudar o estado
+    // Marcar que já realizamos a seleção para evitar seleção automática posterior
     initialAutoSelectDone.current = true;
     
-    // Limpar a seleção primeiro
-    setSelectedRow(null);
+    // Atualizar a seleção em um único passo para evitar renderizações intermediárias
+    setSelectedRow(codccontra);
     
-    // Atualizar a seleção em um setTimeout para quebrar o ciclo de renderizações
-    setTimeout(() => {
-      setSelectedRow(codccontra);
-      
-      if (onSelectServico) {
-        // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+    // Notificar o componente pai sobre a seleção, com delay para quebrar o ciclo de renderização
+    if (onSelectServico) {
+      // Passamos o codccontra para o TableFollowup, que é o código usado na API de tarefas
+      setTimeout(() => {
         onSelectServico(codccontra);
-      }
-    }, 50);
+      }, 50);
+    }
   };
 
   /**
