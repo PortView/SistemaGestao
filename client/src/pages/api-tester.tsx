@@ -66,8 +66,8 @@ export default function ApiTesterPage() {
       }
 
       // Usar a URL da API definida nas variáveis de ambiente
-      const baseApiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL || 
-                        `${import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL}/ger-clientes/clientes`;
+      const baseApiUrl = typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_CLIENTES_URL : process.env.NEXT_PUBLIC_API_CLIENTES_URL || 
+                        `${typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL}/ger-clientes/clientes`;
       
       const apiUrl = `${baseApiUrl}?codcoor=${codCoor}`;
       
@@ -108,7 +108,7 @@ export default function ApiTesterPage() {
     }
   };
 
-  const [email, setEmail] = useState<string>(import.meta.env.VITE_TEST_USER_EMAIL || 'mauro@ameni.com.br');
+  const [email, setEmail] = useState<string>(typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_TEST_USER_EMAIL : process.env.NEXT_PUBLIC_TEST_USER_EMAIL || 'mauro@ameni.com.br');
   const [password, setPassword] = useState<string>('');
   const { toast } = useToast();
 
@@ -120,7 +120,7 @@ export default function ApiTesterPage() {
 
     try {
       // Usar a URL da API definida nas variáveis de ambiente
-      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL || `${import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL}/login`;
+      const apiUrl = typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_AUTH_URL : process.env.NEXT_PUBLIC_API_AUTH_URL || `${typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL}/login`;
       
       if (!email || !password) {
         throw new Error('Email e senha são obrigatórios');
@@ -179,7 +179,7 @@ export default function ApiTesterPage() {
       }
 
       // Usar a URL da API definida nas variáveis de ambiente
-      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL || `${import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL}/user/me`;
+      const apiUrl = typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_ME_URL : process.env.NEXT_PUBLIC_API_ME_URL || `${typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL}/user/me`;
       
       console.log('Testando API de perfil:', apiUrl);
       
@@ -237,12 +237,12 @@ export default function ApiTesterPage() {
 
   // Obter dados das variáveis de ambiente
   const [envInfo, setEnvInfo] = useState({
-    base: import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL || 'Não definida',
-    auth: import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL || 'Não definida',
-    me: import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL || 'Não definida',
-    clientes: import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL || 'Não definida',
-    conformidade: import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL || 'Não definida',
-    useCorsProxy: import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY || 'false',
+    base: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL || 'Não definida',
+    auth: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_AUTH_URL : process.env.NEXT_PUBLIC_API_AUTH_URL || 'Não definida',
+    me: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_ME_URL : process.env.NEXT_PUBLIC_API_ME_URL || 'Não definida',
+    clientes: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_CLIENTES_URL : process.env.NEXT_PUBLIC_API_CLIENTES_URL || 'Não definida',
+    conformidade: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_API_CONFORMIDADE_URL : process.env.NEXT_PUBLIC_API_CONFORMIDADE_URL || 'Não definida',
+    useCorsProxy: typeof window !== 'undefined' ? (window as any).ENV_NEXT_PUBLIC_USE_CORS_PROXY : process.env.NEXT_PUBLIC_USE_CORS_PROXY || 'false',
   });
 
   return (

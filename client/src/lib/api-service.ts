@@ -1,34 +1,29 @@
 import { SiscopCliente, SiscopConformidade, SiscopUnidadesResponse, SiscopUser } from './types';
+import {
+  API_BASE_URL,
+  API_AUTH_URL,
+  API_ME_URL,
+  API_CLIENTES_URL,
+  API_UNIDADES_URL,
+  API_SERVICOS_URL,
+  API_CONFORMIDADE_URL,
+  CACHE_EXPIRATION,
+  USE_CORS_PROXY,
+  CORS_PROXY_URL,
+  LOCAL_STORAGE_TOKEN_KEY,
+  LOCAL_STORAGE_USER_KEY,
+  LOCAL_STORAGE_CACHE_PREFIX
+} from './env';
 
-// Constantes importadas das variáveis de ambiente
-const API_BASE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_BASE_URL || 'https://amenirealestate.com.br:5601';
-const API_AUTH_URL = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL || `${API_BASE_URL}/login`;
-const API_ME_URL = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL || `${API_BASE_URL}/user/me`;
-const API_CLIENTES_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL || `${API_BASE_URL}/ger-clientes/clientes`;
-const API_UNIDADES_URL = import.meta.env.VITE_NEXT_PUBLIC_API_UNIDADES_URL || `${API_BASE_URL}/ger-clientes/unidades`;
-const API_SERVICOS_URL = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || `${API_BASE_URL}/ger-clientes/servicos`;
-const API_CONFORMIDADE_URL = import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL || `${API_BASE_URL}/ger-clientes/conformidades`;
-
-// Configurações de CORS
-// Desativando temporariamente para debug
-const USE_CORS_PROXY = false; // import.meta.env.VITE_NEXT_PUBLIC_USE_CORS_PROXY === 'true';
-const CORS_PROXY_URL = import.meta.env.VITE_NEXT_PUBLIC_CORS_PROXY_URL || 'https://corsproxy.io/?';
+// Configurações de CORS importadas do módulo de ambiente
 
 // Configurações de timeout e retry
 const TIMEOUT = 60000; // 60 segundos - aumentando para requisições mais lentas
 const MAX_RETRIES = 2;
 
-// Cache expiration
-const CACHE_EXPIRATION = {
-  SHORT: parseInt(import.meta.env.VITE_CACHE_SHORT || '300000'),
-  MEDIUM: parseInt(import.meta.env.VITE_CACHE_MEDIUM || '1800000'),
-  LONG: parseInt(import.meta.env.VITE_CACHE_LONG || '86400000')
-};
+// Cache expiration importado do módulo de ambiente
 
-// Chaves para localStorage
-const LOCAL_STORAGE_TOKEN_KEY = 'siscop_token';
-const LOCAL_STORAGE_USER_KEY = 'siscop_user';
-const LOCAL_STORAGE_CACHE_PREFIX = 'siscop_cache_';
+// Chaves para localStorage importadas do módulo de ambiente
 const LOCAL_STORAGE_CLIENTES_KEY = 'siscop_clientes';
 
 interface FetchOptions extends RequestInit {

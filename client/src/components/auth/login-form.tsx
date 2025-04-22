@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { API_AUTH_URL, API_ME_URL, TEST_USER_EMAIL, TEST_USER_PASSWORD } from "../../lib/env";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -47,7 +48,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   // Função para buscar o perfil do usuário usando a API externa
   const fetchUserProfile = async (token: string) => {
     try {
-      const apiMeUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL;
+      const apiMeUrl = API_ME_URL;
       console.log("URL da API de perfil:", apiMeUrl);
 
       const response = await fetch(apiMeUrl, {
@@ -103,8 +104,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: import.meta.env.VITE_TEST_USER_EMAIL || "",
-      password: import.meta.env.VITE_TEST_USER_PASSWORD || "",
+      email: TEST_USER_EMAIL || "",
+      password: TEST_USER_PASSWORD || "",
     },
   });
 
@@ -112,7 +113,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormValues) => {
       // Usa a URL de autenticação da API externa
-      const apiAuthUrl = import.meta.env.VITE_NEXT_PUBLIC_API_AUTH_URL;
+      const apiAuthUrl = API_AUTH_URL;
       console.log("URL da API de autenticação:", apiAuthUrl);
       console.log("Dados de login enviados:", {
         email: data.email,

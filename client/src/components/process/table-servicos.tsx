@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { API_SERVICOS_URL } from '../../lib/env';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { ApiService } from '@/lib/api-service';
 import { Card } from '@/components/ui/card';
@@ -97,7 +98,7 @@ export function TableServicos({
       });
 
       // Construir a URL com os parâmetros do localStorage
-      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_SERVICOS_URL || 'https://amenirealestate.com.br:5601/ger-clientes/servicos';
+      const apiUrl = API_SERVICOS_URL;
       const url = `${apiUrl}?qcodCoor=${qcodCoor}&qcontrato=${qcontrato}&qUnidade=${qUnidade}&qConcluido=${concluido}&qCodServ=${codServ}&qStatus=${status}&qDtlimite=${dtLimite}`;
 
       // Usar o ApiService para fazer a requisição (já configurado para adicionar o token)

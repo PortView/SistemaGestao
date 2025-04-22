@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { API_CLIENTES_URL } from "../lib/env";
 import {
   Dialog,
   DialogContent,
@@ -62,7 +63,7 @@ export function VerificationDialog({
         );
       }
 
-      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_CLIENTES_URL;
+      const apiUrl = API_CLIENTES_URL;
       if (!apiUrl) {
         throw new Error("URL da API não configurada corretamente.");
       }

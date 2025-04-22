@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./index.css";
+// A importação do CSS é feita no _app.tsx do Next.js
 
 // Aplicar tema escuro ao body
 document.documentElement.classList.add('dark');

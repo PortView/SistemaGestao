@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { API_FOLLOWUP_URL } from '../../lib/env';
 import { ApiService } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,7 +57,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
         }
 
         // Usar a URL da API de followup
-        const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
+        const apiUrl = API_FOLLOWUP_URL;
         
         console.log('URL API Followup:', apiUrl);
         console.log('Buscando tarefas para o serviço ID:', codserv);

@@ -55,7 +55,7 @@ const Dashboard = () => {
           {/* Recent notifications */}
           <div className="mt-8">
             <NotificationList 
-              notifications={notifications?.data} 
+               
               isLoading={isLoadingNotifications}
               limit={3}
               showViewAll={true}

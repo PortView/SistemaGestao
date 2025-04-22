@@ -9,13 +9,14 @@ export const LOCAL_STORAGE_CLIENTES_KEY = 'siscop_clientes';
 /**
  * URLs da API
  */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.siscop.com.br';
-export const API_AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL || `${API_BASE_URL}/auth/login`;
-export const API_ME_URL = process.env.NEXT_PUBLIC_API_ME_URL || `${API_BASE_URL}/auth/me`;
-export const API_CLIENTES_URL = process.env.NEXT_PUBLIC_API_CLIENTES_URL || null;
-export const API_UNIDADES_URL = process.env.NEXT_PUBLIC_API_UNIDADES_URL || null;
-export const API_SERVICOS_URL = process.env.NEXT_PUBLIC_API_SERVICOS_URL || null;
-export const API_CONFORMIDADE_URL = process.env.NEXT_PUBLIC_API_CONFORMIDADE_URL || null;
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://amenirealestate.com.br:5601';
+export const API_AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL || `${API_BASE_URL}/login`;
+export const API_ME_URL = process.env.NEXT_PUBLIC_API_ME_URL || `${API_BASE_URL}/user/me`;
+export const API_CLIENTES_URL = process.env.NEXT_PUBLIC_API_CLIENTES_URL || `${API_BASE_URL}/ger-clientes/clientes`;
+export const API_UNIDADES_URL = process.env.NEXT_PUBLIC_API_UNIDADES_URL || `${API_BASE_URL}/ger-clientes/unidades`;
+export const API_SERVICOS_URL = process.env.NEXT_PUBLIC_API_SERVICOS_URL || `${API_BASE_URL}/ger-clientes/servicos`;
+export const API_CONFORMIDADE_URL = process.env.NEXT_PUBLIC_API_CONFORMIDADE_URL || `${API_BASE_URL}/ger-clientes/conformidades`;
+export const API_FOLLOWUP_URL = process.env.NEXT_PUBLIC_API_FOLLOWUP_URL || `${API_BASE_URL}/ger-clientes/tarefas`;
 
 /**
  * Configurações de CORS

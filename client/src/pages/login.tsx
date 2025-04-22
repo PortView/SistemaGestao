@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 export default function LoginPage() {
   const [location, navigate] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
-  
+
   useEffect(() => {
     // Se o usuário já estiver autenticado, redireciona para o dashboard
     if (isAuthenticated && user) {
@@ -20,7 +20,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center bg-black px-4 py-12 sm:px-6 lg:px-8"
       style={{
         backgroundSize: "cover",
@@ -35,8 +35,11 @@ export default function LoginPage() {
             Sistema de Controle de processos
           </h2>
         </div>
-        
+
         <LoginForm onSuccess={handleLoginSuccess} />
+        <p className="text-sm text-muted-foreground">
+          © 2025 SISCOP - Todos os direitos reservados
+        </p>
       </div>
     </div>
   );

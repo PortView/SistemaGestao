@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_ME_URL, LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from '../lib/env';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@shared/schema";
 import { SiscopUser } from "@/lib/types";
-import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants";
 
 interface AuthContextType {
   user: User | SiscopUser | null;
@@ -14,14 +14,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
-  // Verifica se há um token no localStorage
+  // Verificar se há um token no localStorage ao inicializar
   useEffect(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-    if (token) {
+    const userJson = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
+    if (token && userJson) {
       setIsAuthenticated(true);
     }
   }, []);
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para buscar o perfil do usuário da API externa
   const fetchUserProfile = async (token: string) => {
     try {
-      const apiMeUrl = import.meta.env.VITE_NEXT_PUBLIC_API_ME_URL;
+      const apiMeUrl = API_ME_URL;
       console.log("URL da API de perfil (useAuth):", apiMeUrl);
       
       // Adiciona opções para contornar problemas de SSL em ambiente de desenvolvimento
@@ -56,20 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Dados do usuário obtidos (useAuth):", userData);
       
       // Salva os dados do usuário no localStorage
-      if (userData) {
-        localStorage.setItem('user_name', userData.name || '');
-        localStorage.setItem('user_tipo', userData.tipo || userData.role || 'Analista');
-        
-        if (userData.cod) {
-          localStorage.setItem('user_cod', userData.cod.toString() || '');
-        }
-        
-        localStorage.setItem('user_email', userData.email || '');
-        
-        if (userData.mvvm) {
-          localStorage.setItem('user_mvvm', userData.mvvm || '');
-        }
-      }
+      // Salvar o token no localStorage
+      localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
+      
+      // Salvar o usuário no localStorage
+      localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(userData));
       
       return userData;
     } catch (error) {
@@ -103,13 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função para logout
   const logout = () => {
+    // Remover o token e o usuário do localStorage
     localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
-    localStorage.removeItem("user_name");
-    localStorage.removeItem("user_tipo");
-    localStorage.removeItem("user_cod");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_mvvm");
-    localStorage.removeItem("siscop_user"); // Remove também os dados do usuário armazenados
+    localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
     setIsAuthenticated(false);
     queryClient.invalidateQueries();
     queryClient.clear();

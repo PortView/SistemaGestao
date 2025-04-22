@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { API_CONFORMIDADE_URL } from '../../lib/env';
 import { Card, CardContent } from '@/components/ui/card';
 import { ApiService } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
@@ -58,7 +59,7 @@ export default function TableConform({ codimov, web, relatorio, cnpj, temcnpj }:
         }
 
         // Construir a URL com todos os parâmetros
-        const url = `${import.meta.env.VITE_NEXT_PUBLIC_API_CONFORMIDADE_URL}?codimov=${codimov}&web=${web}&relatorio=${relatorio}&cnpj=${cnpj}&temcnpj=${temcnpj}`;
+        const url = `${API_CONFORMIDADE_URL}?codimov=${codimov}&web=${web}&relatorio=${relatorio}&cnpj=${cnpj}&temcnpj=${temcnpj}`;
         
         console.log('Buscando conformidades com URL:', url);
 
