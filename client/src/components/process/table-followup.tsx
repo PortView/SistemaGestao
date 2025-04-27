@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ApiService } from '@/lib/api-service';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Clock } from 'lucide-react';
+import { eventBus, EventTypes } from '@/lib/event-bus';
 
 interface TarefasData {
   analista: string;
@@ -23,78 +24,102 @@ interface TableFollowupProps {
   codserv: number;
 }
 
-export function TableFollowup({ codserv }: TableFollowupProps) {
+export function TableFollowup({ codserv = -1 }: TableFollowupProps) {
   const [data, setData] = useState<TarefasData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentCodserv, setCurrentCodserv] = useState<number>(codserv);
+  const isMountedRef = useRef(false);
+  const lastFetchRef = useRef<number>(-1);
 
-  // Log quando a prop codserv mudar
-  useEffect(() => {
-    console.log('TableFollowup: codserv prop mudou para:', codserv);
-  }, [codserv]);
+  // Função para buscar tarefas
+  const fetchTarefas = async (servicoId: number) => {
+    if (servicoId <= 0) return;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Se não temos um codserv válido, não fazemos requisição
-        if (!codserv || codserv <= 0) {
-          console.log('TableFollowup: Código de serviço inválido, ignorando requisição:', codserv);
-          setData([]);
-          setLoading(false);
-          return;
-        }
+    // Evitar buscar os mesmos dados repetidamente
+    if (lastFetchRef.current === servicoId) {
+      console.log(`TableFollowup: Evitando busca repetida para serviço ${servicoId}`);
+      return;
+    }
 
-        console.log('TableFollowup: Iniciando busca de dados para serviço ID:', codserv);
-        
-        // Usar o token armazenado no localStorage
-        const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+    lastFetchRef.current = servicoId;
+    console.log("TableFollowup: Iniciando busca de dados para serviço ID:", servicoId);
+    setLoading(true);
+    setError(null);
 
-        if (!token) {
-          setError('Não autorizado: Token não encontrado');
-          setLoading(false);
-          return;
-        }
+    try {
+      console.log("Buscando tarefas para o serviço ID:", servicoId);
+      // Usar o token armazenado no localStorage
+      const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
-        // Usar a URL da API de followup
-        const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
-        
-        console.log('URL API Followup:', apiUrl);
-        console.log('Buscando tarefas para o serviço ID:', codserv);
-        
-        if (!apiUrl) {
-          setError('URL da API de tarefas não configurada');
-          setLoading(false);
-          return;
-        }
-
-        // Fazer a requisição usando ApiService
-        const response = await ApiService.get<TarefasData[]>(
-          `${apiUrl}?codserv=${codserv}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            skipCache: true // Garantir dados frescos
-          }
-        );
-        
-        setData(response);
+      if (!token) {
+        setError('Não autorizado: Token não encontrado');
         setLoading(false);
-      } catch (err) {
-        console.error('Erro ao carregar tarefas:', err);
-        setError('Erro ao carregar dados das tarefas');
-        setLoading(false);
+        return;
       }
-    };
 
-    if (codserv > 0) {
-      setLoading(true);
-      fetchData();
-    } else {
-      setData([]);
+      // Usar a URL da API de followup
+      const apiUrl = import.meta.env.VITE_NEXT_PUBLIC_API_FOLLOWUP_URL;
+
+      console.log('URL API Followup:', apiUrl);
+      console.log('Buscando tarefas para o serviço ID:', codserv);
+
+      if (!apiUrl) {
+        setError('URL da API de tarefas não configurada');
+        setLoading(false);
+        return;
+      }
+
+      // Fazer a requisição usando ApiService
+      const response = await ApiService.get<TarefasData[]>(
+        `${apiUrl}?codserv=${servicoId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          skipCache: true // Garantir dados frescos
+        }
+      );
+
+      setData(response);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao carregar tarefas:', err);
+      setError('Erro ao carregar dados das tarefas');
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
-  }, [codserv]);
+  };
+
+  // Efeito para inicializar evento de escuta na montagem do componente
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    // Inscrever-se no evento de seleção de serviço
+    const unsubscribe = eventBus.on(EventTypes.SERVICE_SELECTED, (servicoId) => {
+      if (isMountedRef.current) {
+        console.log("TableFollowup: Evento SERVICE_SELECTED recebido:", servicoId);
+        setCurrentCodserv(servicoId);
+        fetchTarefas(servicoId);
+      }
+    });
+
+    // Limpar inscrição ao desmontar
+    return () => {
+      isMountedRef.current = false;
+      unsubscribe();
+    };
+  }, []);
+
+  // Efeito para reagir às mudanças na prop codserv
+  useEffect(() => {
+    if (codserv !== currentCodserv && codserv > 0) {
+      console.log(`TableFollowup: codserv prop mudou para:`, codserv);
+      setCurrentCodserv(codserv);
+      fetchTarefas(codserv);
+    }
+  }, [codserv, currentCodserv]);
 
   if (loading) {
     return (
@@ -127,7 +152,7 @@ export function TableFollowup({ codserv }: TableFollowupProps) {
       </div>
     );
   }
-  
+
   if (data.length === 0) {
     return (
       <div className="p-4 bg-[#d0e0f0] backdrop-blur shadow-md w-full h-[460px] overflow-hidden flex items-center justify-center rounded-md">

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { LOCAL_STORAGE_TOKEN_KEY } from '@/lib/constants';
 import { ApiService } from '@/lib/api-service';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { eventBus, EventTypes } from '@/lib/event-bus';
 
 interface ServicosData {
   codccontra: number;
@@ -58,6 +59,8 @@ export function TableServicos({
   const [concluido, setConcluido] = useState<boolean>(true); 
   const [forceUpdate, setForceUpdate] = useState(false); 
   const [services, setServices] = useState<ServicosData[]>([]); 
+  const lastDepsRef = useRef("");
+  const initialSelectionDoneRef = useRef(false);
 
   // Função para buscar dados da API
   const fetchData = async () => {
@@ -111,7 +114,7 @@ export function TableServicos({
       if (Array.isArray(response)) {
         setData(response);
         setServices(response); 
-        
+
         // Selecionar automaticamente o primeiro serviço da lista, se disponível- Eu Mudei para codccontra
         if (response.length > 0 && onSelectServico) {
           setTimeout(() => {
@@ -136,8 +139,28 @@ export function TableServicos({
 
   // Efeito para carregar dados sempre que as props mudarem ou forceUpdate mudar
   useEffect(() => {
-    fetchData();
+    // Criar uma string de dependências para comparar mudanças reais
+    const deps = `${qcodCoor}-${qcontrato}-${qUnidade}-${concluido}-${codServ}-${status}-${dtLimite}`;
+
+    // Apenas buscar dados se as dependências mudaram ou se forçar atualização
+    if (lastDepsRef.current !== deps || forceUpdate) {
+      console.log('TableServicos: Carregando dados com dependências:', deps);
+      lastDepsRef.current = deps;
+      fetchData();
+      // Resetar flag de seleção inicial quando os filtros mudam
+      initialSelectionDoneRef.current = false;
+    }
+
   }, [qcodCoor, qcontrato, qUnidade, concluido, codServ, status, dtLimite, forceUpdate]);
+
+  // Efeito para selecionar automaticamente o primeiro serviço após o carregamento
+  useEffect(() => {
+    if (services.length > 0 && !selectedRow && !initialSelectionDoneRef.current) {
+      console.log('TableServicos: Selecionando automaticamente o primeiro serviço:', services[0].codccontra);
+      initialSelectionDoneRef.current = true;
+      handleRowClick(services[0].codccontra);
+    }
+  }, [services, selectedRow]);
 
   //Novo efeito para ouvir o evento de aplicação de filtros e seleção de unidade
   useEffect(() => {
@@ -237,6 +260,7 @@ export function TableServicos({
   const handleRowClick = (codccontra: number) => {
     console.log('TableServicos: Linha clicada, serviço ID:', codccontra);
     setSelectedRow(codccontra);
+    eventBus.emit(EventTypes.SERVICE_SELECTED, codccontra);
     if (onSelectServico) {
       onSelectServico(codccontra);
     }

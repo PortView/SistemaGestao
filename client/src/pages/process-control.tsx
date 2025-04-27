@@ -16,6 +16,23 @@ export default function ProcessControlPage() {
   );
   const [selectedServicoCod, setSelectedServicoCod] = useState<number>(-1);
   const [codCoor, setCodCoor] = useState<number>(0);
+  // Estado para o ID do serviço selecionado
+  const [selectedServiceId, setSelectedServiceId] = useState<number>(-1);
+
+  // Inicializar o EventBus quando o componente for montado
+  useEffect(() => {
+    // Ativar modo debug do EventBus em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      import('@/lib/event-bus').then(({ eventBus }) => {
+        eventBus.setDebug(true);
+      });
+    }
+  }, []);
+
+  // Callback para receber o serviço selecionado da tabela de serviços
+  const handleServiceSelect = (servicoId: number) => {
+    setSelectedServiceId(servicoId);
+  };
 
   // Efeito para obter o código de coordenação (codcoor) do localStorage
   useEffect(() => {
@@ -127,11 +144,11 @@ export default function ProcessControlPage() {
                   qCodServ={-1}
                   qStatus="ALL"
                   qDtlimite="ALL"
-                  onSelectServico={handleServicoSelect}
+                  onSelectServico={handleServiceSelect} // Using the new handler
                 />
               </div>
               <div className="w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
-                <TableFollowup codserv={selectedServicoCod} />
+                <TableFollowup codserv={selectedServiceId} /> {/* Using the new state */}
               </div>
             </div>
 
@@ -171,11 +188,11 @@ export default function ProcessControlPage() {
                 qCodServ={-1}
                 qStatus="ALL"
                 qDtlimite="ALL"
-                onSelectServico={handleServicoSelect}
+                onSelectServico={handleServiceSelect} // Using the new handler
               />
             </div>
             <div className="w-full max-w-[940px] h-[460px] bg-card"> {/* Added bg-card */}
-              <TableFollowup codserv={selectedServicoCod} />
+              <TableFollowup codserv={selectedServiceId} /> {/* Using the new state */}
             </div>
           </div>
 
